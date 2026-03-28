@@ -31,10 +31,17 @@ enum Role {
 model Lead {
   id        String   @id @default(uuid())
   name      String
-  email     String
+  email     String   @unique
   source    String?
+  phone     String?
   status    LeadStatus @default(NEW)
-  score     Int?
+  score     Int?       @default(0)
+  interests InterestType[]
+  tradingYears Int?
+  budgetFormation Int?
+  budgetTrading Int?
+  markets MarketType[]
+  accountType AccountType[]
   createdAt DateTime @default(now())
 
   application Application?
@@ -44,6 +51,25 @@ enum LeadStatus {
   NEW
   QUALIFIED
   REJECTED
+}
+
+enum InterestType {
+  COURS
+  SIGNAUX
+  ACCOMPAGNEMENT
+  ONE_TO_ONE
+}
+
+enum MarketType {
+  CFD
+  CRYPTO
+  FUTURES
+}
+
+enum AccountType {
+  PERSONAL
+  DEMO
+  PROPFIRM
 }
 
 model Application {

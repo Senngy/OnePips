@@ -2,17 +2,22 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15
-    container_name: onepips-db
+    image: postgres
     restart: always
     environment:
-      POSTGRES_USER: onepips
-      POSTGRES_PASSWORD: onepips1998
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: onepips
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
 
-volumes:
-  postgres_data:
+  api:
+    build: .
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgresql://postgres:password@db:5432/onepips"
+      JWT_SECRET: "your-secret-key"
+      STRIPE_SECRET_KEY: "your-stripe-key"
