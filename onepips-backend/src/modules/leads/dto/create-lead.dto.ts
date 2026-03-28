@@ -17,7 +17,7 @@ export class CreateLeadDto {
 
     @IsOptional()
     @IsArray()
-    interests?: ('COURS' | 'SIGNAUX' | 'ACCOMPAGNEMENT' | 'ONE_TO_ONE')[];
+    interests?: ('PRIVATE_COACHING' | 'SIGNALS' | 'LIVES_SUBSCRIPTION' | 'ONE_TO_ONE')[];
 
     @IsOptional()
     @IsInt()

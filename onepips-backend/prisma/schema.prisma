@@ -34,7 +34,7 @@ model Lead {
   email     String   @unique
   source    String?
   phone     String?
-  status    LeadStatus @default(NEW)
+  status    LeadStatus @default(PENDING)
   score     Int?       @default(0)
   interests InterestType[]
   tradingYears Int?
@@ -48,16 +48,17 @@ model Lead {
 }
 
 enum LeadStatus {
-  NEW
-  QUALIFIED
-  REJECTED
+  HOT
+  MID
+  COLD
+  PENDING
 }
 
 enum InterestType {
-  COURS
-  SIGNAUX
-  ACCOMPAGNEMENT
+  SIGNALS
+  PRIVATE_COACHING
   ONE_TO_ONE
+  LIVES_SUBSCRIPTION
 }
 
 enum MarketType {
@@ -89,9 +90,10 @@ model Application {
 }
 
 enum ApplicationStatus {
-  HOT
-  WARM
-  COLD
+  NEW
+  CHECKED
+  QUALIFIED
+  PENDING
 }
 
 model Booking {
