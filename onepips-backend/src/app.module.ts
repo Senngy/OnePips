@@ -12,7 +12,7 @@ import { CronService } from './jobs/cron.service.js';
 import databaseConfig from './config/database.config.js';
 import jwtConfig from './config/jwt.config.js';
 import appConfig from './config/app.config.js';
-import { PrismaModule } from '../prisma/prisma.module';
+import { PrismaModule } from '../prisma/prisma.module.js';
 
 @Module({
   imports: [
@@ -28,6 +28,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     PaymentsModule,
     EventsModule,
     AnalyticsModule,
+    PrismaModule,
   ],
   controllers: [],
   providers: [CronService],

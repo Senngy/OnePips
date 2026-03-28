@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-import { LeadsService } from './leads.service';
-import { CreateLeadDto } from './dto/create-lead.dto';
+import { LeadsService } from './leads.service.js';
+import { CreateLeadDto } from './dto/create-lead.dto.js';
 
 @Controller('leads')
 export class LeadsController {
