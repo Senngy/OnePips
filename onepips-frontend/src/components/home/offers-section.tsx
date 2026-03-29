@@ -7,28 +7,28 @@ export function OffersSection() {
   const offers = [
     {
       title: "Live Academy",
-      desc: "Idéal pour débuter et comprendre les bases.",
+      desc: "Pour maîtriser la lecture des marchés et comprendre les mouvements derrière les prix.",
       price: "97€",
       period: "/mois",
-      features: ["Sessions Live Hebdomadaires", "Accès Bibliothèque Vidéo", "Salon Discord Communautaire"],
+      features: ["Sessions Live Hebdomadaires", "Accès aux ressources exclusives", "Accès à la communauté privée OnePips"],
       buttonText: "S'abonner maintenant",
       popular: false
     },
     {
-      title: "Coaching Privé",
-      desc: "Résolution de blocages spécifiques.",
+      title: "Appel privé – Analyse ciblée en 1h",
+      desc: "Pour les traders souhaitant résoudre un problème précis ou analyser un trade en profondeur",
       price: "150€",
       period: "/heure",
-      features: ["Session 1-to-1 Intensive", "Audit de votre Journal", "Plan d'action personnalisé", "Support DM prioritaire (48h)"],
+      features: ["Prise de conscience de votre situation", "Recevoir des conseils actionnables", "Analyser vos trades ou setups difficiles", "Coaching adapté"],
       buttonText: "Réserver un créneau",
       popular: true
     },
     {
-      title: "Mentorat Elite",
-      desc: "Devenir un professionnel de la finance.",
+      title: "Mentorat",
+      desc: "Pour les traders ambitieux souhaitant se professionnaliser et développer leur propre stratégie et comprendre profondément les marchés. (Admission sur entretien)",
       price: "Sur Candidature",
       period: "",
-      features: ["Suivi quotidien illimité", "Préparation Prop Firm", "Stratégies Algorithmiques", "Réseau Privé d'Investisseurs"],
+      features: ["Suivi personnalisé", "Audit complet de votre profil", "Plan d'action adapté", "Coaching technique et psychologie"],
       buttonText: "Déposer un dossier",
       popular: false
     }
@@ -43,12 +43,12 @@ export function OffersSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
           {offers.map((offer, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className={cn(
                 "bg-surface-container p-10 rounded-xl border flex flex-col transition-all group",
-                offer.popular 
-                  ? "bg-surface-container-highest border-primary relative transform md:-translate-y-4 shadow-2xl shadow-primary/10" 
+                offer.popular
+                  ? "bg-surface-container-highest border-primary relative transform md:-translate-y-4 shadow-2xl shadow-primary/10"
                   : "border-outline-variant/10 hover:border-primary/30"
               )}
             >
@@ -74,20 +74,20 @@ export function OffersSection() {
                   </li>
                 ))}
               </ul>
-              
+
               {offer.title === "Mentorat Elite" ? (
-                <Link 
+                <Link
                   href="/candidature"
                   className="w-full py-4 text-center rounded-md border border-outline text-on-surface font-headline font-bold hover:bg-surface-container-high transition-all"
                 >
                   {offer.buttonText}
                 </Link>
               ) : (
-                <button 
+                <button
                   className={cn(
                     "w-full py-4 rounded-md font-headline font-bold transition-all",
-                    offer.popular 
-                      ? "bg-primary text-on-primary hover:brightness-110" 
+                    offer.popular
+                      ? "bg-primary text-on-primary hover:brightness-110"
                       : "border border-primary text-primary group-hover:bg-primary group-hover:text-on-primary"
                   )}
                 >

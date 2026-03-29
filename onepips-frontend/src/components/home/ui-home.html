@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary": "#68000a",
+                        "on-surface": "#e4e1e7",
+                        "background": "#131317",
+                        "tertiary-fixed": "#ffdad7",
+                        "surface-container-lowest": "#0e0e12",
+                        "surface-container-low": "#1b1b1f",
+                        "primary": "#d2bbff",
+                        "on-background": "#e4e1e7",
+                        "surface-variant": "#353439",
+                        "on-secondary": "#2f2f3f",
+                        "surface-bright": "#39393d",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "outline-variant": "#4a4455",
+                        "primary-container": "#7c3aed",
+                        "on-secondary-fixed": "#1a1a29",
+                        "on-primary-container": "#ede0ff",
+                        "surface-container-high": "#2a292e",
+                        "surface-container-highest": "#353439",
+                        "on-tertiary-container": "#ffdfdc",
+                        "error-container": "#93000a",
+                        "inverse-surface": "#e4e1e7",
+                        "on-surface-variant": "#ccc3d8",
+                        "surface-dim": "#131317",
+                        "surface-tint": "#d2bbff",
+                        "tertiary": "#ffb3ad",
+                        "tertiary-container": "#c6252b",
+                        "surface-container": "#1f1f23",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#410004",
+                        "secondary-container": "#464556",
+                        "primary-fixed-dim": "#d2bbff",
+                        "secondary-fixed": "#e3e0f5",
+                        "on-primary-fixed": "#25005a",
+                        "on-secondary-container": "#b5b3c7",
+                        "on-primary": "#3f008e",
+                        "primary-fixed": "#eaddff",
+                        "secondary": "#c7c4d9",
+                        "inverse-on-surface": "#303034",
+                        "on-secondary-fixed-variant": "#464556",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "surface": "#131317",
+                        "on-error": "#690005",
+                        "secondary-fixed-dim": "#c7c4d9",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "inverse-primary": "#732ee4",
+                        "outline": "#958da1",
+                        "on-error-container": "#ffdad6"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass-card {
+            background: rgba(31, 31, 35, 0.7);
+            backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(228, 225, 231, 0.1);
+        }
+
+        .glow-violet {
+            box-shadow: 0 0 40px rgba(210, 187, 255, 0.08);
+        }
+
+        body {
+            background-color: #131317;
+            color: #E4E1E7;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="selection:bg-primary-container selection:text-on-primary-container">
+    <!-- TopNavBar -->
+    <header
+        class="bg-[#131317] dark:bg-[#131317] docked full-width top-0 z-50 shadow-[0_40px_40px_rgba(210,187,255,0.06)] fixed w-full">
+        <nav class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+            <div class="text-2xl font-black tracking-tighter text-[#E4E1E7] dark:text-[#E4E1E7] font-['Space_Grotesk']">
+                One Pips
+            </div>
+            <div class="hidden md:flex space-x-8 items-center font-['Space_Grotesk'] font-bold tracking-tight">
+                <a class="text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 px-3 py-1 rounded-sm"
+                    href="#">Home</a>
+                <a class="text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 px-3 py-1 rounded-sm"
+                    href="#">Méthode</a>
+                <a class="text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 px-3 py-1 rounded-sm"
+                    href="#">Résultats</a>
+                <a class="text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 px-3 py-1 rounded-sm"
+                    href="#">Offres</a>
+                <a class="text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 px-3 py-1 rounded-sm"
+                    href="#">Live</a>
+            </div>
+            <button
+                class="bg-primary-container text-on-primary-container px-6 py-2 font-headline font-bold scale-95 active:scale-90 transition-transform rounded-md">Candidater</button>
+        </nav>
+    </header>
+    <main class="pt-24">
+        <!-- Hero Section -->
+        <section class="relative min-h-[870px] flex items-center overflow-hidden px-8">
+            <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 z-10">
+                    <span class="text-primary font-label text-sm tracking-[0.2em] uppercase mb-6 block">Elite Trading
+                        Academy</span>
+                    <h1 class="text-6xl md:text-8xl font-headline font-bold tracking-tighter leading-none mb-8">
+                        Devenir trader rentable demande une <span class="text-primary">méthode</span>. Pas de la chance.
+                    </h1>
+                    <p class="text-outline text-xl max-w-xl mb-10 leading-relaxed">
+                        Accédez aux stratégies institutionnelles utilisées par les 1% pour dominer les marchés
+                        financiers. Pas de bruit, juste des résultats.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button
+                            class="bg-primary-container text-on-primary-container px-8 py-4 text-lg font-headline font-bold rounded-md hover:brightness-110 transition-all shadow-lg shadow-primary-container/20">Candidater
+                            maintenant</button>
+                        <button
+                            class="border border-outline-variant text-on-surface px-8 py-4 text-lg font-headline font-bold rounded-md hover:bg-surface-container transition-all">
+                            Voir le programme
+                        </button>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 relative flex flex-col items-center">
+                    <div class="absolute -top-20 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-[120px]"></div>
+                    <div
+                        class="glass-card p-2 rounded-2xl relative overflow-hidden group glow-violet border border-white/5">
+                        <div class="relative overflow-hidden rounded-xl">
+                            <img alt="The Head Trader"
+                                class="w-full h-auto object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                                data-alt="A professional and charismatic male trader in a sharp suit looking confidently at the camera, high-end studio lighting"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmYeuXLFKhsF2E7-5Keed7iZyU7_sR9MFwMnaAfHP6QNuTpHxoe3TaiJJJ64e3PaBt2A6t0l3HS8kI3sUXHkNpM86F8rqi9Sd5XCYssD55JXz_zF8N2IzTF0PFm_FRLqkYcD-3G9lrb3C59SK34Ngu8hhFt5v3jKCuepXIDF2rZGUmyrl6jurFA5MU6P1gehp-KtFLGpnRShZIe6rUoeUv0OIlmX2xk9so-ZNEAsJJKdXhrJHvBlXD4bv7qLo6kpDV3_doA8JPEgE" />
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent">
+                            </div>
+                            <!-- Discord Badge -->
+                            <div
+                                class="absolute top-6 left-6 flex items-center gap-3 bg-[#5865F2]/20 backdrop-blur-md border border-[#5865F2]/40 px-4 py-2 rounded-full">
+                                <svg class="w-6 h-6 text-[#5865F2]" fill="currentColor" viewbox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.063 14.063 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.419 0 1.334-.947 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.419 0 1.334-.946 2.419-2.157 2.419z">
+                                    </path>
+                                </svg>
+                                <span class="text-xs font-headline font-bold tracking-wider text-white">LIVE
+                                    SERVER</span>
+                            </div>
+                            <div class="absolute bottom-8 left-8 right-8 text-center lg:text-left">
+                                <p class="text-primary font-headline font-bold text-2xl mb-1">Coach Principal</p>
+                                <p class="text-on-surface/60 text-sm font-body">Expert en Stratégies Institutionnelles
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        class="mt-8 w-full bg-primary-container text-on-primary-container px-8 py-5 text-lg font-headline font-bold rounded-xl hover:brightness-110 transition-all shadow-xl shadow-primary-container/20 group flex items-center justify-center gap-3">
+                        <span
+                            class="material-symbols-outlined group-hover:translate-x-1 transition-transform">rocket_launch</span>
+                        Rejoindre la Wishlist Live Gratuit
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- Proof Section -->
+        <section class="bg-surface-container-low py-24 px-8 border-y border-outline-variant/10">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+                    <div>
+                        <h2 class="text-4xl font-headline font-bold mb-4">La preuve par les chiffres</h2>
+                        <p class="text-outline max-w-md">Nos étudiants ne se contentent pas d'apprendre, ils performent
+                            sur les marchés réels.</p>
+                    </div>
+                    <div class="flex gap-12">
+                        <div class="text-center">
+                            <p class="text-5xl font-headline font-bold text-primary">+42%</p>
+                            <p class="text-xs font-label text-outline uppercase tracking-widest mt-2">Avg Monthly Return
+                            </p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-5xl font-headline font-bold text-primary">850+</p>
+                            <p class="text-xs font-label text-outline uppercase tracking-widest mt-2">Elite Traders</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-surface-container p-6 rounded-xl border-t border-white/5 glow-violet">
+                        <div
+                            class="aspect-video bg-surface-container-lowest rounded-lg mb-6 overflow-hidden relative group">
+                            <img alt="Profit Screenshot"
+                                class="w-full h-full object-cover blur-sm opacity-40 group-hover:blur-none transition-all duration-500"
+                                data-alt="Blurred screenshot of a professional trading terminal with green and red PnL indicators showing high profit results"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbaN6X08Lg5sddSkkv_2kcVGn2hUwIXk2idn_JuuxCh7Gmk7v3pDH1UQ5IKX3u-xRJBYXV5R7St6M7U22cGnvjRUxlzWb9I8hMITK8OGzCHTSzxdzWbtu-FxKQinKKllKnZ3O5VAdvp3lhdohfhx_peS5UYQO6Thog6APKWq9B_pLVFC8pZshK5tS4PL4hDh0Y3R-mZ0w1PiImDtPucsjTDM43DIQ40yo7zgJwFoOQ-tj6rVfPGRMv_2B_6ezAm_nq3ipqHBZfNkQ" />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span
+                                    class="material-symbols-outlined text-4xl text-primary-container">verified_user</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-surface-variant bg-cover bg-center"
+                                style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB9VZr1-wuP4c9Z9ypIFuHCt84eFSZGKAYW923iPDd4uwMPR-1dAr3P-MPkP4nl6pJcu5h-z1MJMw5hhHmkkkHAot8AvgsZPTbZqR65LETnrzJqDA0P0WWZwq2z8U4TUYKL61CxKBV-6s91oJqv67rJkMik5lmQFSaSv4grpcWpLJoiWV8AV1uDtGnE6OBltqyg7XTnsmUriAQqopsrZtPBpY54bMvu3FnuW_HO_JdPbqMeTUZ_wXqMXeq3ajbGvRhsqaw5DgZAVyY')">
+                            </div>
+                            <div>
+                                <p class="font-bold">Marc L.</p>
+                                <p class="text-xs text-outline">Étudiant Mentorat</p>
+                            </div>
+                        </div>
+                        <p class="text-on-surface-variant italic leading-relaxed">"Avant One Pips, je perdais mon
+                            capital chaque mois. En 3 mois de méthode, j'ai validé ma première Fund Prop de 100k."</p>
+                    </div>
+                    <div class="bg-surface-container p-6 rounded-xl border-t border-white/5 glow-violet">
+                        <div
+                            class="aspect-video bg-surface-container-lowest rounded-lg mb-6 overflow-hidden relative group">
+                            <img alt="Analysis Result"
+                                class="w-full h-full object-cover blur-sm opacity-40 group-hover:blur-none transition-all duration-500"
+                                data-alt="Close up of a financial chart with a clear upward trend and highlighted entry and exit points"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGMDTbpsSW2gmp4cKS4-BpY00e0VKZ83QZxrYKEJSbFJPRTiMFH82yCiy9XUEl78jE0NKAh_y31yk4KIrs5SafcOO_Tun2120kEATYciu2P1JZ_qEFf0u3AGlzdsrp8iZbpw8hazkTC6tXzWi2wHj0qaWRiq2duzulcn6EdkCbGX42IsroidigJ47cPicB6lQ4l0DlidoRRNqmF9ehDcuN_n2W7g-UGgm3JF4OvlEqPPA4qqRzPQ1ZUyxlxutakqSI6Pe74LMmSJo" />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-5xl text-primary/40">play_circle</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-surface-variant bg-cover bg-center"
+                                style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDKAPlWPLmQboshflzocS26QDRGhOu2pr76K1O3lTraQ4O-i6y95r-qUcRapzDWDWWSCyNi3Fanpt8nV7lPEIUicoP9pb6uZPgaBHtbGIk_ixKgCtzojvsZEE77-Vq2g-i29q-A3Iz0rvYk9gggEyyCut8kWsWX5-bxKM57Jzog1dhIYJ6Ss5_LMnqSRCK1wpE-rC6Q4U2QpFvHNHZopjgXmYnjxVU8rvFiEhFPsNvNh8L38XFRi8iJiOdNRT7mVB9zSf1Hxto3BWk')">
+                            </div>
+                            <div>
+                                <p class="font-bold">Sarah K.</p>
+                                <p class="text-xs text-outline">Masterclass Live</p>
+                            </div>
+                        </div>
+                        <p class="text-on-surface-variant italic leading-relaxed">"La clarté de l'enseignement est
+                            incroyable. On ne nous vend pas du rêve, on nous donne des outils mathématiques."</p>
+                    </div>
+                    <div class="bg-surface-container p-6 rounded-xl border-t border-white/5 glow-violet">
+                        <div
+                            class="aspect-video bg-surface-container-lowest rounded-lg mb-6 overflow-hidden relative group">
+                            <img alt="Trade History"
+                                class="w-full h-full object-cover blur-sm opacity-40 group-hover:blur-none transition-all duration-500"
+                                data-alt="Digital representation of a successful crypto trade execution with green confirmation checkmark"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMjcu2WYwSwCcCK83gyXzjHmQVVlfsnW_V0s90fQJXh-at0m5ED6-gvLPoXZkEhCSjFCgLJbqLAc3aaJIU_mjZ72_Vm20ZW0wF8XQq5F4tobDKUywdgaDWQ_GUYYeB8Jr9_ShQHmGEbNz5YkoCbG6cgla64p1-WcNsEQuDm-PL2wNiDy4hexO1zjik5aPHhz4ghb6TjgGKLwoczlKCBEsdCWseXjexcJtHBIiuBYA7NJo0jEMtH9hHiuRc1ufwgBvohLUuOOHiACI" />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span
+                                    class="material-symbols-outlined text-4xl text-primary-container">verified_user</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-surface-variant bg-cover bg-center"
+                                style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDedZfFP-H9q61o04ZMxVKtoj-jBVmPlMqb8T2F_3rsZtf6hc8BzUokFSapzI3VDqZ1_yfUmAV6IS04B9ORunAyMbLkMdyXtIebZ-BkPLgaGdyJqE_S3GckLbWVDDDb_LFlqCiPZfc30NES2iVw40vwbR24nYLju19-hFvkRjkRzQhv3Np26-glauoNhqYMVraoaP4H1E39p2uvZZ_qkeO_A3-GEPh6xQpGwrrBfNs-waH0LA-2gf7yqWjg5RSrEpqSncoWtoMQyRI')">
+                            </div>
+                            <div>
+                                <p class="font-bold">Julien R.</p>
+                                <p class="text-xs text-outline">Coaching VIP</p>
+                            </div>
+                        </div>
+                        <p class="text-on-surface-variant italic leading-relaxed">"Le risk management est enfin devenu
+                            un automatisme. Mes pertes sont maîtrisées, mes gains explosent."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Problem/Solution Section -->
+        <section class="py-24 px-8 overflow-hidden">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <h2 class="text-5xl font-headline font-bold mb-12 tracking-tight">Pourquoi 95% des traders
+                            échouent</h2>
+                        <div class="space-y-6">
+                            <div
+                                class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest border border-error/10">
+                                <span class="material-symbols-outlined text-error text-3xl">trending_down</span>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Perte de capital</h4>
+                                    <p class="text-outline text-sm">Trader sans plan, c'est comme parier au casino. Le
+                                        marché finit toujours par tout reprendre.</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest border border-error/10">
+                                <span class="material-symbols-outlined text-error text-3xl">psychology_alt</span>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Confusion totale</h4>
+                                    <p class="text-outline text-sm">Trop d'indicateurs, trop d'avis contradictoires. La
+                                        paralysie par l'analyse vous tue.</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-start gap-6 p-6 rounded-xl bg-surface-container-lowest border border-error/10">
+                                <span class="material-symbols-outlined text-error text-3xl">person_off</span>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">Solitude absolue</h4>
+                                    <p class="text-outline text-sm">Face à vos écrans, vos émotions prennent le dessus
+                                        sans personne pour vous recadrer.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-primary/5 rounded-3xl blur-2xl"></div>
+                        <div class="relative bg-surface-container p-8 rounded-2xl border border-primary/20">
+                            <h3 class="text-3xl font-headline font-bold text-primary mb-12">L'écosystème One Pips</h3>
+                            <div class="space-y-8">
+                                <div class="flex items-center gap-6">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-white">architecture</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-xl">Méthode Strict</h4>
+                                        <p class="text-outline">Un workflow précis : Analyse -&gt; Setup -&gt; Exécution
+                                            -&gt; Journal.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-6">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-white">groups</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-xl">Encadrement 24/7</h4>
+                                        <p class="text-outline">Des coachs experts répondent à vos analyses en temps
+                                            réel.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-6">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-white">hub</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-xl">Communauté Elite</h4>
+                                        <p class="text-outline">Partagez vos trades avec un groupe d'analystes
+                                            déterminés.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Fast Offers Section -->
+        <section class="py-24 px-8 bg-surface-container-low">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-headline font-bold mb-4">Choisissez votre trajectoire</h2>
+                    <p class="text-outline">Trois niveaux d'engagement pour transformer votre trading.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Live Offer -->
+                    <div
+                        class="bg-surface-container p-10 rounded-xl border border-outline-variant/10 flex flex-col hover:border-primary/30 transition-all group">
+                        <div class="mb-8">
+                            <h3 class="text-2xl font-headline font-bold mb-2">Live Academy</h3>
+                            <p class="text-outline text-sm">Idéal pour débuter et comprendre les bases.</p>
+                        </div>
+                        <div class="mb-8">
+                            <p class="text-4xl font-headline font-bold text-on-surface">97€<span
+                                    class="text-lg text-outline font-normal">/mois</span></p>
+                        </div>
+                        <ul class="space-y-4 mb-12 flex-grow">
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Sessions
+                                Live Hebdomadaires</li>
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Accès
+                                Bibliothèque Vidéo</li>
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Salon
+                                Discord Communautaire</li>
+                        </ul>
+                        <button
+                            class="w-full py-4 rounded-md border border-primary text-primary font-headline font-bold group-hover:bg-primary group-hover:text-on-primary transition-all">
+                            S'abonner maintenant
+                        </button>
+                    </div>
+                    <!-- Coaching Offer -->
+                    <div
+                        class="bg-surface-container-highest p-10 rounded-xl border-2 border-primary relative flex flex-col transform md:-translate-y-4 shadow-2xl shadow-primary/10">
+                        <div
+                            class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-4 py-1 text-xs font-label font-bold uppercase tracking-widest rounded-full">
+                            Plus Populaire</div>
+                        <div class="mb-8">
+                            <h3 class="text-2xl font-headline font-bold mb-2">Coaching Privé</h3>
+                            <p class="text-on-primary-container/70 text-sm">Résolution de blocages spécifiques.</p>
+                        </div>
+                        <div class="mb-8">
+                            <p class="text-4xl font-headline font-bold text-on-surface">150€<span
+                                    class="text-lg text-outline font-normal">/heure</span></p>
+                        </div>
+                        <ul class="space-y-4 mb-12 flex-grow">
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Session
+                                1-to-1 Intensive</li>
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Audit de
+                                votre Journal</li>
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Plan
+                                d'action personnalisé</li>
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Support
+                                DM prioritaire (48h)</li>
+                        </ul>
+                        <button
+                            class="w-full py-4 rounded-md bg-primary text-on-primary font-headline font-bold hover:brightness-110 transition-all">
+                            Réserver un créneau
+                        </button>
+                    </div>
+                    <!-- Mentorat Offer -->
+                    <div
+                        class="bg-surface-container p-10 rounded-xl border border-outline-variant/10 flex flex-col hover:border-primary/30 transition-all group">
+                        <div class="mb-8">
+                            <h3 class="text-2xl font-headline font-bold mb-2">Mentorat Elite</h3>
+                            <p class="text-outline text-sm">Devenir un professionnel de la finance.</p>
+                        </div>
+                        <div class="mb-8">
+                            <p class="text-4xl font-headline font-bold text-on-surface">Sur Candidature</p>
+                        </div>
+                        <ul class="space-y-4 mb-12 flex-grow">
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Suivi
+                                quotidien illimité</li>
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                                Préparation Prop Firm</li>
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                                Stratégies Algorithmiques</li>
+                            <li class="flex items-center gap-3 text-sm"><span
+                                    class="material-symbols-outlined text-primary text-lg">check_circle</span> Réseau
+                                Privé d'Investisseurs</li>
+                        </ul>
+                        <button
+                            class="w-full py-4 rounded-md border border-outline text-on-surface font-headline font-bold hover:bg-surface-container-high transition-all">
+                            Déposer un dossier
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Final CTA Section -->
+        <section class="py-32 px-8 relative overflow-hidden">
+            <div class="absolute inset-0 bg-primary/5 opacity-30"></div>
+            <div class="max-w-4xl mx-auto text-center relative z-10">
+                <h2 class="text-5xl md:text-7xl font-headline font-bold mb-8 leading-tight">Prêt à changer de ligue ?
+                </h2>
+                <p class="text-xl text-outline mb-12 max-w-2xl mx-auto">Rejoignez One Pips et accédez à une éducation
+                    sans compromis. Le marché n'attend pas.</p>
+                <div
+                    class="inline-block p-1 bg-gradient-to-r from-primary/20 via-primary/50 to-primary/20 rounded-full">
+                    <button
+                        class="bg-primary-container text-on-primary-container px-12 py-6 text-xl font-headline font-bold rounded-full hover:scale-105 transition-transform shadow-2xl shadow-primary-container/40">Candidater
+                        maintenant</button>
+                </div>
+                <p class="mt-8 text-xs font-label text-outline uppercase tracking-[0.3em]">Places limitées pour garantir
+                    la qualité</p>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-[#0E0E12] dark:bg-[#0E0E12] w-full py-12 border-t border-[#4A4455]/15">
+        <div class="max-w-7xl mx-auto px-8 flex flex-col items-center text-center space-y-6">
+            <div class="flex flex-wrap justify-center gap-8 mb-4">
+                <a class="text-[#4A4455] hover:text-[#958DA1] font-['Inter'] text-[10px] leading-relaxed uppercase tracking-widest transition-colors"
+                    href="#">Terms of Service</a>
+                <a class="text-[#4A4455] hover:text-[#958DA1] font-['Inter'] text-[10px] leading-relaxed uppercase tracking-widest transition-colors"
+                    href="#">Risk Disclosure</a>
+                <a class="text-[#4A4455] hover:text-[#958DA1] font-['Inter'] text-[10px] leading-relaxed uppercase tracking-widest transition-colors"
+                    href="#">Privacy Policy</a>
+                <a class="text-[#4A4455] hover:text-[#958DA1] font-['Inter'] text-[10px] leading-relaxed uppercase tracking-widest transition-colors"
+                    href="#">Contact</a>
+            </div>
+            <p
+                class="text-[#958DA1] font-['Inter'] text-[10px] leading-relaxed max-w-2xl opacity-80 hover:opacity-100 transition-opacity">
+                © 2024 One Pips Premium Trading Education. High-risk investment warning: Trading involves significant
+                risk. Les performances passées ne garantissent pas les résultats futurs. Ne tradez que le capital que
+                vous pouvez vous permettre de perdre.
+            </p>
+        </div>
+    </footer>
+</body>
+
+</html>

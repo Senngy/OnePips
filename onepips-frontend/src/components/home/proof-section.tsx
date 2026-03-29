@@ -2,8 +2,8 @@
 
 export function ProofSection() {
   const stats = [
-    { label: "Avg Monthly Return", value: "+42%" },
-    { label: "Elite Traders", value: "850+" },
+    { label: "Nombre de payouts de la communauté", value: "122" },
+    { label: "Certicifafication Propfirm validé", value: "15" },
   ];
 
   const testimonials = [
@@ -41,8 +41,8 @@ export function ProofSection() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div>
-            <h2 className="text-4xl font-headline font-bold mb-4">La preuve par les chiffres</h2>
-            <p className="text-outline max-w-md">Nos étudiants ne se contentent pas d'apprendre, ils performent sur les marchés réels.</p>
+            <h2 className="text-4xl font-headline font-bold mb-4">Les retours des membres actifs sur le discord</h2>
+            <p className="text-outline max-w-md">Les étudiants ne se contentent pas d'apprendre, ils performent sur les marchés réels.</p>
           </div>
           <div className="flex gap-12">
             {stats.map(s => (
@@ -53,7 +53,7 @@ export function ProofSection() {
             ))}
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((t, i) => (
             <div key={i} className="bg-surface-container p-6 rounded-xl border-t border-white/5 glow-violet">
@@ -64,8 +64,8 @@ export function ProofSection() {
                 </div>
               </div>
               <div className="flex items-center gap-4 mb-4">
-                <div 
-                  className="w-10 h-10 rounded-full bg-surface-variant bg-cover bg-center" 
+                <div
+                  className="w-10 h-10 rounded-full bg-surface-variant bg-cover bg-center"
                   style={{ backgroundImage: `url('${t.image}')` }}
                 ></div>
                 <div>

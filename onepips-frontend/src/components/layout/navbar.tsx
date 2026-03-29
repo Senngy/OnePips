@@ -6,13 +6,13 @@ export function Navbar() {
   return (
     <header className="bg-background docked full-width top-0 z-50 shadow-[0_40px_40px_rgba(210,187,255,0.06)] fixed w-full border-b border-outline-variant/10">
       <nav className="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
-        <Link 
-          href="/" 
-          className="text-2xl font-black tracking-tighter text-on-background font-headline hover:opacity-80 transition-opacity"
-        >
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-2xl font-black tracking-tighter text-on-background font-headline hover:opacity-80 transition-opacity"
+        ><img src="/logo-onepips.png" alt="Logo" className="w-10 h-10" />
           One Pips
         </Link>
-        
+
         <div className="hidden md:flex space-x-8 items-center font-headline font-bold tracking-tight">
           {[
             { label: "Home", href: "/" },

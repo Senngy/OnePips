@@ -27,13 +27,13 @@ export function ProblemSolution() {
     },
     {
       icon: "groups",
-      title: "Encadrement 24/7",
-      text: "Des coachs experts répondent à vos analyses en temps réel."
+      title: "Encadrement personnalisé",
+      text: "On adapte la stratégie en fonction de votre profil et de vos objectifs."
     },
     {
       icon: "hub",
-      title: "Communauté Elite",
-      text: "Partagez vos trades avec un groupe d'analystes déterminés."
+      title: "Communauté Solidaire",
+      text: "Partagez vos analyses avec le reste de la communauté et bénéficiez de leurs retours."
     }
   ];
 
@@ -62,7 +62,7 @@ export function ProblemSolution() {
               <div className="space-y-8">
                 {solutions.map((s, i) => (
                   <div key={i} className="flex items-center gap-6">
-                    <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+                    <div className="min-w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
                       <span className="material-symbols-outlined text-white">{s.icon}</span>
                     </div>
                     <div>

@@ -18,11 +18,11 @@
   --color-primary: #d2bbff;
   --color-on-background: #e4e1e7;
   --color-surface-variant: #353439;
-  --color-on-secondary: #2f2f3f;
+  --color-on-secondary: #dd8dac;
   --color-surface-bright: #39393d;
   --color-on-primary-fixed-variant: #5a00c6;
   --color-outline-variant: #4a4455;
-  --color-primary-container: #7c3aed;
+  --color-primary-container: #AE4074;
   --color-on-secondary-fixed: #1a1a29;
   --color-on-primary-container: #ede0ff;
   --color-surface-container-high: #2a292e;
@@ -66,12 +66,15 @@
 :root {
   --background: #131317;
   --foreground: #e4e1e7;
+  --primary: #AE4074;
+  --secondary: #eda5c1;
 }
 
 @layer base {
   * {
     @apply border-outline-variant/10 outline-primary/50;
   }
+
   body {
     @apply bg-background text-on-surface font-body;
   }
@@ -81,34 +84,57 @@
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
-  .glass-card, .glass-effect, .glass-highlight {
+
+  .glass-card,
+  .glass-effect,
+  .glass-highlight {
     background: rgba(31, 31, 35, 0.6);
     backdrop-filter: blur(12px);
     border-top: 0.5px solid rgba(210, 187, 255, 0.1);
   }
+
   .sunken-field {
     background-color: #0e0e12 !important;
   }
+
   .glow-indicator {
     box-shadow: 0 0 8px 0px rgba(210, 187, 255, 0.4);
   }
+
   .violet-glow {
     box-shadow: 0 0 40px rgba(124, 58, 237, 0.15);
   }
+
+  .text-primary {
+    color: #AE4074;
+  }
+
+  .text-secondary {
+    color: #dd8dac;
+  }
+
   .text-gradient {
-    background: linear-gradient(45deg, #D2BBFF, #7C3AED);
+    background: linear-gradient(45deg, #D2BBFF, #AE4074);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
   .text-glow {
     text-shadow: 0 0 20px rgba(210, 187, 255, 0.4);
   }
+
   .obsidian-gradient {
     background: radial-gradient(circle at top right, #1b1b1f 0%, #0e0e12 100%);
   }
-  .btn-glow {
-    box-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+
+  .btn-primary {
+    background: linear-gradient(45deg, #AE4074, #eda5c1);
   }
+
+  .btn-glow {
+    box-shadow: 0 0 30px rgba(237, 58, 156, 0.5);
+  }
+
   .headline-font {
     @apply font-headline;
   }
