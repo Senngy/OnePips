@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { CreateLeadDto } from './dto/create-lead.dto.js';
+import { UpdateLeadDto } from './dto/update-lead.dto.js';
 import { calculateScore, getLeadStatus } from '../../common/utils/scoring.js';
 
 @Injectable()
@@ -57,6 +58,35 @@ export class LeadsService {
     return this.prisma.lead.update({
       where: { id },
       data: { status },
+    });
+  }
+
+  async update(id: string, dto: UpdateLeadDto) {
+    const existing = await this.prisma.lead.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException(`Lead with ID ${id} not found`);
+    }
+
+    // Merge existing data with incoming partial data for score calculation
+    const merged = {
+      tradingYears: dto.tradingYears ?? existing.tradingYears ?? undefined,
+      interests: dto.interests ?? existing.interests ?? undefined,
+      markets: dto.markets ?? existing.markets ?? undefined,
+      accountType: dto.accountType ?? existing.accountType ?? undefined,
+      budgetFormation: dto.budgetFormation ?? existing.budgetFormation ?? undefined,
+      budgetTrading: dto.budgetTrading ?? existing.budgetTrading ?? undefined,
+    };
+
+    const score = calculateScore(merged);
+    const status = getLeadStatus(score);
+
+    return this.prisma.lead.update({
+      where: { id },
+      data: {
+        ...dto,
+        score,
+        status,
+      },
     });
   }
 }

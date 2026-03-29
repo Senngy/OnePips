@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createLead, CreateLeadDto } from "@/lib/services/leads.service";
+import { createLead, updateLead, CreateLeadDto } from "@/lib/services/leads.service";
 import { createApplication } from "@/lib/services/applications.service";
 import { ApiError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
@@ -39,28 +39,42 @@ export default function MultiStepForm() {
   const progress = (step / TOTAL_STEPS) * 100;
 
   const next = async () => {
-    // Si on quitte l'étape 1, on crée/maj le Lead immédiatement pour le funnel
-    if (step === 1) {
-      setLoading(true);
-      setError(null);
-      try {
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (step === 1) {
+        // Step 1 → CREATE lead
         const lead = await createLead({
           name: form.name,
           email: form.email,
           phone: form.phone,
-          source: "funnel_multistep"
+          source: "funnel_multistep",
         });
         setLeadId(lead.id);
-        setStep(2);
-      } catch (e: any) {
-        console.error(e);
-        setError(e.message || "Impossible de créer le profil. Vérifiez vos informations.");
-      } finally {
-        setLoading(false);
+      } else if (step === 2 && leadId) {
+        // Step 2 → UPDATE with experience data only
+        await updateLead(leadId, {
+          tradingYears: form.tradingYears,
+          markets: form.markets,
+          interests: form.interests,
+        });
+      } else if (step === 3 && leadId) {
+        // Step 3 → UPDATE with budget data only
+        await updateLead(leadId, {
+          budgetFormation: form.budgetFormation,
+          budgetTrading: form.budgetTrading,
+          accountType: form.accountType,
+        });
       }
-      return;
+
+      setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+    } catch (e: any) {
+      console.error(e);
+      setError(e.message || "Une erreur est survenue. Réessayez.");
+    } finally {
+      setLoading(false);
     }
-    setStep((s) => Math.min(s + 1, TOTAL_STEPS));
   };
 
   const prev = () => setStep((s) => Math.max(s - 1, 1));
