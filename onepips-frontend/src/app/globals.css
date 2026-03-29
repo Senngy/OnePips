@@ -1,0 +1,115 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-body: var(--font-inter);
+  --font-headline: var(--font-space-grotesk);
+  --font-label: var(--font-inter);
+
+  --color-on-tertiary: #68000a;
+  --color-on-surface: #e4e1e7;
+  --color-background: #131317;
+  --color-tertiary-fixed: #ffdad7;
+  --color-surface-container-lowest: #0e0e12;
+  --color-surface-container-low: #1b1b1f;
+  --color-primary: #d2bbff;
+  --color-on-background: #e4e1e7;
+  --color-surface-variant: #353439;
+  --color-on-secondary: #2f2f3f;
+  --color-surface-bright: #39393d;
+  --color-on-primary-fixed-variant: #5a00c6;
+  --color-outline-variant: #4a4455;
+  --color-primary-container: #7c3aed;
+  --color-on-secondary-fixed: #1a1a29;
+  --color-on-primary-container: #ede0ff;
+  --color-surface-container-high: #2a292e;
+  --color-surface-container-highest: #353439;
+  --color-on-tertiary-container: #ffdfdc;
+  --color-error-container: #93000a;
+  --color-inverse-surface: #e4e1e7;
+  --color-on-surface-variant: #ccc3d8;
+  --color-surface-dim: #131317;
+  --color-surface-tint: #d2bbff;
+  --color-tertiary: #ffb3ad;
+  --color-tertiary-container: #c6252b;
+  --color-surface-container: #1f1f23;
+  --color-error: #ffb4ab;
+  --color-on-tertiary-fixed: #410004;
+  --color-secondary-container: #464556;
+  --color-primary-fixed-dim: #d2bbff;
+  --color-secondary-fixed: #e3e0f5;
+  --color-on-primary-fixed: #25005a;
+  --color-on-secondary-container: #b5b3c7;
+  --color-on-primary: #3f008e;
+  --color-primary-fixed: #eaddff;
+  --color-secondary: #c7c4d9;
+  --color-inverse-on-surface: #303034;
+  --color-on-secondary-fixed-variant: #464556;
+  --color-tertiary-fixed-dim: #ffb3ad;
+  --color-surface: #131317;
+  --color-on-error: #690005;
+  --color-secondary-fixed-dim: #c7c4d9;
+  --color-on-tertiary-fixed-variant: #930013;
+  --color-inverse-primary: #732ee4;
+  --color-outline: #958da1;
+  --color-on-error-container: #ffdad6;
+
+  --radius-DEFAULT: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+}
+
+:root {
+  --background: #131317;
+  --foreground: #e4e1e7;
+}
+
+@layer base {
+  * {
+    @apply border-outline-variant/10 outline-primary/50;
+  }
+  body {
+    @apply bg-background text-on-surface font-body;
+  }
+}
+
+@layer components {
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .glass-card, .glass-effect, .glass-highlight {
+    background: rgba(31, 31, 35, 0.6);
+    backdrop-filter: blur(12px);
+    border-top: 0.5px solid rgba(210, 187, 255, 0.1);
+  }
+  .sunken-field {
+    background-color: #0e0e12 !important;
+  }
+  .glow-indicator {
+    box-shadow: 0 0 8px 0px rgba(210, 187, 255, 0.4);
+  }
+  .violet-glow {
+    box-shadow: 0 0 40px rgba(124, 58, 237, 0.15);
+  }
+  .text-gradient {
+    background: linear-gradient(45deg, #D2BBFF, #7C3AED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .text-glow {
+    text-shadow: 0 0 20px rgba(210, 187, 255, 0.4);
+  }
+  .obsidian-gradient {
+    background: radial-gradient(circle at top right, #1b1b1f 0%, #0e0e12 100%);
+  }
+  .btn-glow {
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+  }
+  .headline-font {
+    @apply font-headline;
+  }
+}

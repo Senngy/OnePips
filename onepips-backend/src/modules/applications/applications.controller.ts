@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { ApplicationsService } from './applications.service.js';
+import { CreateApplicationDto } from './dto/create-application.dto.js';
 
 @Controller('applications')
 export class ApplicationsController {
@@ -11,7 +12,7 @@ export class ApplicationsController {
   }
 
   @Post()
-  async create(@Body() body: any) {
-    return this.applicationsService.create(body);
+  async create(@Body() dto: CreateApplicationDto) {
+    return this.applicationsService.create(dto);
   }
 }

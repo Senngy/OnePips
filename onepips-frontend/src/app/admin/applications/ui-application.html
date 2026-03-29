@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary": "#2f2f3f",
+                        "inverse-on-surface": "#303034",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#410004",
+                        "on-primary": "#3f008e",
+                        "on-surface": "#e4e1e7",
+                        "on-primary-container": "#ede0ff",
+                        "surface-dim": "#131317",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "on-error": "#690005",
+                        "surface-container-lowest": "#0e0e12",
+                        "tertiary": "#ffb3ad",
+                        "surface": "#131317",
+                        "inverse-primary": "#732ee4",
+                        "background": "#131317",
+                        "secondary-container": "#464556",
+                        "secondary-fixed-dim": "#c7c4d9",
+                        "primary-fixed-dim": "#d2bbff",
+                        "on-secondary-fixed": "#1a1a29",
+                        "primary": "#d2bbff",
+                        "on-surface-variant": "#ccc3d8",
+                        "on-tertiary-container": "#ffdfdc",
+                        "primary-fixed": "#eaddff",
+                        "surface-container-low": "#1b1b1f",
+                        "secondary-fixed": "#e3e0f5",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c7c4d9",
+                        "surface-container-high": "#2a292e",
+                        "surface-bright": "#39393d",
+                        "surface-container": "#1f1f23",
+                        "tertiary-container": "#c6252b",
+                        "on-secondary-fixed-variant": "#464556",
+                        "on-background": "#e4e1e7",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "on-tertiary": "#68000a",
+                        "surface-variant": "#353439",
+                        "on-primary-fixed": "#25005a",
+                        "error-container": "#93000a",
+                        "inverse-surface": "#e4e1e7",
+                        "outline-variant": "#4a4455",
+                        "on-secondary-container": "#b5b3c7",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "tertiary-fixed": "#ffdad7",
+                        "surface-tint": "#d2bbff",
+                        "outline": "#958da1",
+                        "surface-container-highest": "#353439",
+                        "primary-container": "#7c3aed"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(31, 31, 35, 0.6);
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #131317;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a4455;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
+    <!-- SideNavBar Integration -->
+    <aside
+        class="h-screen w-64 fixed left-0 top-0 z-40 bg-[#1B1B1F] border-r border-[#4A4455]/15 flex flex-col py-8 px-4">
+        <div class="mb-10 px-2">
+            <h1 class="font-space-grotesk font-black text-[#D2BBFF] text-2xl tracking-tighter">One Pips</h1>
+            <p class="text-[10px] text-outline uppercase tracking-[0.2em] mt-1 font-bold">Admin Applications</p>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="group">group</span>
+                Leads
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#D2BBFF] border-r-2 border-[#7C3AED] bg-gradient-to-r from-[#7C3AED]/10 to-transparent font-inter text-sm font-medium tracking-wide transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="assignment">assignment</span>
+                Applications
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="event_available">event_available</span>
+                Booking
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="payments">payments</span>
+                Payments
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="calendar_month">calendar_month</span>
+                Events
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="leaderboard">leaderboard</span>
+                Analytics
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+                Settings
+            </a>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-outline-variant/10 flex items-center gap-3 px-2">
+            <img class="w-10 h-10 rounded-xl object-cover grayscale brightness-125"
+                data-alt="Close-up portrait of a professional male analyst with a focused expression in a dimly lit high-tech environment"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9dAKlaM0Hemh__LV-I87ejoiecYHnqeTw-6PyYOy3ENDvedvP4wL0655OeBmrnqRj5JYhHPx9w_pRivGZ9irwTr0ciwNQXxsxZw9kX1-aJBPWJvs3cSHo1puibxrHabBxtgTIC813q_NS3GdVEzInNGseyWLxu9ZhxinlJld4qUBThcWROkrFrma1lKqaMsWOAuOQYvaiw3xyP4aKUbgkVLO9q6fctLlznyYfe4znEIukb9a4iffi4JPLuTVO5ACj40zxycsqdpQ" />
+            <div>
+                <p class="text-on-surface font-semibold text-xs">One Pips Admin</p>
+                <p class="text-outline text-[10px] uppercase tracking-tighter">Elite Analyst Tier</p>
+            </div>
+        </div>
+    </aside>
+    <main class="ml-64 min-h-screen">
+        <!-- TopNavBar Integration -->
+        <header
+            class="w-full sticky top-0 z-30 bg-[#131317] flex items-center justify-between px-8 py-4 shadow-[0_40px_40px_rgba(210,187,255,0.06)]">
+            <div class="flex items-center gap-6">
+                <div class="relative group">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg"
+                        data-icon="search">search</span>
+                    <input
+                        class="bg-surface-container-lowest border-none ring-1 ring-outline-variant/20 focus:ring-primary-container rounded-md pl-10 pr-4 py-2 text-sm w-80 transition-all font-body text-on-surface"
+                        placeholder="Search applications..." type="text" />
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="p-2 rounded-full text-outline hover:bg-[#1F1F23] transition-colors active:scale-95">
+                    <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                </button>
+                <button
+                    class="flex items-center gap-2 p-1 pr-3 rounded-full bg-surface-container-low hover:bg-[#1F1F23] transition-colors active:scale-95">
+                    <span class="material-symbols-outlined text-primary" data-icon="account_circle"
+                        style="font-variation-settings: 'FILL' 1;">account_circle</span>
+                    <span class="text-xs font-medium text-on-surface">Admin Panel</span>
+                </button>
+            </div>
+        </header>
+        <!-- Content Canvas -->
+        <div class="p-8 grid grid-cols-12 gap-8">
+            <!-- Filter & List Sidebar -->
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h2 class="font-headline text-3xl font-bold text-on-surface tracking-tight">Applications</h2>
+                        <p class="text-outline text-sm font-label uppercase tracking-widest mt-1">42 PENDING REVIEW</p>
+                    </div>
+                    <button
+                        class="flex items-center gap-2 text-primary-fixed-dim text-xs font-bold border border-primary-container/30 px-3 py-1.5 rounded-md hover:bg-primary-container/10 transition-colors">
+                        <span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
+                        FILTER
+                    </button>
+                </div>
+                <!-- Application List -->
+                <div class="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto pr-2">
+                    <!-- Active Card -->
+                    <div
+                        class="bg-surface-container border-l-4 border-primary p-4 cursor-pointer transition-all duration-200">
+                        <div class="flex justify-between items-start mb-2">
+                            <span
+                                class="text-[10px] font-black uppercase tracking-widest text-primary bg-primary-container/20 px-2 py-0.5 rounded">Scoring:
+                                98</span>
+                            <span class="text-[10px] text-outline">2m ago</span>
+                        </div>
+                        <h3 class="font-headline font-semibold text-on-surface text-lg">Marcus Sterling</h3>
+                        <p class="text-outline text-xs truncate">Elite scalp strategist looking to expand capital...</p>
+                        <div class="mt-3 flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Reviewing</span>
+                        </div>
+                    </div>
+                    <!-- List Item -->
+                    <div
+                        class="bg-surface-container-low hover:bg-surface-container p-4 cursor-pointer transition-all duration-200 border-l-4 border-transparent">
+                        <div class="flex justify-between items-start mb-2">
+                            <span
+                                class="text-[10px] font-black uppercase tracking-widest text-tertiary bg-tertiary-container/20 px-2 py-0.5 rounded">Scoring:
+                                64</span>
+                            <span class="text-[10px] text-outline">1h ago</span>
+                        </div>
+                        <h3 class="font-headline font-semibold text-on-surface text-lg opacity-80">Elara Vance</h3>
+                        <p class="text-outline text-xs truncate">Swing trader focused on institutional liquidity...</p>
+                        <div class="mt-3 flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full bg-outline"></div>
+                            <span class="text-[10px] font-bold uppercase tracking-tighter text-outline">New
+                                Submission</span>
+                        </div>
+                    </div>
+                    <!-- List Item -->
+                    <div
+                        class="bg-surface-container-low hover:bg-surface-container p-4 cursor-pointer transition-all duration-200 border-l-4 border-transparent">
+                        <div class="flex justify-between items-start mb-2">
+                            <span
+                                class="text-[10px] font-black uppercase tracking-widest text-primary bg-primary-container/20 px-2 py-0.5 rounded">Scoring:
+                                82</span>
+                            <span class="text-[10px] text-outline">3h ago</span>
+                        </div>
+                        <h3 class="font-headline font-semibold text-on-surface text-lg opacity-80">Julian Thorne</h3>
+                        <p class="text-outline text-xs truncate">Macro analyst with 5 years track record...</p>
+                        <div class="mt-3 flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full bg-outline"></div>
+                            <span class="text-[10px] font-bold uppercase tracking-tighter text-outline">New
+                                Submission</span>
+                        </div>
+                    </div>
+                    <!-- List Item -->
+                    <div
+                        class="bg-surface-container-low hover:bg-surface-container p-4 cursor-pointer transition-all duration-200 border-l-4 border-transparent">
+                        <div class="flex justify-between items-start mb-2">
+                            <span
+                                class="text-[10px] font-black uppercase tracking-widest text-primary bg-primary-container/20 px-2 py-0.5 rounded">Scoring:
+                                91</span>
+                            <span class="text-[10px] text-outline">Yesterday</span>
+                        </div>
+                        <h3 class="font-headline font-semibold text-on-surface text-lg opacity-80">Sienna Blake</h3>
+                        <p class="text-outline text-xs truncate">Quant developer seeking algorithmic funding...</p>
+                        <div class="mt-3 flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Waiting
+                                on Data</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Detailed View -->
+            <div class="col-span-12 lg:col-span-8 space-y-6">
+                <!-- Profile Header -->
+                <div
+                    class="bg-surface-container-low rounded-xl p-8 relative overflow-hidden border border-outline-variant/10">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -z-0"></div>
+                    <div class="flex flex-col md:flex-row gap-6 items-center md:items-start relative z-10">
+                        <div class="relative">
+                            <img class="w-24 h-24 rounded-2xl object-cover shadow-2xl"
+                                data-alt="Portrait of a sophisticated professional male trader in a dark suit with a sharp gaze against a minimalist dark background"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAF-FXvGuEzb6ik827yanFwWtqn5VH3joga7dq_-P1UQNnSLTZyRmju-K0ZYmpu2TvwjOfv6IcVSnj27qLQN9zbpD3a63-l8QW0Lq4Xk9h2b0scPmq-hqz1TZkksZn3JI7IdJiKXN_dWx2wZ-PUcXFsUIfEp-9cg_XATxikCWbMYiuYbPSson8GkU3PJJENWlyPLQqIMUrwLlyjr6ZfJRIZHB-CrCWA-v7LnYnkQcU_sonfQNOJiBHvMIWJ6J10x_JPDtiS6psH_3g" />
+                            <div class="absolute -bottom-2 -right-2 bg-primary p-1 rounded-lg">
+                                <span class="material-symbols-outlined text-on-primary text-sm font-bold"
+                                    data-icon="verified">verified</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 text-center md:text-left">
+                            <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-2">
+                                <h1 class="font-headline text-4xl font-bold tracking-tight text-on-surface">Marcus
+                                    Sterling</h1>
+                                <span
+                                    class="bg-surface-container-highest px-3 py-1 text-[10px] font-bold text-primary border border-primary/20 rounded-full tracking-widest">ID:
+                                    #PX-8821</span>
+                            </div>
+                            <p class="text-outline text-base max-w-xl">London, UK • 6.2 Years Experience • High
+                                Frequency Specialist</p>
+                            <div class="flex flex-wrap gap-2 mt-6">
+                                <button
+                                    class="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:brightness-110 active:scale-95 transition-all">APPROVE
+                                    FOR FUNDING</button>
+                                <button
+                                    class="bg-surface-container-highest text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright active:scale-95 transition-all">REQUEST
+                                    INTERVIEW</button>
+                                <button
+                                    class="bg-transparent border border-error/30 text-error px-6 py-2.5 rounded-md font-bold text-sm hover:bg-error/10 active:scale-95 transition-all">REJECT</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Bento Grid Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-surface-container p-6 border-t border-primary/20">
+                        <p class="text-outline text-[10px] font-black uppercase tracking-widest mb-4">Algorithmic
+                            Scoring</p>
+                        <div class="flex items-end gap-3">
+                            <span class="font-headline text-5xl font-black text-primary">98</span>
+                            <span class="text-outline text-xs mb-2">/ 100</span>
+                        </div>
+                        <div class="mt-4 h-1.5 w-full bg-secondary-container rounded-full overflow-hidden">
+                            <div class="h-full bg-primary shadow-[0_0_10px_#d2bbff]" style="width: 98%;"></div>
+                        </div>
+                        <p class="text-[10px] mt-4 text-on-surface-variant font-medium">Top 0.5% of applicants this
+                            quarter.</p>
+                    </div>
+                    <div class="bg-surface-container p-6 border-t border-outline-variant/30">
+                        <p class="text-outline text-[10px] font-black uppercase tracking-widest mb-4">Historical Win
+                            Rate</p>
+                        <div class="flex items-end gap-3">
+                            <span class="font-headline text-5xl font-black text-on-surface">72%</span>
+                        </div>
+                        <div class="flex items-center gap-1 mt-4 text-primary text-xs font-bold">
+                            <span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+                            +4.2% Consistency
+                        </div>
+                        <p class="text-[10px] mt-4 text-outline font-medium">Based on 1,200 verified executions.</p>
+                    </div>
+                    <div class="bg-surface-container p-6 border-t border-outline-variant/30">
+                        <p class="text-outline text-[10px] font-black uppercase tracking-widest mb-4">Risk Profile</p>
+                        <span
+                            class="inline-block bg-tertiary-container/20 text-tertiary border border-tertiary/30 px-4 py-1.5 rounded text-xl font-headline font-bold">MODERATE</span>
+                        <div class="mt-6 flex items-center justify-between">
+                            <span class="text-[10px] text-outline">Max Drawdown</span>
+                            <span class="text-xs font-bold text-error">4.1%</span>
+                        </div>
+                        <div class="mt-1 flex items-center justify-between">
+                            <span class="text-[10px] text-outline">Profit Factor</span>
+                            <span class="text-xs font-bold text-on-surface">3.2</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Detail Tabs & History -->
+                <div class="bg-surface-container rounded-xl overflow-hidden">
+                    <div class="flex border-b border-outline-variant/10">
+                        <button
+                            class="px-8 py-4 text-xs font-bold tracking-widest text-primary border-b-2 border-primary bg-primary/5 uppercase">Form
+                            Responses</button>
+                        <button
+                            class="px-8 py-4 text-xs font-bold tracking-widest text-outline hover:text-on-surface transition-colors uppercase">Interaction
+                            History</button>
+                        <button
+                            class="px-8 py-4 text-xs font-bold tracking-widest text-outline hover:text-on-surface transition-colors uppercase">Strategy
+                            Documents</button>
+                    </div>
+                    <div class="p-8 space-y-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                            <div>
+                                <label
+                                    class="text-[10px] font-black text-outline uppercase tracking-widest block mb-2">Core
+                                    Trading Methodology</label>
+                                <p class="text-on-surface text-sm leading-relaxed">Systematic scalp strategy utilizing
+                                    order flow imbalance and institutional liquidity pockets. Focused on EUR/USD and
+                                    GBP/JPY during New York overlap.</p>
+                            </div>
+                            <div>
+                                <label
+                                    class="text-[10px] font-black text-outline uppercase tracking-widest block mb-2">Monthly
+                                    Volume Projection</label>
+                                <p class="text-on-surface text-sm leading-relaxed">$50M - $120M Notional. Requires
+                                    high-leverage execution environment with sub-5ms latency.</p>
+                            </div>
+                            <div>
+                                <label
+                                    class="text-[10px] font-black text-outline uppercase tracking-widest block mb-2">Previous
+                                    Funding</label>
+                                <p class="text-on-surface text-sm leading-relaxed">FTMO ($200k), MyForexFunds ($300k).
+                                    Successfully withdrew over $140k in 18 months.</p>
+                            </div>
+                            <div>
+                                <label
+                                    class="text-[10px] font-black text-outline uppercase tracking-widest block mb-2">Crisis
+                                    Management Protocol</label>
+                                <p class="text-on-surface text-sm leading-relaxed">Auto-kill switch at 2% daily
+                                    drawdown. Hard stop for all positions during NFP and FOMC announcements.</p>
+                            </div>
+                        </div>
+                        <!-- Interaction Timeline (Subtle Section) -->
+                        <div class="pt-8 border-t border-outline-variant/10">
+                            <h4
+                                class="text-xs font-bold text-on-surface uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+                                RECENT ACTIVITY LOG
+                            </h4>
+                            <div class="space-y-6">
+                                <div class="flex gap-4">
+                                    <div class="w-2 h-2 rounded-full bg-primary mt-1.5 shadow-[0_0_8px_#d2bbff]"></div>
+                                    <div>
+                                        <p class="text-xs font-bold text-on-surface">Background screening completed by
+                                            automated system</p>
+                                        <p class="text-[10px] text-outline mt-1 uppercase">Today, 09:12 AM</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4">
+                                    <div class="w-2 h-2 rounded-full bg-outline-variant mt-1.5"></div>
+                                    <div>
+                                        <p class="text-xs font-bold text-on-surface-variant">Identity verified via
+                                            SumSub portal</p>
+                                        <p class="text-[10px] text-outline mt-1 uppercase">Today, 08:45 AM</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4">
+                                    <div class="w-2 h-2 rounded-full bg-outline-variant mt-1.5"></div>
+                                    <div>
+                                        <p class="text-xs font-bold text-on-surface-variant">Application submitted via
+                                            Mobile Tier 3 portal</p>
+                                        <p class="text-[10px] text-outline mt-1 uppercase">Today, 08:32 AM</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
