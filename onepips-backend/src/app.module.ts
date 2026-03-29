@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { UsersModule } from './modules/users/users.module.js';
@@ -13,6 +13,7 @@ import databaseConfig from './config/database.config.js';
 import jwtConfig from './config/jwt.config.js';
 import appConfig from './config/app.config.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
+import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
 
 @Module({
   imports: [
@@ -33,4 +34,10 @@ import { PrismaModule } from '../prisma/prisma.module.js';
   controllers: [],
   providers: [CronService],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes('*');
+  }
+}

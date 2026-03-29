@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { ApplicationsService } from './applications.service.js';
 import { CreateApplicationDto } from './dto/create-application.dto.js';
+import { ApplicationStatus } from '../../../prisma/index.js';
 
 @Controller('applications')
 export class ApplicationsController {
@@ -14,5 +15,13 @@ export class ApplicationsController {
   @Post()
   async create(@Body() dto: CreateApplicationDto) {
     return this.applicationsService.create(dto);
+  }
+
+  @Patch(':id/status')
+  async updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: ApplicationStatus,
+  ) {
+    return this.applicationsService.updateStatus(id, status);
   }
 }

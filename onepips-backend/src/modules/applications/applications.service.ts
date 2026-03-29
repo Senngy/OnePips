@@ -54,4 +54,11 @@ export class ApplicationsService {
       return application;
     });
   }
+
+  async updateStatus(id: string, status: any) {
+    return this.prisma.application.update({
+      where: { id },
+      data: { status },
+    });
+  }
 }
