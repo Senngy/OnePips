@@ -1,6 +1,12 @@
+"use client";
+
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+
 export default function LegalPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <Navbar />
       <h1 className="text-4xl font-headline font-bold mb-8 text-center">Mentions Légales & Disclaimer</h1>
       <div className="bg-surface-container p-8 rounded-xl border border-outline-variant/10 w-full max-w-4xl space-y-6">
         <section>
@@ -14,6 +20,7 @@ export default function LegalPage() {
           <p className="text-outline text-sm">Contenu en attente de rédaction...</p>
         </section>
       </div>
+      <Footer />
     </main>
   );
 }

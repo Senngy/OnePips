@@ -26,7 +26,9 @@ export function Hero() {
             >
               Candidater maintenant
             </Link>
-            <button className="border border-outline-variant text-on-surface px-8 py-4 text-lg font-headline font-bold rounded-md hover:bg-surface-container transition-all">
+            <button
+              onClick={() => window.location.href = "/methode"}
+              className="border border-outline-variant text-on-surface px-8 py-4 text-lg font-headline font-bold rounded-md hover:bg-surface-container transition-all">
               Voir le programme
             </button>
           </div>
@@ -62,7 +64,8 @@ export function Hero() {
             </div>
           </div>
           <button
-            className="mt-8 w-full bg-primary-container text-on-primary-container px-8 py-5 text-lg font-headline font-bold rounded-xl hover:brightness-110 transition-all shadow-xl shadow-primary-container/20 group flex items-center justify-center gap-3">
+            className="mt-8 w-full bg-primary-container text-on-primary-container px-8 py-5 text-lg font-headline font-bold rounded-xl hover:brightness-110 transition-all shadow-xl shadow-primary-container/20 group flex items-center justify-center gap-3"
+            onClick={() => window.location.href = "/live"}>
             <span
               className="material-symbols-outlined group-hover:translate-x-1 transition-transform">rocket_launch</span>
             Rejoindre la Wishlist Live Gratuit

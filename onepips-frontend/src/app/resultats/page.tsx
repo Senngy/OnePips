@@ -1,23 +1,13 @@
 "use client";
 
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+import { Button } from "@/components/ui/button";
+
 export default function ResultatsPage() {
   return (
     <>
-      <nav className="fixed top-0 w-full z-50 bg-[#131317]/80 backdrop-blur-xl transition-all h-20">
-        <div className="flex justify-between items-center max-w-7xl mx-auto px-8 h-full">
-          <div className="text-2xl font-bold tracking-tighter text-[#E4E1E7] font-headline">One Pips</div>
-          <div className="hidden md:flex items-center space-x-8">
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors font-headline tracking-tight" href="/">Home</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors font-headline tracking-tight" href="/methode">Méthode</a>
-            <a className="text-[#D2BBFF] border-b-2 border-[#7C3AED] pb-1 font-headline tracking-tight" href="/resultats">Résultats</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors font-headline tracking-tight" href="/offres">Offres</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors font-headline tracking-tight" href="/live">Live</a>
-          </div>
-          <button className="bg-primary-container text-on-primary-container px-6 py-2 rounded font-headline font-semibold active:scale-95 transition-transform hover:bg-[#1F1F23]">
-            Candidater
-          </button>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="pt-32 pb-24">
         {/* Hero Section */}
@@ -88,7 +78,7 @@ export default function ResultatsPage() {
                 <p className="text-outline text-sm mt-2">Le parcours de Sarah sur 18 mois au sein de One Pips.</p>
               </div>
             </div>
-            
+
             <div className="md:col-span-2 relative group overflow-hidden rounded-lg bg-surface-container-high aspect-video md:aspect-auto">
               <img className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6eZyxZThkcZBpzfxKEZ4g-pKoF_m6BOZUyBWNubOHnjhkg2CcxD2rU3A8mYJz0SXOv-Z-NlWoLgLdZ9dVRGY3Muk2TYMAIKtw60xkdtQpgB0DkDjKr_UbypMFIC--lbu0HSpuIzB3rLQlWn66dW8ld-9p_DQ7vme6xFAvPAG4mqLymBovLEkDT6bOmV26a_RYYib104ec3tjnWT0_PM7QfmgAAq8NSJPPSDFwnobgOozqL1k3SWULRXRn6MK9d52tGVZI3F_I7A0" alt="Thomas Testimonial" />
               <div className="absolute inset-0 flex items-center justify-center">
@@ -103,8 +93,8 @@ export default function ResultatsPage() {
             </div>
 
             <div className="md:col-span-1 relative group overflow-hidden rounded-lg bg-surface-container-high aspect-square md:aspect-auto">
-               <img className="absolute inset-0 w-full h-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtOuJ5md_xAMGSzjtX-BCzMZBKbtVSkyyy3-gkw1Onxb4Tv4b8PnlG8q4l00pJPTcx1LXilOJN4GlVXQZOH2CB10eMQDraNYslgr9NCXgEGsX4llzyVSF-0OZH9cvezwjgMF5qIl9Iq9o0r-XPZio2BFJBbG6aBtdqhncV3cbRwmdizrTLYgVtSRRbytXcdfoqZyqllUDz7_3yzxXt75Qty1a2tG3AXVAem16JzLwrojMIK6Bah13rhbkhq0ugEz2dz3L5T5e_U_Y" alt="Testimonial 3" />
-               <div className="absolute inset-0 flex items-center justify-center">
+              <img className="absolute inset-0 w-full h-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtOuJ5md_xAMGSzjtX-BCzMZBKbtVSkyyy3-gkw1Onxb4Tv4b8PnlG8q4l00pJPTcx1LXilOJN4GlVXQZOH2CB10eMQDraNYslgr9NCXgEGsX4llzyVSF-0OZH9cvezwjgMF5qIl9Iq9o0r-XPZio2BFJBbG6aBtdqhncV3cbRwmdizrTLYgVtSRRbytXcdfoqZyqllUDz7_3yzxXt75Qty1a2tG3AXVAem16JzLwrojMIK6Bah13rhbkhq0ugEz2dz3L5T5e_U_Y" alt="Testimonial 3" />
+              <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-primary/20 transition-all">
                   <span className="material-symbols-outlined text-xl text-on-surface">play_arrow</span>
                 </div>
@@ -168,31 +158,23 @@ export default function ResultatsPage() {
               Ne vous contentez pas de regarder les autres réussir. Intégrez une communauté où la transparence est la norme et la performance la priorité.
             </p>
             <div className="flex flex-col md:flex-row justify-center gap-6">
-              <button className="bg-primary-container text-on-primary-container px-10 py-4 rounded font-headline font-bold text-lg active:scale-95 transition-all hover:bg-primary-container/90">
+              <Button
+                onClick={() => window.location.href = "/candidature"}
+                className="bg-primary-container text-on-primary-container px-10 py-8 rounded font-headline font-bold text-lg active:scale-95 transition-all hover:bg-primary-container/90">
                 Candidater Maintenant
-              </button>
-              <button className="bg-surface-container border border-outline-variant/50 text-on-surface px-10 py-4 rounded font-headline font-bold text-lg hover:bg-surface-container-high active:scale-95 transition-all">
+              </Button>
+              <Button
+                onClick={() => window.location.href = "/offres"}
+                className="bg-surface-container border border-outline-variant/50 text-on-surface px-10 py-8 rounded font-headline font-bold text-lg hover:bg-surface-container-high active:scale-95 transition-all">
                 Consulter les Offres
-              </button>
+              </Button>
             </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#131317] w-full border-t border-[#4A4455]/15">
-        <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto px-8 py-12 gap-6">
-          <div className="text-lg font-black text-[#E4E1E7] font-body">One Pips</div>
-          <div className="text-[#958DA1] text-xs font-body tracking-wide uppercase text-center md:text-left max-w-xl">
-            © 2024 One Pips. Premium Trading Education. High-risk investment warning: Trading involves significant risk of loss.
-          </div>
-          <div className="flex flex-wrap justify-center gap-6">
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors font-body text-sm tracking-wide uppercase opacity-80 hover:opacity-100" href="/legal">Mentions Légales</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors font-body text-sm tracking-wide uppercase opacity-80 hover:opacity-100" href="/privacy">Politique de Confidentialité</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors font-body text-sm tracking-wide uppercase opacity-80 hover:opacity-100" href="/cgv">CGV</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

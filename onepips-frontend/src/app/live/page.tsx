@@ -1,24 +1,14 @@
 "use client";
 
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+import { LiveForm } from "@/components/form/live-form";
+
 export default function LivePage() {
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container min-h-screen">
       {/* TopNavBar */}
-      <nav className="fixed top-0 w-full z-50 bg-[#131317]/80 backdrop-blur-xl shadow-[0_40px_40px_0_rgba(210,187,255,0.06)]">
-        <div className="flex justify-between items-center max-w-7xl mx-auto px-8 h-20">
-          <div className="text-2xl font-bold tracking-tighter text-[#E4E1E7] font-headline">One Pips</div>
-          <div className="hidden md:flex items-center gap-8 font-headline tracking-tight">
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/">Home</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/methode">Méthode</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/resultats">Résultats</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/offres">Offres</a>
-            <a className="text-[#D2BBFF] border-b-2 border-[#7C3AED] pb-1" href="/live">Live</a>
-          </div>
-          <button className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-medium font-headline active:scale-95 transition-transform hover:bg-[#1F1F23] transition-all duration-300">
-            Candidater
-          </button>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="pt-20">
         {/* Hero Section with Asymmetric Layout */}
@@ -37,15 +27,15 @@ export default function LivePage() {
                 Maîtrisez les Marchés en <span className="text-primary italic text-glow">Temps Réel</span>.
               </h1>
               <p className="text-lg text-outline leading-relaxed max-w-xl mb-12">
-                Rejoignez nos analystes seniors pour une session de trading en direct. Obtenez une vision institutionnelle du carnet d&apos;ordres et découvrez les opportunités avant le reste du marché.
+                Demandez à rejoindre le prochain live pour une session d'introduction, d'analyse ou de trading en direct. Pour obtenir une vision aiguisée du marché et découvrir l'approche OnePips.
               </p>
               {/* Benefits Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-surface-container-low">
                   <span className="material-symbols-outlined text-primary">analytics</span>
                   <div>
-                    <h3 className="font-headline font-bold text-on-surface">Analyse Flux</h3>
-                    <p className="text-xs text-outline mt-1 font-label">Lecture du carnet d&apos;ordres institutionnel.</p>
+                    <h3 className="font-headline font-bold text-on-surface">Analyse Graphique</h3>
+                    <p className="text-xs text-outline mt-1 font-label">Structure de marché, Order Flow, Price Action.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-surface-container-low">
@@ -80,32 +70,9 @@ export default function LivePage() {
                       <span className="text-[8px] uppercase tracking-tighter text-outline font-label">Min</span>
                     </div>
                   </div>
+                  <LiveForm />
                 </div>
-                {/* Registration Form */}
-                <form action="#" className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-outline ml-1 font-label">Nom complet</label>
-                    <input className="w-full bg-surface-container-lowest border-none rounded-md px-4 py-3 text-on-surface placeholder:text-outline/40 focus:ring-1 focus:ring-primary-fixed-dim transition-all outline-none" placeholder="Alexandre Martin" type="text" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-outline ml-1 font-label">Email professionnel</label>
-                    <input className="w-full bg-surface-container-lowest border-none rounded-md px-4 py-3 text-on-surface placeholder:text-outline/40 focus:ring-1 focus:ring-primary-fixed-dim transition-all outline-none" placeholder="alex@premium.com" type="email" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest text-outline ml-1 font-label">Expérience</label>
-                    <select className="w-full bg-surface-container-lowest border-none rounded-md px-4 py-3 text-on-surface focus:ring-1 focus:ring-primary-fixed-dim transition-all appearance-none outline-none">
-                      <option>Débutant (0-1 an)</option>
-                      <option>Intermédiaire (1-3 ans)</option>
-                      <option>Avancé (3+ ans)</option>
-                    </select>
-                  </div>
-                  <button className="w-full bg-primary-container text-on-primary-container font-headline font-bold py-4 rounded-md mt-4 hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_10px_20px_-5px_rgba(124,58,237,0.4)]" type="submit">
-                    RÉSERVER MON ACCÈS
-                  </button>
-                  <p className="text-[9px] text-center text-outline/60 px-4 font-label">
-                    En vous inscrivant, vous acceptez de recevoir nos analyses hebdomadaires et invitations exclusives.
-                  </p>
-                </form>
+
               </div>
               {/* Decorative Image Overlay */}
               <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full overflow-hidden border-4 border-surface z-20 hidden md:block">
@@ -175,20 +142,7 @@ export default function LivePage() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-[#4A4455]/15 bg-[#131317]">
-        <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto px-8 py-12 gap-6 font-body text-sm tracking-wide uppercase font-bold">
-          <div className="text-lg font-black text-[#E4E1E7] font-headline">One Pips</div>
-          <div className="flex flex-wrap justify-center gap-8">
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/legal">Mentions Légales</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/privacy">Politique de Confidentialité</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/cgv">CGV</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/legal">Avertissement sur les Risques</a>
-          </div>
-          <p className="text-[#958DA1] text-[10px] text-center md:text-right max-w-xs normal-case opacity-80 font-normal">
-            © 2024 One Pips. Premium Trading Education. High-risk investment warning: Trading involves significant risk of loss.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

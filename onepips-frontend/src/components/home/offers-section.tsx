@@ -75,7 +75,7 @@ export function OffersSection() {
                 ))}
               </ul>
 
-              {offer.title === "Mentorat Elite" ? (
+              {offer.title === "Mentorat" ? (
                 <Link
                   href="/candidature"
                   className="w-full py-4 text-center rounded-md border border-outline text-on-surface font-headline font-bold hover:bg-surface-container-high transition-all"

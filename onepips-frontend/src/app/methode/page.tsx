@@ -1,24 +1,16 @@
 "use client";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 
 export default function MethodePage() {
   return (
     <>
       {/* TopAppBar */}
-      <nav className="fixed top-0 w-full z-50 bg-[#131317]/80 backdrop-blur-xl shadow-[0_40px_40px_0_rgba(210,187,255,0.06)]">
-        <div className="flex justify-between items-center max-w-7xl mx-auto px-8 h-20">
-          <div className="text-2xl font-bold tracking-tighter text-[#E4E1E7] font-headline">One Pips</div>
-          <div className="hidden md:flex gap-8 items-center font-headline tracking-tight">
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/">Home</a>
-            <a className="text-[#D2BBFF] border-b-2 border-[#7C3AED] pb-1" href="/methode">Méthode</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/resultats">Résultats</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/offres">Offres</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/live">Live</a>
-          </div>
-          <button className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-medium active:scale-95 transition-transform hover:bg-[#1F1F23]">
-            Candidater
-          </button>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="pt-20">
         {/* Hero Section */}
@@ -102,7 +94,7 @@ export default function MethodePage() {
             </div>
             <div className="relative space-y-24">
               <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-primary via-primary-container to-transparent -translate-x-1/2 hidden md:block"></div>
-              
+
               {/* Step 1 */}
               <div className="flex flex-col md:flex-row items-center gap-12 group">
                 <div className="flex-1 md:text-right order-2 md:order-1">
@@ -148,14 +140,63 @@ export default function MethodePage() {
           </div>
         </section>
 
+        {/* Free Youtube Courses Section */}
+        <section className="py-24 px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-headline font-bold mb-4">Apprendre avec OnePips sur Youtube</h2>
+              <p className="text-outline">Commencez à apprendre notre statégie avec les contenus gratuits.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
+              {/* Free Youtube Courses Cards */}
+              <div className="bg-surface-container-highest rounded-xl overflow-hidden border border-outline-variant/20 hover:border-primary transition-colors group cursor-pointer">
+                <div className="relative">
+                  <iframe
+                    width="560"
+                    height="315"
+                    src="https://www.youtube.com/embed/-zUjH8Ecjwo?si=VHcfxbd_hbUmCWQG"
+                    title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+              <div className="bg-surface-container-highest rounded-xl overflow-hidden border border-outline-variant/20 hover:border-primary transition-colors group cursor-pointer">
+                <div className="relative">
+                  <iframe
+                    width="560"
+                    height="315"
+                    src="https://www.youtube.com/embed/WeEf9zNjlOs?si=W9ToI4i1FGoMXeY5"
+                    title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+              <div className="bg-surface-container-highest rounded-xl overflow-hidden border border-outline-variant/20 hover:border-primary transition-colors group cursor-pointer">
+                <div className="relative">
+                  <iframe
+                    width="560"
+                    height="315"
+                    src="https://www.youtube.com/embed/wIYzkairDTs?si=O7K_cnOjOdh-l94c"
+                    title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section className="py-24 px-8">
           <div className="max-w-7xl mx-auto rounded-2xl overflow-hidden relative">
             <div className="absolute inset-0 bg-primary-container/10 backdrop-blur-sm"></div>
             <div className="relative z-10 p-12 md:p-24 flex flex-col items-center text-center gap-8 border border-outline-variant/10">
-              <h2 className="text-3xl md:text-5xl font-headline font-bold">Prêt à changer de paradigme ?</h2>
+              <h2 className="text-3xl md:text-5xl font-headline font-bold">Prêt à évoluer ?</h2>
               <p className="text-outline max-w-2xl text-lg">
-                Le trading professionnel n&apos;est pas accessible à tous. Nous sélectionnons nos membres sur leur motivation et leur capacité de discipline.
+                Le trading avec la méthode OnePips demande de l'engagement et rigueur. Nous sélectionnons nos membres sur leur motivation et leur capacité de discipline.
               </p>
               <div className="flex flex-wrap justify-center gap-6">
                 <button className="bg-primary-container text-on-primary-container px-10 py-4 rounded-md font-bold text-lg active:scale-95 transition-transform hover:bg-primary-container/90">
@@ -171,22 +212,7 @@ export default function MethodePage() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-[#4A4455]/15 bg-[#131317]">
-        <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto px-8 py-12 gap-6">
-          <div className="flex flex-col items-center md:items-start gap-4">
-            <div className="text-lg font-black text-[#E4E1E7] font-headline uppercase tracking-tighter">One Pips</div>
-            <p className="max-w-md text-xs text-[#958DA1] text-center md:text-left font-body leading-relaxed">
-              © 2024 One Pips. Premium Trading Education. High-risk investment warning: Trading involves significant risk of loss.
-            </p>
-          </div>
-          <div className="flex flex-wrap justify-center gap-6 text-sm font-body tracking-wide uppercase font-semibold">
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/legal">Mentions Légales</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/privacy">Politique de Confidentialité</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/cgv">CGV</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/legal">Avertissement sur les Risques</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

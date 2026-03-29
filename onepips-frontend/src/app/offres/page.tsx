@@ -1,24 +1,13 @@
+"use client";
+
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+
 export default function OffresPage() {
   return (
     <>
       {/* TopNavBar */}
-      <nav className="fixed top-0 w-full z-50 bg-[#131317]/80 backdrop-blur-xl shadow-[0_40px_40px_0_rgba(210,187,255,0.06)]">
-        <div className="flex justify-between items-center max-w-7xl mx-auto px-8 h-20">
-          <div className="text-2xl font-bold tracking-tighter text-[#E4E1E7] font-headline">
-            One Pips
-          </div>
-          <div className="hidden md:flex items-center space-x-8 font-headline tracking-tight">
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/">Home</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/methode">Méthode</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/resultats">Résultats</a>
-            <a className="text-[#D2BBFF] border-b-2 border-[#7C3AED] pb-1" href="/offres">Offres</a>
-            <a className="text-[#958DA1] hover:text-[#E4E1E7] transition-colors" href="/live">Live</a>
-          </div>
-          <button className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded font-bold hover:bg-[#1F1F23] transition-all duration-300 active:scale-95">
-            Candidater
-          </button>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="pt-32 pb-24">
         {/* Hero Section */}
@@ -182,22 +171,7 @@ export default function OffresPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#131317] w-full border-t border-[#4A4455]/15">
-        <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto px-8 py-12 gap-6">
-          <div className="text-lg font-black text-[#E4E1E7] font-body">
-            One Pips
-          </div>
-          <div className="flex flex-wrap justify-center gap-8 font-body text-sm tracking-wide uppercase opacity-80">
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/legal">Mentions Légales</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/privacy">Politique de Confidentialité</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/cgv">CGV</a>
-            <a className="text-[#958DA1] hover:text-[#D2BBFF] transition-colors" href="/legal">Avertissement sur les Risques</a>
-          </div>
-          <div className="text-[#958DA1] text-[10px] text-center md:text-right max-w-md leading-relaxed uppercase">
-            © 2024 One Pips. Premium Trading Education. High-risk investment warning: Trading involves significant risk of loss.
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }
