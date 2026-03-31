@@ -24,18 +24,40 @@ export type UpdateLeadDto = {
     accountType?: string[];
 };
 
-export const createLead = (data: CreateLeadDto) =>
+export type GetLeadsParams = {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+    score?: string;
+    interest?: string;
+    tradingYears?: string;
+};
+
+export const createLead = async (data: CreateLeadDto) =>
     api("/leads", {
         method: "POST",
         body: JSON.stringify(data),
     });
 
-export const updateLead = (id: string, data: UpdateLeadDto) =>
+export const updateLead = async (id: string, data: UpdateLeadDto) =>
     api(`/leads/${id}`, {
         method: "PATCH",
         body: JSON.stringify(data),
     });
 
-export const getLeads = () => api("/leads");
-export const getLeadById = (id: string) => api(`/leads/${id}`);
+export const getLeads = async (params: GetLeadsParams = {}) => {
+    // Filter out undefined/empty values before building query string
+    const cleanParams = Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== undefined && v !== "" && v !== null)
+    );
+    const query = new URLSearchParams(cleanParams as Record<string, string>).toString();
+    const res = await api(`/leads${query ? `?${query}` : ""}`);
+    console.log("leads service, res: ", res);
+    const leads = res.data;
+    console.log("leads service, leads: ", leads);
+    return leads;
+};
+
+export const getLeadById = async (id: string) => api(`/leads/${id}`);
 

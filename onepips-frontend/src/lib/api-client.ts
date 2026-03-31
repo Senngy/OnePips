@@ -16,6 +16,7 @@ export class ApiError extends Error {
 }
 
 export async function api(endpoint: string, options: FetchOptions = {}) {
+  console.log("api endpoint called", endpoint);
   const { auth = false, ...rest } = options;
 
   const headers = new Headers(options.headers);
@@ -39,8 +40,9 @@ export async function api(endpoint: string, options: FetchOptions = {}) {
   let data;
   try {
     data = await res.json();
-  } catch {
+  } catch (error) {
     data = null;
+    console.error("error", error);
   }
   if (!res.ok) {
     throw new ApiError(
@@ -49,7 +51,6 @@ export async function api(endpoint: string, options: FetchOptions = {}) {
       data
     );
   }
-
   return data;
 }
 

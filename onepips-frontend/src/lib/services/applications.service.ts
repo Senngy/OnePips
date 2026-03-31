@@ -1,6 +1,6 @@
 import { api } from "../api-client";
 
-export type CreateApplicationDto = {
+export type ApplicationDto = {
     leadId: string;
     answers: any;
     interests?: string[];
@@ -8,7 +8,7 @@ export type CreateApplicationDto = {
     capitalTrading?: number;
 };
 
-export const createApplication = (data: CreateApplicationDto) =>
+export const createApplication = (data: ApplicationDto) =>
     api("/applications", {
         method: "POST",
         body: JSON.stringify(data),
