@@ -6,7 +6,7 @@ import { NotificationsService } from '../notifications/notification.service.js';
 
 @Injectable()
 export class ApplicationsService {
-  constructor(private prisma: PrismaService, private notificationsService: NotificationsService) { }
+  constructor(private prisma: PrismaService) { }
 
   async findAll() {
     return this.prisma.application.findMany({ include: { lead: true } });

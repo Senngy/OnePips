@@ -10,11 +10,19 @@ export class LeadsController {
 
   @Get()
   async findAll(
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 10,
     @Query('status') status?: string,
-    @Query('minScore') minScore?: number,
+    @Query('score') score?: number,
     @Query('search') search?: string,
   ) {
-    return this.leadsService.findAll({ status, minScore, search });
+    return this.leadsService.findAll({
+      page: Number(page),
+      limit: Number(limit),
+      search,
+      status,
+      score: score ? Number(score) : undefined,
+    });
   }
 
   @Post()
