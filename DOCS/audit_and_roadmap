@@ -1,0 +1,65 @@
+# Audit Global & Roadmap OnePips
+
+Ce document analyse l'état actuel du projet OnePips par rapport à la vision cible et définit la trajectoire pour les prochaines étapes.
+
+## 🧠 1. Analyse de l'Existant (Audit)
+
+| Composant | État Actuel | Statut |
+| :--- | :--- | :---: |
+| **🌐 Front - Visiteur** | Home, Méthode, Résultats, Offres, Live + Landings implémentés avec un design premium. | ✅ Terminé |
+| **🎯 Front - Conversion** | Page `/candidature` (placeholder), `/booking` (placeholder). | 🏗️ En cours |
+| **🧑💼 Front - Admin** | Dashboard (UI simple), autres pages existantes mais vides. | 🏗️ En cours |
+| **📦 Back - NestJS** | Architecture modulaire complète (`leads`, `applications`, `auth`, etc.). | ✅ Terminé |
+| **🧠 DB - Prisma** | Schéma complet et aligné avec la vision (User, Lead, Application, Booking, Payment, Event). | ✅ Terminé |
+| **⚙️ Scoring Lead** | Logique de scoring et status intégrée dans `LeadsService`. | ✅ Terminé |
+
+### Points Forts
+- **Design Premium** : Le front-end respecte les codes esthétiques du trading (sombre, minimalisme, accents violets).
+- **Logique Métier** : Le système de scoring automatique des leads est déjà codé côté backend.
+- **Structure Solide** : La base de données et les modules NestJS couvrent 100% des besoins de la vision globale.
+
+### Écarts / Manques
+- **Authentification** : Non encore active pour protéger la zone `/admin`.
+- **Formulaire multi-step** : La pièce maîtresse de la conversion (scoring dynamique) n'est pas encore implémentée sur le front.
+- **Dynamisme Admin** : Les tables de leads et d'applications ne tirent pas encore les données réelles du backend.
+
+---
+
+## 🚀 2. Roadmap d'Avancement
+
+### Phase 2 : Conversion & Automatisation (Priorité Immédiate)
+- [ ] **Formulaire Multi-step (`/candidature`)** : UI dynamique avec questions engageantes.
+- [ ] **Connection Candidature → Backend** : Envoi des données et récupération du score en temps réel.
+- [ ] **Intégration Booking** : Ajout du widget Cal.com sur la page `/booking`.
+- [ ] **Protection Admin** : Mise en place des guards JWT/Session pour l'administration.
+
+### Phase 3 : Backoffice & Payments
+- [ ] **Table des Leads** : Affichage trié par score (HOT/MID/COLD) dans le dashboard.
+- [ ] **Gestion des Candidatures** : Vue détaillée pour accepter/refuser les profils.
+- [ ] **Intégration Stripe** : Paiement des offres "Discord" et "Coaching".
+
+### Phase 4 : Analytics & DevOps
+- [ ] **Tracking UTM** : Enregistrement de la source (TikTok/Insta) lors de la création du lead.
+- [ ] **Dashboard Charts** : Visualisation du taux de conversion avec Recharts.
+- [ ] **Déploiement** : Dockerisation et mise en prod.
+
+---
+
+## ✅ 3. Checklist Avant de Poursuivre
+
+> [!IMPORTANT]
+> Avant de passer à la suite, nous devons valider ces points critiques :
+
+- [x] **Cohérence UI** : Toutes les pages visiteurs utilisent le nouveau `globals.css`.
+- [ ] **Flux Candidature** : Est-ce qu'on commence par l'UI du formulaire ou par l'auth admin ?
+- [ ] **Contenu Légal** : Remplacement des placeholders dans `/legal` pour la conformité trading.
+- [ ] **Validation Prisma Client** : S'assurer que les migrations sont synchronisées avec la DB locale.
+
+---
+
+## 🛠️ Actions Immédiates Proposées
+
+1. **Priorité 1** : Création du composant `StepForm` pour la page `/candidature`.
+2. **Priorité 2** : Mise en place du module `Auth` (Login/Guard) pour sécuriser le backoffice.
+
+*Lequel de ces deux chantiers souhaitez-vous attaquer en premier ?*

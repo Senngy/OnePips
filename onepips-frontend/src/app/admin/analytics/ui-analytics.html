@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Analytics &amp; Traffic | One Pips Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary": "#2f2f3f",
+                        "inverse-on-surface": "#303034",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#410004",
+                        "on-primary": "#3f008e",
+                        "on-surface": "#e4e1e7",
+                        "on-primary-container": "#ede0ff",
+                        "surface-dim": "#131317",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "on-error": "#690005",
+                        "surface-container-lowest": "#0e0e12",
+                        "tertiary": "#ffb3ad",
+                        "surface": "#131317",
+                        "inverse-primary": "#732ee4",
+                        "background": "#131317",
+                        "secondary-container": "#464556",
+                        "secondary-fixed-dim": "#c7c4d9",
+                        "primary-fixed-dim": "#d2bbff",
+                        "on-secondary-fixed": "#1a1a29",
+                        "primary": "#d2bbff",
+                        "on-surface-variant": "#ccc3d8",
+                        "on-tertiary-container": "#ffdfdc",
+                        "primary-fixed": "#eaddff",
+                        "surface-container-low": "#1b1b1f",
+                        "secondary-fixed": "#e3e0f5",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c7c4d9",
+                        "surface-container-high": "#2a292e",
+                        "surface-bright": "#39393d",
+                        "surface-container": "#1f1f23",
+                        "tertiary-container": "#c6252b",
+                        "on-secondary-fixed-variant": "#464556",
+                        "on-background": "#e4e1e7",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "on-tertiary": "#68000a",
+                        "surface-variant": "#353439",
+                        "on-primary-fixed": "#25005a",
+                        "error-container": "#93000a",
+                        "inverse-surface": "#e4e1e7",
+                        "outline-variant": "#4a4455",
+                        "on-secondary-container": "#b5b3c7",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "tertiary-fixed": "#ffdad7",
+                        "surface-tint": "#d2bbff",
+                        "outline": "#958da1",
+                        "surface-container-highest": "#353439",
+                        "primary-container": "#7c3aed"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass-panel {
+            background: rgba(31, 31, 35, 0.6);
+            backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(228, 225, 231, 0.1);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body selection:bg-primary/30">
+    <!-- Sidebar Navigation -->
+    <aside
+        class="h-screen w-64 fixed left-0 top-0 z-40 bg-[#1B1B1F] border-r border-[#4A4455]/15 flex flex-col py-8 px-4">
+        <div class="mb-10 px-2">
+            <span class="font-space-grotesk font-black text-[#D2BBFF] text-2xl tracking-tighter">One Pips</span>
+            <div class="mt-4 flex items-center gap-3 p-3 rounded-lg bg-surface-container-lowest">
+                <div
+                    class="w-10 h-10 rounded bg-primary-container flex items-center justify-center text-on-primary-container font-bold">
+                    EA</div>
+                <div>
+                    <p class="font-inter text-sm font-medium tracking-wide text-[#D2BBFF]">One Pips Admin</p>
+                    <p class="text-[10px] text-outline uppercase tracking-widest">Elite Analyst Tier</p>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto no-scrollbar">
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out group"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span> Dashboard
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out group"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="group">group</span> Leads
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out group"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="assignment">assignment</span> Applications
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out group"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="event_available">event_available</span> Booking
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out group"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="payments">payments</span> Payments
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out group"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span> Events
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#D2BBFF] border-r-2 border-[#7C3AED] bg-gradient-to-r from-[#7C3AED]/10 to-transparent font-inter text-sm font-medium tracking-wide transition-all duration-300 ease-in-out group"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="leaderboard"
+                    style="font-variation-settings: 'FILL' 1;">leaderboard</span> Analytics
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out group"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="settings">settings</span> Settings
+            </a>
+        </nav>
+        <div class="mt-auto p-4 border-t border-outline-variant/10 text-[11px] text-outline text-center">
+            SYSTEM STATUS: OPERATIONAL
+        </div>
+    </aside>
+    <!-- Main Content Canvas -->
+    <main class="ml-64 min-h-screen">
+        <!-- Top Bar -->
+        <header
+            class="w-full sticky top-0 z-50 bg-[#131317] flex items-center justify-between px-8 py-4 shadow-[0_40px_40px_rgba(210,187,255,0.06)]">
+            <div class="flex items-center gap-6">
+                <h1 class="font-headline text-2xl font-bold tracking-tight text-primary">Analytics Engine</h1>
+                <div class="h-4 w-px bg-outline-variant/30"></div>
+                <div
+                    class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-md border border-outline-variant/15">
+                    <span class="material-symbols-outlined text-sm text-primary"
+                        data-icon="calendar_today">calendar_today</span>
+                    <span class="text-xs font-medium text-on-surface-variant">Last 30 Days</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="p-2 rounded-full hover:bg-surface-container transition-colors">
+                    <span class="material-symbols-outlined text-on-surface-variant"
+                        data-icon="notifications">notifications</span>
+                </button>
+                <div
+                    class="w-8 h-8 rounded-full bg-surface-container-highest border border-primary/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-sm text-primary"
+                        data-icon="account_circle">account_circle</span>
+                </div>
+            </div>
+        </header>
+        <section class="p-8 max-w-7xl mx-auto space-y-8">
+            <!-- Bento Grid: Key Performance Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="md:col-span-2 p-7 rounded-lg bg-surface-container relative overflow-hidden">
+                    <div
+                        class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-transparent opacity-50">
+                    </div>
+                    <p class="text-xs font-label uppercase tracking-widest text-outline mb-2">Total Platform Traffic</p>
+                    <div class="flex items-end gap-4">
+                        <h2 class="text-4xl font-headline font-bold text-on-background">142,890</h2>
+                        <span class="flex items-center text-primary text-sm font-bold mb-1">
+                            <span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+                            12.4%
+                        </span>
+                    </div>
+                    <div class="mt-6 h-16 w-full flex items-end gap-1">
+                        <!-- Simulated Chart Bars -->
+                        <div class="flex-1 bg-primary/10 h-1/2 rounded-t-sm"></div>
+                        <div class="flex-1 bg-primary/20 h-2/3 rounded-t-sm"></div>
+                        <div class="flex-1 bg-primary/10 h-1/3 rounded-t-sm"></div>
+                        <div class="flex-1 bg-primary/40 h-3/4 rounded-t-sm"></div>
+                        <div class="flex-1 bg-primary/60 h-full rounded-t-sm"></div>
+                        <div class="flex-1 bg-primary/30 h-1/2 rounded-t-sm"></div>
+                        <div class="flex-1 bg-primary/20 h-2/3 rounded-t-sm"></div>
+                        <div class="flex-1 bg-primary/50 h-5/6 rounded-t-sm"></div>
+                    </div>
+                </div>
+                <div class="p-7 rounded-lg bg-surface-container-low border border-outline-variant/5">
+                    <p class="text-xs font-label uppercase tracking-widest text-outline mb-2">Active Funnel</p>
+                    <h2 class="text-3xl font-headline font-bold text-on-background">8.4%</h2>
+                    <p class="text-xs text-on-surface-variant mt-2">Global Conv. Rate</p>
+                    <div class="mt-6 flex items-center gap-2">
+                        <div class="flex-1 h-1.5 rounded-full bg-secondary-container overflow-hidden">
+                            <div class="h-full w-[8.4%] bg-primary shadow-[0_0_8px_rgba(210,187,255,0.6)]"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-7 rounded-lg bg-surface-container-low border border-outline-variant/5">
+                    <p class="text-xs font-label uppercase tracking-widest text-outline mb-2">Net Profit Forecast</p>
+                    <h2 class="text-3xl font-headline font-bold text-on-background">$48.2k</h2>
+                    <p class="text-xs text-on-surface-variant mt-2">Next 14 Days</p>
+                    <div class="mt-6 flex justify-end">
+                        <span class="material-symbols-outlined text-primary/40 text-4xl"
+                            data-icon="query_stats">query_stats</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Funnel Performance Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-surface-container rounded-lg p-8">
+                    <div class="flex justify-between items-center mb-10">
+                        <div>
+                            <h3 class="font-headline text-xl font-bold">Funnel Velocity</h3>
+                            <p class="text-sm text-outline mt-1">Deep-dive into multi-stage conversion drops</p>
+                        </div>
+                        <button
+                            class="text-xs font-label uppercase tracking-widest text-primary border-b border-primary/30 pb-0.5">Full
+                            Audit</button>
+                    </div>
+                    <div class="space-y-6">
+                        <!-- Stage 1 -->
+                        <div class="relative group">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-sm font-bold tracking-tight">Stage 01: Landing Page</span>
+                                <span class="text-xs font-mono text-primary">142,890 Users</span>
+                            </div>
+                            <div class="h-10 bg-surface-container-lowest rounded-md flex overflow-hidden">
+                                <div class="h-full bg-primary/40 w-full flex items-center px-4">
+                                    <span class="text-[10px] font-black tracking-tighter text-on-primary-container">AD
+                                        IMPRESSION &amp; DIRECT</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Dropoff 1 -->
+                        <div class="flex justify-center -my-3 relative z-10">
+                            <div
+                                class="bg-surface-variant px-3 py-1 rounded text-[10px] font-bold text-tertiary flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs"
+                                    data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span> 68.2%
+                                DROPOFF
+                            </div>
+                        </div>
+                        <!-- Stage 2 -->
+                        <div class="relative group">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-sm font-bold tracking-tight">Stage 02: Application Submitted</span>
+                                <span class="text-xs font-mono text-primary">45,439 Users</span>
+                            </div>
+                            <div class="h-10 bg-surface-container-lowest rounded-md flex overflow-hidden">
+                                <div class="h-full bg-primary/60 w-[31%] flex items-center px-4">
+                                    <span class="text-[10px] font-black tracking-tighter text-on-primary-container">FORM
+                                        COMPLETED</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Dropoff 2 -->
+                        <div class="flex justify-center -my-3 relative z-10">
+                            <div
+                                class="bg-surface-variant px-3 py-1 rounded text-[10px] font-bold text-tertiary flex items-center gap-1">
+                                <span class="material-symbols-outlined text-xs"
+                                    data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span> 74.8%
+                                DROPOFF
+                            </div>
+                        </div>
+                        <!-- Stage 3 -->
+                        <div class="relative group">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-sm font-bold tracking-tight">Stage 03: Payment Success</span>
+                                <span class="text-xs font-mono text-primary">11,450 Users</span>
+                            </div>
+                            <div class="h-10 bg-surface-container-lowest rounded-md flex overflow-hidden">
+                                <div
+                                    class="h-full bg-primary w-[8%] flex items-center px-4 shadow-[0_0_15px_rgba(210,187,255,0.3)]">
+                                    <span
+                                        class="text-[10px] font-black tracking-tighter text-on-primary-container">CONVERTED</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Traffic Sources Breakdown -->
+                <div class="bg-surface-container-low rounded-lg p-8 border border-outline-variant/10">
+                    <h3 class="font-headline text-xl font-bold mb-8">Traffic Sources</h3>
+                    <div class="space-y-8">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded bg-[#FE2C55]/10 flex items-center justify-center text-[#FE2C55]">
+                                <span class="material-symbols-outlined" data-icon="video_library">video_library</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-bold">TikTok Ads</span>
+                                    <span class="text-on-surface-variant">42%</span>
+                                </div>
+                                <div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+                                    <div class="h-full bg-[#FE2C55] w-[42%]"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded bg-[#E4405F]/10 flex items-center justify-center text-[#E4405F]">
+                                <span class="material-symbols-outlined" data-icon="camera">camera</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-bold">Instagram</span>
+                                    <span class="text-on-surface-variant">35%</span>
+                                </div>
+                                <div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+                                    <div class="h-full bg-[#E4405F] w-[35%]"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded bg-primary/10 flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined" data-icon="search">search</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-bold">Organic SEO</span>
+                                    <span class="text-on-surface-variant">18%</span>
+                                </div>
+                                <div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary w-[18%]"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 opacity-50">
+                            <div class="w-12 h-12 rounded bg-outline/10 flex items-center justify-center text-outline">
+                                <span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-bold">Other</span>
+                                    <span class="text-on-surface-variant">5%</span>
+                                </div>
+                                <div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+                                    <div class="h-full bg-outline w-[5%]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-12 p-4 bg-surface-container-lowest rounded-md border border-outline-variant/10">
+                        <p class="text-[10px] font-label uppercase text-outline mb-2">Editor's Insight</p>
+                        <p class="text-xs italic leading-relaxed text-on-surface-variant">"TikTok volume is up 4% this
+                            week, however Instagram traffic shows a 2.4x higher LTV in Stage 03."</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Heatmap / User Growth Visual -->
+            <div class="bg-surface-container rounded-lg p-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+                    <div>
+                        <h3 class="font-headline text-xl font-bold">Hourly Traffic Density</h3>
+                        <p class="text-sm text-outline mt-1">Heatmap indicating peak system engagement</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button
+                            class="px-4 py-2 bg-surface-container-highest rounded text-xs font-bold text-primary transition-all active:scale-95">EXPORT
+                            DATA</button>
+                        <button
+                            class="px-4 py-2 bg-primary-container rounded text-xs font-bold text-on-primary-container shadow-lg shadow-primary-container/20 transition-all active:scale-95">RECALIBRATE</button>
+                    </div>
+                </div>
+                <!-- Grid Heatmap -->
+                <div class="grid grid-cols-24 gap-1 h-32">
+                    <!-- Column generation proxy -->
+                    <div class="flex gap-1 w-full justify-between items-end">
+                        <div class="w-full bg-primary/10 h-1/4 rounded-sm"></div>
+                        <div class="w-full bg-primary/20 h-1/3 rounded-sm"></div>
+                        <div class="w-full bg-primary/10 h-1/2 rounded-sm"></div>
+                        <div class="w-full bg-primary/40 h-1/5 rounded-sm"></div>
+                        <div class="w-full bg-primary/5 h-2/3 rounded-sm"></div>
+                        <div class="w-full bg-primary/60 h-1/4 rounded-sm"></div>
+                        <div class="w-full bg-primary/80 h-3/4 rounded-sm"></div>
+                        <div class="w-full bg-primary h-full rounded-sm shadow-[0_0_12px_rgba(210,187,255,0.2)]"></div>
+                        <div class="w-full bg-primary/70 h-5/6 rounded-sm"></div>
+                        <div class="w-full bg-primary/40 h-2/3 rounded-sm"></div>
+                        <div class="w-full bg-primary/20 h-1/2 rounded-sm"></div>
+                        <div class="w-full bg-primary/30 h-1/3 rounded-sm"></div>
+                        <div class="w-full bg-primary/50 h-3/4 rounded-sm"></div>
+                        <div class="w-full bg-primary/90 h-[95%] rounded-sm shadow-[0_0_10px_rgba(210,187,255,0.2)]">
+                        </div>
+                        <div class="w-full bg-primary/40 h-2/3 rounded-sm"></div>
+                        <div class="w-full bg-primary/10 h-1/4 rounded-sm"></div>
+                        <div class="w-full bg-primary/20 h-1/2 rounded-sm"></div>
+                        <div class="w-full bg-primary/60 h-5/6 rounded-sm"></div>
+                        <div class="w-full bg-primary/30 h-1/2 rounded-sm"></div>
+                        <div class="w-full bg-primary/10 h-1/4 rounded-sm"></div>
+                        <div class="w-full bg-primary/20 h-1/3 rounded-sm"></div>
+                        <div class="w-full bg-primary/40 h-2/3 rounded-sm"></div>
+                        <div class="w-full bg-primary/10 h-1/2 rounded-sm"></div>
+                        <div class="w-full bg-primary/5 h-1/4 rounded-sm"></div>
+                    </div>
+                </div>
+                <div
+                    class="flex justify-between mt-4 text-[10px] font-mono text-outline uppercase tracking-widest px-1">
+                    <span>00:00</span>
+                    <span>04:00</span>
+                    <span>08:00</span>
+                    <span>12:00</span>
+                    <span>16:00</span>
+                    <span>20:00</span>
+                    <span>23:59</span>
+                </div>
+            </div>
+            <!-- Detailed Source Performance Table -->
+            <div class="bg-surface-container-low rounded-lg overflow-hidden border border-outline-variant/15">
+                <div class="p-6 border-b border-outline-variant/10 flex justify-between items-center">
+                    <h3 class="font-headline text-lg font-bold">Campaign Breakdown</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-outline">Search:</span>
+                        <input
+                            class="bg-surface-container-lowest border-none text-xs rounded p-2 focus:ring-1 focus:ring-primary w-48"
+                            placeholder="Campaign ID..." type="text" />
+                    </div>
+                </div>
+                <table class="w-full text-left">
+                    <thead class="bg-surface-container-highest/30">
+                        <tr>
+                            <th class="px-6 py-4 text-[10px] font-label uppercase tracking-widest text-outline">Source
+                                Campaign</th>
+                            <th class="px-6 py-4 text-[10px] font-label uppercase tracking-widest text-outline">Spend
+                            </th>
+                            <th class="px-6 py-4 text-[10px] font-label uppercase tracking-widest text-outline">Leads
+                            </th>
+                            <th class="px-6 py-4 text-[10px] font-label uppercase tracking-widest text-outline">CPA</th>
+                            <th class="px-6 py-4 text-[10px] font-label uppercase tracking-widest text-outline">ROI</th>
+                            <th
+                                class="px-6 py-4 text-[10px] font-label uppercase tracking-widest text-outline text-right">
+                                Trend</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/5">
+                        <tr class="hover:bg-surface-container transition-colors group">
+                            <td class="px-6 py-5">
+                                <p class="text-sm font-bold text-on-surface">TT_Global_Prospecting_V4</p>
+                                <p class="text-[10px] text-outline">TikTok Ads Manager</p>
+                            </td>
+                            <td class="px-6 py-5 text-sm font-mono">$12,450</td>
+                            <td class="px-6 py-5 text-sm">4,210</td>
+                            <td class="px-6 py-5 text-sm font-mono">$2.95</td>
+                            <td class="px-6 py-5">
+                                <span
+                                    class="bg-primary/10 text-primary px-2 py-1 rounded text-[11px] font-bold">412%</span>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="material-symbols-outlined text-primary"
+                                    data-icon="trending_up">trending_up</span>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-surface-container transition-colors group">
+                            <td class="px-6 py-5">
+                                <p class="text-sm font-bold text-on-surface">IG_Reels_Educational_Series</p>
+                                <p class="text-[10px] text-outline">Instagram Boost</p>
+                            </td>
+                            <td class="px-6 py-5 text-sm font-mono">$8,900</td>
+                            <td class="px-6 py-5 text-sm">2,150</td>
+                            <td class="px-6 py-5 text-sm font-mono">$4.13</td>
+                            <td class="px-6 py-5">
+                                <span
+                                    class="bg-primary/10 text-primary px-2 py-1 rounded text-[11px] font-bold">650%</span>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="material-symbols-outlined text-primary"
+                                    data-icon="trending_up">trending_up</span>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-surface-container transition-colors group">
+                            <td class="px-6 py-5">
+                                <p class="text-sm font-bold text-on-surface">Organic_Youtube_Shorts</p>
+                                <p class="text-[10px] text-outline">Direct Link-in-Bio</p>
+                            </td>
+                            <td class="px-6 py-5 text-sm font-mono">$0</td>
+                            <td class="px-6 py-5 text-sm">1,020</td>
+                            <td class="px-6 py-5 text-sm font-mono">$0.00</td>
+                            <td class="px-6 py-5">
+                                <span
+                                    class="bg-primary/10 text-primary px-2 py-1 rounded text-[11px] font-bold">∞</span>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="material-symbols-outlined text-outline"
+                                    data-icon="trending_flat">trending_flat</span>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-surface-container transition-colors group">
+                            <td class="px-6 py-5 text-tertiary">
+                                <p class="text-sm font-bold">Google_Search_Branded</p>
+                                <p class="text-[10px] text-tertiary/60">PPC Campaigns</p>
+                            </td>
+                            <td class="px-6 py-5 text-sm font-mono">$4,200</td>
+                            <td class="px-6 py-5 text-sm">112</td>
+                            <td class="px-6 py-5 text-sm font-mono">$37.50</td>
+                            <td class="px-6 py-5">
+                                <span
+                                    class="bg-tertiary/10 text-tertiary px-2 py-1 rounded text-[11px] font-bold">-14%</span>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="material-symbols-outlined text-tertiary"
+                                    data-icon="trending_down">trending_down</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <!-- Dynamic Context Area -->
+        <section class="p-8 border-t border-outline-variant/10 grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+            <div class="p-8 rounded-lg bg-surface-container border border-primary/20 relative">
+                <div class="absolute top-4 right-4 text-[10px] font-bold text-primary bg-primary/10 px-2 py-1 rounded">
+                    SYSTEM ADVICE</div>
+                <h4 class="font-headline text-lg font-bold mb-4">Traffic Channel Recommendation</h4>
+                <p class="text-sm text-on-surface-variant leading-relaxed mb-6">
+                    Based on the current 14-day cycle, shifting 15% of the <span class="text-primary font-bold">Google
+                        Search</span> budget into <span class="text-primary font-bold">Instagram Reels</span> is
+                    projected to increase top-of-funnel conversions by <span class="text-white font-mono">~2.4%</span>
+                    without increasing total CAC.
+                </p>
+                <div class="flex gap-4">
+                    <button
+                        class="bg-primary text-on-primary font-bold text-[10px] uppercase tracking-widest px-4 py-2 rounded">Apply
+                        Allocation</button>
+                    <button
+                        class="text-outline font-bold text-[10px] uppercase tracking-widest px-4 py-2 hover:text-white">Ignore</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div
+                    class="p-6 bg-surface-container-low rounded-lg border border-outline-variant/10 flex flex-col items-center justify-center text-center">
+                    <span class="material-symbols-outlined text-primary mb-3 text-3xl" data-icon="bolt">bolt</span>
+                    <p class="text-[10px] font-label text-outline uppercase tracking-widest">Server Response</p>
+                    <p class="text-xl font-headline font-bold">42ms</p>
+                </div>
+                <div
+                    class="p-6 bg-surface-container-low rounded-lg border border-outline-variant/10 flex flex-col items-center justify-center text-center">
+                    <span class="material-symbols-outlined text-primary mb-3 text-3xl" data-icon="update">update</span>
+                    <p class="text-[10px] font-label text-outline uppercase tracking-widest">Next Refresh</p>
+                    <p class="text-xl font-headline font-bold">08:42</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- FAB (Suppressed for analytics) -->
+</body>
+
+</html>

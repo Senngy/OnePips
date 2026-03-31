@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Obsidian Admin - Communauté</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "surface-variant": "#353439",
+                        "surface-container-high": "#2a292e",
+                        "on-primary-fixed": "#25005a",
+                        "inverse-surface": "#e4e1e7",
+                        "on-tertiary-fixed": "#410004",
+                        "tertiary": "#ffb3ad",
+                        "secondary-fixed": "#e3e0f5",
+                        "primary-container": "#7c3aed",
+                        "on-secondary-container": "#b5b3c7",
+                        "surface-container": "#1f1f23",
+                        "error-container": "#93000a",
+                        "surface-bright": "#39393d",
+                        "primary-fixed": "#eaddff",
+                        "on-surface": "#e4e1e7",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "primary": "#d2bbff",
+                        "on-error": "#690005",
+                        "surface-tint": "#d2bbff",
+                        "secondary-container": "#464556",
+                        "outline-variant": "#4a4455",
+                        "on-secondary": "#2f2f3f",
+                        "surface-container-highest": "#353439",
+                        "secondary": "#c7c4d9",
+                        "on-tertiary": "#68000a",
+                        "surface": "#131317",
+                        "primary-fixed-dim": "#d2bbff",
+                        "background": "#131317",
+                        "error": "#ffb4ab",
+                        "surface-dim": "#131317",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "on-background": "#e4e1e7",
+                        "surface-container-low": "#1b1b1f",
+                        "tertiary-container": "#c6252b",
+                        "on-primary-container": "#ede0ff",
+                        "on-secondary-fixed-variant": "#464556",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#732ee4",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-surface-variant": "#ccc3d8",
+                        "on-tertiary-container": "#ffdfdc",
+                        "on-primary": "#3f008e",
+                        "surface-container-lowest": "#0e0e12",
+                        "outline": "#958da1",
+                        "inverse-on-surface": "#303034",
+                        "on-secondary-fixed": "#1a1a29",
+                        "secondary-fixed-dim": "#c7c4d9"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        .font-headline {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .tonal-shift-asymmetry {
+            background: linear-gradient(135deg, #1B1B1F 0%, #131317 100%);
+        }
+
+        .glass-card {
+            background: rgba(31, 31, 35, 0.6);
+            backdrop-filter: blur(12px);
+            border-top: 0.5px solid rgba(228, 225, 231, 0.1);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen flex">
+    <!-- SideNavBar -->
+    <aside
+        class="h-screen w-64 flex flex-col py-8 bg-[#131317] shadow-[40px_0_40px_-20px_rgba(210,187,255,0.06)] sticky top-0 shrink-0">
+        <div class="px-8 mb-12">
+            <h1 class="text-xl font-bold tracking-tighter text-[#E4E1E7] font-headline">Obsidian Admin</h1>
+            <p class="text-[10px] font-label uppercase tracking-[0.2em] text-outline">Elite Trading Edu</p>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <!-- Navigation Items Mapping from JSON -->
+            <a class="flex items-center px-8 py-3 font-headline tracking-tight text-sm uppercase text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1B1B1F] transition-all duration-300 active:scale-95"
+                href="#">
+                <span class="material-symbols-outlined mr-4">dashboard</span>
+                Dashboard
+            </a>
+            <a class="flex items-center px-8 py-3 font-headline tracking-tight text-sm uppercase text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1B1B1F] transition-all duration-300 active:scale-95"
+                href="#">
+                <span class="material-symbols-outlined mr-4">group</span>
+                Leads
+            </a>
+            <a class="flex items-center px-8 py-3 font-headline tracking-tight text-sm uppercase text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1B1B1F] transition-all duration-300 active:scale-95"
+                href="#">
+                <span class="material-symbols-outlined mr-4">description</span>
+                Applications
+            </a>
+            <a class="flex items-center px-8 py-3 font-headline tracking-tight text-sm uppercase text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1B1B1F] transition-all duration-300 active:scale-95"
+                href="#">
+                <span class="material-symbols-outlined mr-4">calendar_today</span>
+                Booking
+            </a>
+            <a class="flex items-center px-8 py-3 font-headline tracking-tight text-sm uppercase text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1B1B1F] transition-all duration-300 active:scale-95"
+                href="#">
+                <span class="material-symbols-outlined mr-4">payments</span>
+                Payments
+            </a>
+            <a class="flex items-center px-8 py-3 font-headline tracking-tight text-sm uppercase text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1B1B1F] transition-all duration-300 active:scale-95"
+                href="#">
+                <span class="material-symbols-outlined mr-4">event</span>
+                Events
+            </a>
+            <a class="flex items-center px-8 py-3 font-headline tracking-tight text-sm uppercase text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1B1B1F] transition-all duration-300 active:scale-95"
+                href="#">
+                <span class="material-symbols-outlined mr-4">analytics</span>
+                Analytics
+            </a>
+            <!-- Active Navigation -->
+            <a class="flex items-center px-8 py-3 font-headline tracking-tight text-sm uppercase text-[#D2BBFF] bg-[#1F1F23] border-r-2 border-[#7C3AED] transition-all duration-300 active:scale-95"
+                href="#">
+                <span class="material-symbols-outlined mr-4" style="font-variation-settings: 'FILL' 1;">forum</span>
+                Communauté
+            </a>
+            <a class="flex items-center px-8 py-3 font-headline tracking-tight text-sm uppercase text-[#958DA1] hover:text-[#E4E1E7] hover:bg-[#1B1B1F] transition-all duration-300 active:scale-95"
+                href="#">
+                <span class="material-symbols-outlined mr-4">settings</span>
+                Settings
+            </a>
+        </nav>
+        <div class="px-8 mt-auto pt-8 border-t border-white/5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-surface-container overflow-hidden">
+                <img class="w-full h-full object-cover"
+                    data-alt="close-up portrait of professional male trader in dark suit, clean lighting, high resolution obsidian office background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfxRR-wO8zmMqRa7hWfvbrZdIimwEbXRjmLsEaE9ET0yRMptlOCiBPBoiKg3Lhmaqk7T_2QWc_XMnC0MICRQbS0X8oyr3wNEPLpObfWUnO8tg0zGT1_mr2do-ysVhXO4RTm1MM7D144JrxR5vGHUZ_fqiouFMl2ddREzSJps39PsCsdKN-1hX1HGhq9_eZwLN5godezmpzFRRwgpD-nMGsEbY6uLYRCWd5BHs6G_H0Bz6XiDRU2Meh7j3W1lt6xKpJpwjcElkBftE" />
+            </div>
+            <div>
+                <p class="text-sm font-medium text-on-surface">Alex Rivière</p>
+                <p class="text-[10px] text-outline uppercase tracking-wider">Master Admin</p>
+            </div>
+        </div>
+    </aside>
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 bg-surface">
+        <!-- TopAppBar -->
+        <header
+            class="sticky top-0 z-40 bg-[#131317]/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-8 h-20 w-full">
+            <div class="flex items-center gap-8">
+                <h2 class="text-2xl font-bold font-headline text-on-surface tracking-tight">Communauté</h2>
+                <nav class="flex gap-6">
+                    <a class="text-[#D2BBFF] border-b-2 border-[#7C3AED] pb-1 font-headline font-medium text-sm transition-colors duration-200"
+                        href="#">Témoignages</a>
+                    <a class="text-[#958DA1] hover:text-[#E4E1E7] font-headline font-medium text-sm transition-colors duration-200"
+                        href="#">Résultats</a>
+                </nav>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="relative group">
+                    <span
+                        class="material-symbols-outlined text-outline group-hover:text-on-surface cursor-pointer">notifications</span>
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full ring-2 ring-background"></span>
+                </div>
+                <span
+                    class="material-symbols-outlined text-outline hover:text-on-surface cursor-pointer">help_outline</span>
+                <button
+                    class="bg-primary-container text-on-primary-container px-4 py-2 rounded-md font-headline text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                    Add Entry
+                </button>
+            </div>
+        </header>
+        <!-- Content Canvas -->
+        <div class="p-8 space-y-8 max-w-7xl mx-auto w-full">
+            <!-- Statistics Overview (Bento Style) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 flex flex-col gap-1">
+                    <span class="text-outline text-[10px] font-label uppercase tracking-widest">Total
+                        Testimonials</span>
+                    <span class="text-3xl font-headline font-bold text-on-surface">1,284</span>
+                    <span class="text-xs text-primary mt-2 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">trending_up</span>
+                        +12% this month
+                    </span>
+                </div>
+                <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 flex flex-col gap-1">
+                    <span class="text-outline text-[10px] font-label uppercase tracking-widest">Average Rating</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-3xl font-headline font-bold text-on-surface">4.92</span>
+                        <div class="flex text-primary">
+                            <span class="material-symbols-outlined text-sm"
+                                style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm"
+                                style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm"
+                                style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm"
+                                style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="material-symbols-outlined text-sm"
+                                style="font-variation-settings: 'FILL' 1;">star_half</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 flex flex-col gap-1">
+                    <span class="text-outline text-[10px] font-label uppercase tracking-widest">Global Pips
+                        Shared</span>
+                    <span class="text-3xl font-headline font-bold text-on-surface">+45.2k</span>
+                    <span class="text-xs text-outline mt-2 tracking-wide uppercase font-label">Across 420 traders</span>
+                </div>
+                <div class="bg-surface-container-low p-6 rounded-xl border border-white/5 flex flex-col gap-1">
+                    <span class="text-outline text-[10px] font-label uppercase tracking-widest">Active Results</span>
+                    <span class="text-3xl font-headline font-bold text-on-surface">842</span>
+                    <span class="text-xs text-tertiary mt-2 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">pending</span>
+                        14 pending review
+                    </span>
+                </div>
+            </div>
+            <!-- Asymmetric Main Area -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left Column: Testimonials Management -->
+                <section class="lg:col-span-8 space-y-6">
+                    <div class="flex justify-between items-end">
+                        <h3 class="text-xl font-headline font-bold text-on-surface">Derniers Témoignages</h3>
+                        <div class="flex gap-2">
+                            <button
+                                class="p-2 bg-surface-container text-outline hover:text-on-surface rounded border border-white/5">
+                                <span class="material-symbols-outlined">filter_list</span>
+                            </button>
+                            <button
+                                class="p-2 bg-surface-container text-outline hover:text-on-surface rounded border border-white/5">
+                                <span class="material-symbols-outlined">search</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-low rounded-xl overflow-hidden border border-white/5 shadow-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-surface-container-high/50 text-outline text-[10px] font-label uppercase tracking-widest border-b border-white/5">
+                                    <th class="px-6 py-4">Membre</th>
+                                    <th class="px-6 py-4">Évaluation</th>
+                                    <th class="px-6 py-4">Commentaire</th>
+                                    <th class="px-6 py-4">Statut</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                <tr class="hover:bg-surface-container/30 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-secondary text-xs font-bold">
+                                                JD</div>
+                                            <div>
+                                                <p class="text-sm font-medium text-on-surface">Julien Durand</p>
+                                                <p class="text-[10px] text-outline">Gold Member</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex text-primary text-xs">
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <p class="text-xs text-on-surface-variant max-w-[240px] truncate italic">"Une
+                                            stratégie limpide qui m'a permis de..."</p>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span
+                                            class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] font-label uppercase">Visible</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button class="text-outline hover:text-on-surface">
+                                            <span class="material-symbols-outlined text-lg">more_vert</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-surface-container/30 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden">
+                                                <img class="w-full h-full object-cover"
+                                                    data-alt="professional headshot of a female stock analyst, soft lighting, minimalistic background"
+                                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTtijnhx2fC04A-NcOimj_Y91RKiB444Korgel-4lBqr8yi6GQGSxF8b3TtuuN12wNzz035j57rraV1uRVhLibccls2BffHXQ4Qo0D9FdiqKNqIK0l7hqsAu2y5vPSFfYyeH-YeQinEAE6KzCriF-lxWfBkKkfXkrjpXLlQtm4hODqxVKQJdMfNFViRmPatLu9U055F_EzjCTC_G6wQH5k4ro_ziw2e3-_Jf2TiAQzTqQvRjHttvU82MX-Ymvgu3Bovddt1jlnAhY" />
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-on-surface">Sarah Belkacem</p>
+                                                <p class="text-[10px] text-outline">Elite Trader</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex text-primary text-xs">
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 0;">star</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <p class="text-xs text-on-surface-variant max-w-[240px] truncate italic">"Les
+                                            lives sessions sont d'une valeur incroyable."</p>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span
+                                            class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] font-label uppercase">Visible</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button class="text-outline hover:text-on-surface">
+                                            <span class="material-symbols-outlined text-lg">more_vert</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-surface-container/30 transition-colors">
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-outline text-xs font-bold">
+                                                MP</div>
+                                            <div>
+                                                <p class="text-sm font-medium text-on-surface">Marc Pierre</p>
+                                                <p class="text-[10px] text-outline">Beginner</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex text-primary text-xs">
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                            <span class="material-symbols-outlined text-xs"
+                                                style="font-variation-settings: 'FILL' 1;">star</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <p class="text-xs text-on-surface-variant max-w-[240px] truncate italic">"Début
+                                            prometteur après seulement 2 semaines."</p>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span
+                                            class="px-2 py-1 rounded bg-surface-container-highest text-outline text-[10px] font-label uppercase">Hidden</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-right">
+                                        <button class="text-outline hover:text-on-surface">
+                                            <span class="material-symbols-outlined text-lg">more_vert</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <!-- Right Column: Add New Form (Glassmorphism) -->
+                <aside class="lg:col-span-4 space-y-6">
+                    <div class="glass-card p-8 rounded-xl border border-white/5 space-y-6">
+                        <div class="space-y-1">
+                            <h3 class="text-lg font-headline font-bold text-on-surface">Nouveau Témoignage</h3>
+                            <p class="text-xs text-outline">Ajouter manuellement un avis reçu.</p>
+                        </div>
+                        <form class="space-y-4">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-label uppercase tracking-widest text-outline">Nom
+                                    Complet</label>
+                                <input
+                                    class="w-full bg-surface-container-lowest border-none ring-1 ring-white/10 focus:ring-primary text-sm rounded-md px-4 py-3 text-on-surface placeholder:text-outline/30 transition-all"
+                                    placeholder="ex: Jean Dupont" type="text" />
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-label uppercase tracking-widest text-outline">Rôle /
+                                    Badge</label>
+                                <select
+                                    class="w-full bg-surface-container-lowest border-none ring-1 ring-white/10 focus:ring-primary text-sm rounded-md px-4 py-3 text-on-surface transition-all">
+                                    <option>Membre Gold</option>
+                                    <option>Elite Trader</option>
+                                    <option>Beginner</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-label uppercase tracking-widest text-outline">Évaluation
+                                    (1-5)</label>
+                                <div class="flex gap-2">
+                                    <span
+                                        class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform"
+                                        style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span
+                                        class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform"
+                                        style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span
+                                        class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform"
+                                        style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span
+                                        class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform"
+                                        style="font-variation-settings: 'FILL' 1;">star</span>
+                                    <span
+                                        class="material-symbols-outlined text-outline cursor-pointer hover:scale-110 transition-transform">star</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label
+                                    class="text-[10px] font-label uppercase tracking-widest text-outline">Témoignage</label>
+                                <textarea
+                                    class="w-full bg-surface-container-lowest border-none ring-1 ring-white/10 focus:ring-primary text-sm rounded-md px-4 py-3 text-on-surface placeholder:text-outline/30 transition-all"
+                                    placeholder="Tapez ici le contenu du message..." rows="4"></textarea>
+                            </div>
+                            <button
+                                class="w-full bg-primary-container text-on-primary-container py-3 rounded-md font-headline font-bold text-sm tracking-wide shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all"
+                                type="button">
+                                ENREGISTRER L'AVIS
+                            </button>
+                        </form>
+                    </div>
+                </aside>
+            </div>
+            <!-- Performance Section Header -->
+            <div class="flex justify-between items-end pt-8 border-t border-white/5">
+                <div class="space-y-1">
+                    <h3 class="text-2xl font-headline font-bold text-on-surface">Gestion des Résultats</h3>
+                    <p class="text-sm text-outline">Performance screenshots et analyses partagées.</p>
+                </div>
+                <button
+                    class="flex items-center gap-2 text-primary font-headline text-sm font-semibold hover:opacity-80 transition-opacity">
+                    <span class="material-symbols-outlined">cloud_upload</span>
+                    UPLOADER UN RÉSULTAT
+                </button>
+            </div>
+            <!-- Performance Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Entry 1 -->
+                <div class="bg-surface-container rounded-xl overflow-hidden group border border-white/5">
+                    <div class="h-40 overflow-hidden relative">
+                        <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            data-alt="close-up of a trading candlestick chart on a dark phone screen, vibrant green and red bars against a deep obsidian background"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTqDnGMpZSNCH4uSCEdOtWLQ1YdxwkTcWUIjCL84vossmPXNuZBXvixncUjsCLwOxxTAEzT1eOoSwbgnMwSeiLyQkI4IpSLGLfl_pcYyBND37epWHSMhH3U0J0qOvo8MuL-9pzHfuXb4UtOKCestxJ2kzSTiSDb_TPqWBLV_6OGuabKg4U60Og0zGhSTuHZd740K6Gh2nf5ooC2MA3HnnsN_WwKN5T8eIwWrvdj1XMsUPVx9DG9oqCHGasIhMS3IK3ixIrg_eRDQw" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <span
+                            class="absolute top-4 left-4 px-2 py-1 bg-primary text-on-primary text-[10px] font-bold rounded">XAUUSD
+                            Buy</span>
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xl font-headline font-bold text-primary">+142.5%</span>
+                            <span class="text-[10px] font-label text-outline uppercase tracking-widest">12 Oct
+                                2023</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-on-surface-variant">Setup: Elliott Waves</span>
+                            <div class="flex gap-2">
+                                <span
+                                    class="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-on-surface">edit</span>
+                                <span
+                                    class="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-tertiary">delete</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Entry 2 -->
+                <div class="bg-surface-container rounded-xl overflow-hidden group border border-white/5">
+                    <div class="h-40 overflow-hidden relative">
+                        <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            data-alt="financial technical analysis screen showing multiple currency pair indicators on a dark UI interface"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl1yZiXcuvaootjB44BWb7Dd6o7XYf1Rb__x_Gbuxbim4KOPqy2VJ6NkWflk7KiW89KcufZf_xr_kTndt-PKmh3dtpsaeKDEhZhUEYI41iDfb0q4xNxqKwJCOmJtUCzgmYuGxW_F9E7x2muw4gKvqPfMr7U-5jitMuQNnqEmO_E43asj7V-8roqCwWzqEa3Ae3RAvNUknLNze-c9k5Zx9osxHRirCrPuSSOVCgR6T3hrIc26E3rvHD8_c-0Gx7nuHMLAPNgyWFD3I" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <span
+                            class="absolute top-4 left-4 px-2 py-1 bg-primary text-on-primary text-[10px] font-bold rounded">EURUSD
+                            Sell</span>
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xl font-headline font-bold text-primary">+82.1%</span>
+                            <span class="text-[10px] font-label text-outline uppercase tracking-widest">10 Oct
+                                2023</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-on-surface-variant">Setup: Resistance Hit</span>
+                            <div class="flex gap-2">
+                                <span
+                                    class="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-on-surface">edit</span>
+                                <span
+                                    class="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-tertiary">delete</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Entry 3 -->
+                <div class="bg-surface-container rounded-xl overflow-hidden group border border-white/5">
+                    <div class="h-40 overflow-hidden relative">
+                        <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            data-alt="close up of meta trader dashboard showing profit balance and open trades on a smartphone screen in a dark room"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3Zun7hOKoqr7Bkv_UBrMraROehBDLdwWp4i_bJt0yLgQU2o-DIxFU1y2q60ucM7Z8tGINwiAuCbuqQyinA-hSCf2jaSd4QeWKltpvKyITcJOrNa8UIm0i9mQ6Z9NKcFgi4lBI9JmR74MmyvVsT4pApc6Vlz6neTUPC3gu_7uB4tPRYxLLYxz2CnRX-8Cured-ZBiD7lx42Orhq-AAIuLbpX389xZ-XUz1VuU60pHz1WwL8QznL5i_GKaRhbr_sarzdft53d2e6Ug" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <span
+                            class="absolute top-4 left-4 px-2 py-1 bg-primary text-on-primary text-[10px] font-bold rounded">BTCUSD
+                            Long</span>
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xl font-headline font-bold text-primary">+210.4%</span>
+                            <span class="text-[10px] font-label text-outline uppercase tracking-widest">08 Oct
+                                2023</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-on-surface-variant">Setup: Breakout</span>
+                            <div class="flex gap-2">
+                                <span
+                                    class="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-on-surface">edit</span>
+                                <span
+                                    class="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-tertiary">delete</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Add New Placeholder -->
+                <div
+                    class="bg-surface-container-low border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center p-8 group hover:border-primary/50 transition-colors cursor-pointer">
+                    <div
+                        class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
+                        <span class="material-symbols-outlined text-primary group-hover:text-white">add_a_photo</span>
+                    </div>
+                    <p class="text-sm font-headline font-bold text-on-surface">Ajouter un résultat</p>
+                    <p class="text-[10px] text-outline text-center mt-1">PNG, JPG ou Screenshot MT4/MT5</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

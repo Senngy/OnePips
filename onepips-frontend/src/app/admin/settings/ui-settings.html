@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>One Pips | Admin Settings</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;family=Inter:wght@100..900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary": "#2f2f3f",
+                        "inverse-on-surface": "#303034",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#410004",
+                        "on-primary": "#3f008e",
+                        "on-surface": "#e4e1e7",
+                        "on-primary-container": "#ede0ff",
+                        "surface-dim": "#131317",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "on-error": "#690005",
+                        "surface-container-lowest": "#0e0e12",
+                        "tertiary": "#ffb3ad",
+                        "surface": "#131317",
+                        "inverse-primary": "#732ee4",
+                        "background": "#131317",
+                        "secondary-container": "#464556",
+                        "secondary-fixed-dim": "#c7c4d9",
+                        "primary-fixed-dim": "#d2bbff",
+                        "on-secondary-fixed": "#1a1a29",
+                        "primary": "#d2bbff",
+                        "on-surface-variant": "#ccc3d8",
+                        "on-tertiary-container": "#ffdfdc",
+                        "primary-fixed": "#eaddff",
+                        "surface-container-low": "#1b1b1f",
+                        "secondary-fixed": "#e3e0f5",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c7c4d9",
+                        "surface-container-high": "#2a292e",
+                        "surface-bright": "#39393d",
+                        "surface-container": "#1f1f23",
+                        "tertiary-container": "#c6252b",
+                        "on-secondary-fixed-variant": "#464556",
+                        "on-background": "#e4e1e7",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "on-tertiary": "#68000a",
+                        "surface-variant": "#353439",
+                        "on-primary-fixed": "#25005a",
+                        "error-container": "#93000a",
+                        "inverse-surface": "#e4e1e7",
+                        "outline-variant": "#4a4455",
+                        "on-secondary-container": "#b5b3c7",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "tertiary-fixed": "#ffdad7",
+                        "surface-tint": "#d2bbff",
+                        "outline": "#958da1",
+                        "surface-container-highest": "#353439",
+                        "primary-container": "#7c3aed"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        body {
+            background-color: #131317;
+            color: #e4e1e7;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(31, 31, 35, 0.6);
+            backdrop-filter: blur(12px);
+            border-top: 0.5px solid rgba(210, 187, 255, 0.1);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #131317;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4a4455;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body class="bg-surface font-body selection:bg-primary/30">
+    <!-- Sidebar Navigation Shell -->
+    <aside
+        class="h-screen w-64 fixed left-0 top-0 z-40 bg-[#1B1B1F] border-r border-[#4A4455]/15 flex flex-col py-8 px-4">
+        <div class="mb-10 px-4">
+            <h1 class="font-headline font-black text-2xl text-[#D2BBFF] tracking-tighter">One Pips</h1>
+            <p class="text-[10px] font-label uppercase tracking-widest text-outline mt-1">Elite Analyst Tier</p>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="group">group</span>
+                <span>Leads</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+                <span>Applications</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+                <span>Booking</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#958DA1] font-inter text-sm font-medium tracking-wide hover:text-[#E4E1E7] hover:bg-[#1F1F23] transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="payments">payments</span>
+                <span>Payments</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 text-[#D2BBFF] border-r-2 border-[#7C3AED] bg-gradient-to-r from-[#7C3AED]/10 to-transparent font-inter text-sm font-medium tracking-wide transition-all duration-300 ease-in-out"
+                href="#">
+                <span class="material-symbols-outlined" data-icon="settings">settings</span>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="mt-auto px-4 pt-4 border-t border-outline-variant/15 flex items-center gap-3">
+            <div class="w-8 h-8 bg-surface-container-high rounded-full overflow-hidden">
+                <img class="w-full h-full object-cover"
+                    data-alt="close up professional headshot of a senior analyst with neutral lighting and dark studio background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBip15L3BddzlnnMD5fRB-u8dgIjHfQUuN5EvwMAjjR6EAALIIT0QYjhpA9anYmAPuX-fUyDtmTRPxP48PKfWlegB5ITsiRnMyLVmvs5J8kELXu8XtkhtkERM9MYH3CqCxNNDoEhagVp6QhhnEcNHuLmlkB81UCGbgKs8DZp_LDov9621fzBWUKCP41SFa40JeeYIwIQ1CgK3plCbnGVnRXNG-Vl2C4AhpSDdCO0wDd923iltWKZ0IbpQr-4_6aFg-bi3SDZBdGEt8" />
+            </div>
+            <div>
+                <p class="text-xs font-bold text-on-surface">Alex Sterling</p>
+                <p class="text-[10px] text-outline">Admin Access</p>
+            </div>
+        </div>
+    </aside>
+    <!-- Main Content Canvas -->
+    <main class="ml-64 min-h-screen">
+        <!-- Top App Bar -->
+        <header
+            class="w-full sticky top-0 z-50 bg-[#131317] flex items-center justify-between px-10 py-4 shadow-[0_40px_40px_rgba(210,187,255,0.06)]">
+            <div class="flex items-center gap-4">
+                <h2 class="font-headline font-bold text-xl tracking-tight text-primary">Admin Settings</h2>
+                <div class="h-4 w-px bg-outline-variant/30"></div>
+                <p class="text-sm text-outline font-medium">System Configuration &amp; Integration Control</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="p-2 text-outline hover:text-primary transition-colors active:scale-95">
+                    <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                </button>
+                <button
+                    class="bg-primary-container text-on-primary-container px-4 py-1.5 rounded-md text-sm font-bold tracking-tight hover:brightness-110 active:scale-95 transition-all">
+                    Save All Changes
+                </button>
+            </div>
+        </header>
+        <div class="p-10 max-w-7xl mx-auto">
+            <!-- Grid Layout: Settings Navigation + Content -->
+            <div class="grid grid-cols-12 gap-10">
+                <!-- Inner Nav Column (Asymmetrical Sidebar) -->
+                <div class="col-span-3">
+                    <div class="sticky top-24 space-y-6">
+                        <div>
+                            <h3 class="text-[10px] font-label uppercase tracking-widest text-outline mb-4">Configuration
+                            </h3>
+                            <ul class="space-y-1">
+                                <li>
+                                    <a class="group flex items-center justify-between px-3 py-2 text-sm font-medium text-primary bg-surface-container-low rounded-md"
+                                        href="#branding">
+                                        Site Branding
+                                        <span class="material-symbols-outlined text-[18px]"
+                                            data-icon="palette">palette</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="group flex items-center justify-between px-3 py-2 text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-container/50 rounded-md transition-all"
+                                        href="#seo">
+                                        SEO &amp; Meta
+                                        <span class="material-symbols-outlined text-[18px]"
+                                            data-icon="search">search</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-[10px] font-label uppercase tracking-widest text-outline mb-4">Commercial
+                            </h3>
+                            <ul class="space-y-1">
+                                <li>
+                                    <a class="group flex items-center justify-between px-3 py-2 text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-container/50 rounded-md transition-all"
+                                        href="#plans">
+                                        Offer Management
+                                        <span class="material-symbols-outlined text-[18px]"
+                                            data-icon="shopping_bag">shopping_bag</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="group flex items-center justify-between px-3 py-2 text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-container/50 rounded-md transition-all"
+                                        href="#coupons">
+                                        Discounts
+                                        <span class="material-symbols-outlined text-[18px]"
+                                            data-icon="confirmation_number">confirmation_number</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-[10px] font-label uppercase tracking-widest text-outline mb-4">Ecosystem
+                            </h3>
+                            <ul class="space-y-1">
+                                <li>
+                                    <a class="group flex items-center justify-between px-3 py-2 text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-container/50 rounded-md transition-all"
+                                        href="#integrations">
+                                        Integrations
+                                        <span class="material-symbols-outlined text-[18px]" data-icon="api">api</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="group flex items-center justify-between px-3 py-2 text-sm font-medium text-outline hover:text-on-surface hover:bg-surface-container/50 rounded-md transition-all"
+                                        href="#webhooks">
+                                        Webhooks
+                                        <span class="material-symbols-outlined text-[18px]"
+                                            data-icon="webhook">webhook</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Main Forms Column -->
+                <div class="col-span-9 space-y-12">
+                    <!-- Branding Section -->
+                    <section id="branding">
+                        <div class="mb-6">
+                            <h4 class="font-headline font-bold text-2xl text-on-surface tracking-tight">Site
+                                Configuration</h4>
+                            <p class="text-outline text-sm">Control the visual identity and global branding tokens of
+                                the One Pips platform.</p>
+                        </div>
+                        <div class="bg-surface-container p-8 rounded-lg glass-panel space-y-8">
+                            <div class="grid grid-cols-2 gap-8">
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-label uppercase tracking-wider text-primary">Platform
+                                        Name</label>
+                                    <input
+                                        class="w-full bg-surface-container-lowest border-outline-variant/20 rounded-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                                        type="text" value="One Pips Elite" />
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-label uppercase tracking-wider text-primary">Support
+                                        Email</label>
+                                    <input
+                                        class="w-full bg-surface-container-lowest border-outline-variant/20 rounded-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                                        type="email" value="ops@onepips.com" />
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <label class="text-[11px] font-label uppercase tracking-wider text-primary">Brand
+                                    Assets</label>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div
+                                        class="border-2 border-dashed border-outline-variant/30 rounded-lg p-6 flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-colors cursor-pointer bg-surface-container-lowest">
+                                        <span class="material-symbols-outlined text-outline"
+                                            data-icon="upload_file">upload_file</span>
+                                        <span class="text-xs text-outline font-medium text-center">Primary
+                                            Logo<br /><span class="opacity-60">PNG or SVG</span></span>
+                                    </div>
+                                    <div
+                                        class="border-2 border-dashed border-outline-variant/30 rounded-lg p-6 flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-colors cursor-pointer bg-surface-container-lowest">
+                                        <span class="material-symbols-outlined text-outline"
+                                            data-icon="upload_file">upload_file</span>
+                                        <span class="text-xs text-outline font-medium text-center">Favicon<br /><span
+                                                class="opacity-60">32x32px</span></span>
+                                    </div>
+                                    <div
+                                        class="border-2 border-dashed border-outline-variant/30 rounded-lg p-6 flex flex-col items-center justify-center gap-2 hover:border-primary/50 transition-colors cursor-pointer bg-surface-container-lowest">
+                                        <span class="material-symbols-outlined text-outline"
+                                            data-icon="upload_file">upload_file</span>
+                                        <span class="text-xs text-outline font-medium text-center">Social
+                                            Card<br /><span class="opacity-60">1200x630px</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Offer Management -->
+                    <section id="plans">
+                        <div class="mb-6 flex items-end justify-between">
+                            <div>
+                                <h4 class="font-headline font-bold text-2xl text-on-surface tracking-tight">Offer
+                                    Management</h4>
+                                <p class="text-outline text-sm">Configure subscription plans, pricing tiers, and access
+                                    levels.</p>
+                            </div>
+                            <button
+                                class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-high border border-outline-variant/20 rounded-md text-xs font-bold text-primary hover:bg-surface-container-highest transition-all">
+                                <span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                                Add Tier
+                            </button>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- Tier Card -->
+                            <div
+                                class="bg-surface-container border-l-4 border-primary p-6 rounded-r-lg flex items-center justify-between group hover:bg-surface-container-high transition-colors">
+                                <div class="flex items-center gap-6">
+                                    <div class="w-12 h-12 rounded bg-primary/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary"
+                                            data-icon="military_tech">military_tech</span>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-bold text-on-surface">Alpha Signal Room</h5>
+                                        <p class="text-xs text-outline">Real-time trading alerts + Discord Access</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-10">
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-primary">$199.00 <span
+                                                class="text-[10px] text-outline">/ month</span></p>
+                                        <p
+                                            class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
+                                            Active Plan</p>
+                                    </div>
+                                    <button
+                                        class="p-2 text-outline hover:text-on-surface opacity-0 group-hover:opacity-100 transition-all">
+                                        <span class="material-symbols-outlined" data-icon="edit">edit</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Tier Card -->
+                            <div
+                                class="bg-surface-container border-l-4 border-outline-variant/30 p-6 rounded-r-lg flex items-center justify-between group hover:bg-surface-container-high transition-colors">
+                                <div class="flex items-center gap-6">
+                                    <div
+                                        class="w-12 h-12 rounded bg-surface-container-highest flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-outline"
+                                            data-icon="school">school</span>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-bold text-on-surface">Foundation Mentorship</h5>
+                                        <p class="text-xs text-outline">Complete video library + Bi-weekly calls</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-10">
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-primary">$499.00 <span
+                                                class="text-[10px] text-outline">/ lifetime</span></p>
+                                        <p
+                                            class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant">
+                                            Active Plan</p>
+                                    </div>
+                                    <button
+                                        class="p-2 text-outline hover:text-on-surface opacity-0 group-hover:opacity-100 transition-all">
+                                        <span class="material-symbols-outlined" data-icon="edit">edit</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Integrations Section -->
+                    <section id="integrations">
+                        <div class="mb-6">
+                            <h4 class="font-headline font-bold text-2xl text-on-surface tracking-tight">Integration
+                                Links</h4>
+                            <p class="text-outline text-sm">Connect your third-party infrastructure for seamless
+                                operations.</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6">
+                            <!-- Stripe Integration -->
+                            <div
+                                class="bg-surface-container-low p-6 rounded-lg border border-outline-variant/10 hover:border-primary/20 transition-all">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded bg-[#635BFF]/10 flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-[#635BFF]"
+                                                data-icon="account_balance">account_balance</span>
+                                        </div>
+                                        <h6 class="font-bold text-on-surface">Stripe</h6>
+                                    </div>
+                                    <span
+                                        class="px-2 py-0.5 rounded-full bg-primary/10 text-[10px] font-bold text-primary uppercase">Connected</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-outline font-label uppercase">Live Secret
+                                            Key</label>
+                                        <div class="relative">
+                                            <input
+                                                class="w-full bg-surface-container-lowest border-outline-variant/20 rounded text-xs text-outline pr-10"
+                                                type="password" value="sk_live_51M..." />
+                                            <button class="absolute right-2 top-1.5 text-outline-variant">
+                                                <span class="material-symbols-outlined text-sm"
+                                                    data-icon="visibility">visibility</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Discord Integration -->
+                            <div
+                                class="bg-surface-container-low p-6 rounded-lg border border-outline-variant/10 hover:border-primary/20 transition-all">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded bg-[#5865F2]/10 flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-[#5865F2]"
+                                                data-icon="forum">forum</span>
+                                        </div>
+                                        <h6 class="font-bold text-on-surface">Discord Bot</h6>
+                                    </div>
+                                    <span
+                                        class="px-2 py-0.5 rounded-full bg-primary/10 text-[10px] font-bold text-primary uppercase">Connected</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-outline font-label uppercase">Guild ID</label>
+                                        <input
+                                            class="w-full bg-surface-container-lowest border-outline-variant/20 rounded text-xs text-on-surface"
+                                            type="text" value="8429304857210" />
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Cal.com Integration -->
+                            <div
+                                class="bg-surface-container-low p-6 rounded-lg border border-outline-variant/10 hover:border-primary/20 transition-all">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded bg-white/5 flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-on-surface"
+                                                data-icon="calendar_month">calendar_month</span>
+                                        </div>
+                                        <h6 class="font-bold text-on-surface">Cal.com</h6>
+                                    </div>
+                                    <span
+                                        class="px-2 py-0.5 rounded-full bg-error-container/20 text-[10px] font-bold text-error uppercase">Action
+                                        Required</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-outline font-label uppercase">API Key</label>
+                                        <input
+                                            class="w-full bg-surface-container-lowest border-outline-variant/20 rounded text-xs text-on-surface"
+                                            placeholder="Enter Cal.com API key" type="text" />
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- SEO / Meta Section (Integrated into grid for layout variety) -->
+                            <div
+                                class="bg-surface-container-low p-6 rounded-lg border border-outline-variant/10 hover:border-primary/20 transition-all">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded bg-primary/10 flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-primary"
+                                                data-icon="travel_explore">travel_explore</span>
+                                        </div>
+                                        <h6 class="font-bold text-on-surface">Global SEO</h6>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] text-outline font-label uppercase">Meta
+                                            Description</label>
+                                        <textarea
+                                            class="w-full bg-surface-container-lowest border-outline-variant/20 rounded text-xs text-on-surface resize-none"
+                                            rows="2">Elite FX educational platform for precision trading and market analysis.</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- Advanced Maintenance -->
+                    <section class="pb-20">
+                        <div class="bg-surface-container-lowest p-8 rounded-lg border border-error/20">
+                            <h5 class="font-bold text-error flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined text-[20px]" data-icon="warning">warning</span>
+                                Danger Zone
+                            </h5>
+                            <p class="text-sm text-outline mb-6">These actions are irreversible. Please proceed with
+                                extreme caution.</p>
+                            <div
+                                class="flex items-center justify-between p-4 bg-surface-container rounded border border-outline-variant/10">
+                                <div>
+                                    <p class="text-sm font-bold text-on-surface">Maintenance Mode</p>
+                                    <p class="text-xs text-outline">Disable site access for all non-admin users.</p>
+                                </div>
+                                <div class="relative inline-flex items-center cursor-pointer">
+                                    <input class="sr-only peer" type="checkbox" value="" />
+                                    <div
+                                        class="w-11 h-6 bg-secondary-container rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-error">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Visual Polish: Ambient Glows -->
+    <div
+        class="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0">
+    </div>
+    <div
+        class="fixed bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary-container/5 blur-[120px] rounded-full pointer-events-none z-0">
+    </div>
+</body>
+
+</html>

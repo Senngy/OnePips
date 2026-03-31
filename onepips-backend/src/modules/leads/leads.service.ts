@@ -7,7 +7,7 @@ import { calculateScore, getLeadStatus } from '../../common/utils/scoring.js';
 @Injectable()
 export class LeadsService {
   constructor(private prisma: PrismaService) { }
-  
+
   async findAll(query?: { status?: string; minScore?: number; search?: string }) {
     const where: any = {};
 

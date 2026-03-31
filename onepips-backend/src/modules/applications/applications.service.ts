@@ -2,10 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { CreateApplicationDto } from './dto/create-application.dto.js';
 import { calculateScore } from '../../common/utils/scoring.js';
+import { NotificationsService } from '../notifications/notification.service.js';
 
 @Injectable()
 export class ApplicationsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private notificationsService: NotificationsService) { }
 
   async findAll() {
     return this.prisma.application.findMany({ include: { lead: true } });
@@ -50,6 +51,17 @@ export class ApplicationsService {
           status: 'HOT',
         },
       });
+
+      // 4. Send Discord Notification
+      /*
+      await this.notificationsService.sendToDiscord(`
+        Nouvelle candidature mentorat
+
+        Nom: ${lead.name}
+        Score: ${application.score}
+        Budget formation: ${lead.budgetFormation}€
+      `);
+      */
 
       return application;
     });
