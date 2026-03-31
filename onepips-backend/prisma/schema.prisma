@@ -16,6 +16,7 @@ model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String?
+  profilePic String?
   role      Role     @default(USER)
   createdAt DateTime @default(now())
 
@@ -126,5 +127,41 @@ model Event {
   date        DateTime
   participants Json?
 
+  createdAt   DateTime @default(now())
+}
+
+model Result {
+  id          String   @id @default(uuid())
+  title       String
+  image       String
+  description String?
+  date        DateTime
+  participants Json?
+
+  createdAt   DateTime @default(now())
+}
+
+model YoutubeCourse {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  embededLink String
+
+  createdAt   DateTime @default(now())
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  price       Float
+  createdAt   DateTime @default(now())
+}
+
+model Community {
+  id          String   @id @default(uuid())
+  title       String
+  stat        Int
+  description String?
   createdAt   DateTime @default(now())
 }
