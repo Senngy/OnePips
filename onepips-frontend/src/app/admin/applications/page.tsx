@@ -1,5 +1,6 @@
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
+import ApplicantTable from "@/components/admin/candidatures/applicant-table";
 
 export default function AdminApplicationsPage() {
   return (
@@ -26,63 +27,9 @@ export default function AdminApplicationsPage() {
             </div>
 
             {/* Application List */}
-            <div className="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto pr-2">
-              {/* Active Card */}
-              <div className="bg-surface-container border-l-4 border-primary p-4 cursor-pointer transition-all duration-200">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary-container/20 px-2 py-0.5 rounded">Scoring: 98</span>
-                  <span className="text-[10px] text-outline">2m ago</span>
-                </div>
-                <h3 className="font-headline font-semibold text-on-surface text-lg">Marcus Sterling</h3>
-                <p className="text-outline text-xs truncate">Elite scalp strategist looking to expand capital...</p>
-                <div className="mt-3 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                  <span className="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Reviewing</span>
-                </div>
-              </div>
+            <ApplicantTable />
 
-              {/* List Item */}
-              <div className="bg-surface-container-low hover:bg-surface-container p-4 cursor-pointer transition-all duration-200 border-l-4 border-transparent">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-tertiary bg-tertiary-container/20 px-2 py-0.5 rounded">Scoring: 64</span>
-                  <span className="text-[10px] text-outline">1h ago</span>
-                </div>
-                <h3 className="font-headline font-semibold text-on-surface text-lg opacity-80">Elara Vance</h3>
-                <p className="text-outline text-xs truncate">Swing trader focused on institutional liquidity...</p>
-                <div className="mt-3 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-outline"></div>
-                  <span className="text-[10px] font-bold uppercase tracking-tighter text-outline">New Submission</span>
-                </div>
-              </div>
 
-              {/* List Item */}
-              <div className="bg-surface-container-low hover:bg-surface-container p-4 cursor-pointer transition-all duration-200 border-l-4 border-transparent">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary-container/20 px-2 py-0.5 rounded">Scoring: 82</span>
-                  <span className="text-[10px] text-outline">3h ago</span>
-                </div>
-                <h3 className="font-headline font-semibold text-on-surface text-lg opacity-80">Julian Thorne</h3>
-                <p className="text-outline text-xs truncate">Macro analyst with 5 years track record...</p>
-                <div className="mt-3 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-outline"></div>
-                  <span className="text-[10px] font-bold uppercase tracking-tighter text-outline">New Submission</span>
-                </div>
-              </div>
-
-              {/* List Item */}
-              <div className="bg-surface-container-low hover:bg-surface-container p-4 cursor-pointer transition-all duration-200 border-l-4 border-transparent">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary-container/20 px-2 py-0.5 rounded">Scoring: 91</span>
-                  <span className="text-[10px] text-outline">Yesterday</span>
-                </div>
-                <h3 className="font-headline font-semibold text-on-surface text-lg opacity-80">Sienna Blake</h3>
-                <p className="text-outline text-xs truncate">Quant developer seeking algorithmic funding...</p>
-                <div className="mt-3 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary-container"></div>
-                  <span className="text-[10px] font-bold uppercase tracking-tighter text-on-surface-variant">Waiting on Data</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Detailed View */}
@@ -213,7 +160,7 @@ export default function AdminApplicationsPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </main >
+    </div >
   );
 }

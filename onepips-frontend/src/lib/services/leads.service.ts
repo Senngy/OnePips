@@ -32,6 +32,9 @@ export type GetLeadsParams = {
     score?: string;
     interest?: string;
     tradingYears?: string;
+    createdAt?: string;
+    minScore?: string;
+    maxScore?: string;
 };
 
 export const createLead = async (data: CreateLeadDto) =>
@@ -53,9 +56,7 @@ export const getLeads = async (params: GetLeadsParams = {}) => {
     );
     const query = new URLSearchParams(cleanParams as Record<string, string>).toString();
     const res = await api(`/leads${query ? `?${query}` : ""}`);
-    console.log("leads service, res: ", res);
     const leads = res.data;
-    console.log("leads service, leads: ", leads);
     return leads;
 };
 

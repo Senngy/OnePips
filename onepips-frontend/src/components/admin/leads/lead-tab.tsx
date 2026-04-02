@@ -2,8 +2,7 @@
 
 import { useLeads } from "@/lib/hooks/useLeads";
 import { useState } from "react";
-import { formatDate } from "@/lib/helpers/format-date";
-import { formatInterest } from "@/lib/helpers/format-interest";
+import { formatDateLeads, formatInterest, formatSource, formatStatus } from "@/lib/helpers/formatData";
 
 
 export default function LeadTab() {
@@ -13,11 +12,12 @@ export default function LeadTab() {
         search: "",
         status: "",
         minScore: "",
+        maxScore: "",
     });
 
     const { leads, isLoading, error } = useLeads(filters);
 
-    const handleFilterChange = (e) => {
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
     };
@@ -41,7 +41,7 @@ export default function LeadTab() {
                         value={filters.status}
                         onChange={handleFilterChange}
                         className="w-full bg-surface-container-low border-none rounded-lg px-4 py-4 text-sm text-on-surface focus:ring-1 focus:ring-primary/50 cursor-pointer">
-                        <option value="">All Statuses</option>
+                        <option value="">Tri par statut</option>
                         <option value="HOT">Hot (Ready)</option>
                         <option value="PENDING">Pending Review</option>
                         <option value="COLD">Cold (Archived)</option>
@@ -53,10 +53,10 @@ export default function LeadTab() {
                         value={filters.minScore}
                         onChange={handleFilterChange}
                         className="w-full bg-surface-container-low border-none rounded-lg px-4 py-4 text-sm text-on-surface focus:ring-1 focus:ring-primary/50 cursor-pointer">
-                        <option value="">Score Range</option>
-                        <option value="90">90 - 100 (Elite)</option>
-                        <option value="70">70 - 89 (Prime)</option>
-                        <option value="50">50 - 69 (Stable)</option>
+                        <option value="">Tri par score</option>
+                        <option value="90"> Elite (Score {'>'} 90)</option>
+                        <option value="70"> Bon (Score {'>'} 70)</option>
+                        <option value="50"> Moyen (Score {'>'} 50)</option>
                     </select>
                 </div>
             </div>
@@ -72,6 +72,8 @@ export default function LeadTab() {
                                 <th className="px-6 py-5 text-[10px] uppercase tracking-widest text-outline font-bold">Statut</th>
                                 <th className="px-6 py-5 text-[10px] uppercase tracking-widest text-outline font-bold">Source</th>
                                 <th className="px-6 py-5 text-[10px] uppercase tracking-widest text-outline font-bold">Intérêts</th>
+                                <th className="px-6 py-5 text-[10px] uppercase tracking-widest text-outline font-bold">Trading Years</th>
+                                <th className="px-6 py-5 text-[10px] uppercase tracking-widest text-outline font-bold">Tags</th>
                                 <th className="px-6 py-5 text-[10px] uppercase tracking-widest text-outline font-bold">Date d'entrée</th>
                                 <th className="px-6 py-5 text-[10px] uppercase tracking-widest text-outline font-bold text-right">Actions</th>
                             </tr>
@@ -83,7 +85,7 @@ export default function LeadTab() {
                                 <tr key={lead.id} className="hover:bg-surface-container-high/50 transition-colors group">
                                     <td className="px-6 py-5">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary font-bold">JA</div>
+                                            <input type="checkbox" className="w-5 h-5 rounded-lg bg-surface-container flex items-center justify-center text-primary font-bold" />
                                             <div>
                                                 <div className="text-sm font-semibold text-on-surface">{lead.name}</div>
                                                 <div className="text-[11px] text-outline">{lead.email}</div>
@@ -92,7 +94,7 @@ export default function LeadTab() {
                                     </td>
                                     <td className="px-6 py-5">
                                         <div className="flex flex-col items-center gap-1.5">
-                                            <span className="text-sm font-headline font-bold text-primary">{lead.score}</span>
+                                            <span className="text-sm text-center font-headline font-bold text-primary ">{lead.score}</span>
                                             <div className="w-24 h-1 bg-secondary-container rounded-full overflow-hidden">
                                                 <div className="h-full bg-primary shadow-[0_0_8px_rgba(210,187,255,0.4)]" style={{ width: `${lead.score}%` }}></div>
                                             </div>
@@ -101,22 +103,24 @@ export default function LeadTab() {
                                     <td className="px-6 py-5">
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-container/20 text-primary border border-primary/20">
                                             <span className="w-1.5 h-1.5 rounded-full bg-primary mr-2 animate-pulse"></span>
-                                            HOT LEAD
+                                            {formatStatus(lead.status)}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-5 text-sm text-outline font-medium">{lead.source}</td>
+                                    <td className="px-6 py-5 text-sm text-outline font-medium">{formatSource(lead.source)}</td>
                                     <td className="px-6 py-5 text-sm text-outline font-medium">{formatInterest(lead.interests)}</td>
-                                    <td className="px-6 py-5 text-sm text-outline font-medium">{formatDate(lead.createdAt)}</td>
+                                    <td className="px-6 py-5 text-sm text-outline font-medium">{lead.tradingYears}</td>
+                                    <td className="px-6 py-5 text-sm text-outline font-medium">{lead.tags?.join(", ")}</td>
+                                    <td className="px-6 py-5 text-sm text-outline font-medium">{formatDateLeads(lead.createdAt)}</td>
                                     <td className="px-6 py-5">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                             <button className="p-2 text-outline hover:text-primary hover:bg-surface-container transition-all rounded" title="Tag Lead">
                                                 <span className="material-symbols-outlined text-lg">sell</span>
                                             </button>
-                                            <button className="p-2 text-outline hover:text-error hover:bg-error-container/10 transition-all rounded" title="Reject">
-                                                <span className="material-symbols-outlined text-lg">do_not_disturb_on</span>
+                                            <button className="p-2 text-outline hover:text-primary hover:bg-surface-container transition-all rounded" title="Contacter">
+                                                <span className="material-symbols-outlined text-lg">mail</span>
                                             </button>
-                                            <button className="p-2 text-outline hover:text-primary hover:bg-surface-container transition-all rounded" title="Accept">
-                                                <span className="material-symbols-outlined text-lg">check_circle</span>
+                                            <button className="p-2 text-outline hover:text-error hover:bg-error-container/10 transition-all rounded" title="Supprimer">
+                                                <span className="material-symbols-outlined text-lg">delete</span>
                                             </button>
                                             <button className="ml-2 px-3 py-1.5 bg-surface-container-highest text-on-surface text-xs font-bold rounded-md hover:bg-primary transition-all hover:text-on-primary">Details</button>
                                         </div>

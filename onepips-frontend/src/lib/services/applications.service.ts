@@ -6,6 +6,15 @@ export type ApplicationDto = {
     interests?: string[];
     budgetFormation?: number;
     capitalTrading?: number;
+    tradingYears?: number;
+    status?: string;
+    score?: number;
+    createdAt?: string;
+    updatedAt?: string;
+    id?: string;
+    lead?: any;
+    name?: string;
+    email?: string;
 };
 
 export const createApplication = (data: ApplicationDto) =>
