@@ -56,6 +56,12 @@
   --color-inverse-primary: #732ee4;
   --color-outline: #958da1;
   --color-on-error-container: #ffdad6;
+  --color-budget-text: #9790fd;
+  --color-budget-text-light: #c7c4d9;
+
+  --color-budget-container: #6259e0dc;
+  --color-budget-border: #5d55c2;
+  ;
 
   --radius-DEFAULT: 0.125rem;
   --radius-lg: 0.25rem;
@@ -68,6 +74,7 @@
   --foreground: #e4e1e7;
   --primary: #AE4074;
   --secondary: #eda5c1;
+  --budget: #5d55c2;
 }
 
 @layer base {
@@ -138,4 +145,17 @@
   .headline-font {
     @apply font-headline;
   }
+}
+
+.glass-overlay {
+  backdrop-filter: blur(20px);
+  background: rgba(19, 19, 23, 0.85);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.etched-edge {
+  border-top: 0.5px solid rgba(228, 225, 231, 0.1);
 }

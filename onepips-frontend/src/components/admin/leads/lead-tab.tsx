@@ -2,7 +2,7 @@
 
 import { useLeads } from "@/lib/hooks/useLeads";
 import { useState } from "react";
-import { formatDateLeads, formatInterest, formatSource, formatStatus } from "@/lib/helpers/formatData";
+import { formatDate, formatInterest, formatSource, formatStatus } from "@/lib/helpers/formatData";
 
 
 export default function LeadTab() {
@@ -110,7 +110,7 @@ export default function LeadTab() {
                                     <td className="px-6 py-5 text-sm text-outline font-medium">{formatInterest(lead.interests)}</td>
                                     <td className="px-6 py-5 text-sm text-outline font-medium">{lead.tradingYears}</td>
                                     <td className="px-6 py-5 text-sm text-outline font-medium">{lead.tags?.join(", ")}</td>
-                                    <td className="px-6 py-5 text-sm text-outline font-medium">{formatDateLeads(lead.createdAt)}</td>
+                                    <td className="px-6 py-5 text-sm text-outline font-medium">{formatDate(lead.createdAt)}</td>
                                     <td className="px-6 py-5">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                             <button className="p-2 text-outline hover:text-primary hover:bg-surface-container transition-all rounded" title="Tag Lead">
