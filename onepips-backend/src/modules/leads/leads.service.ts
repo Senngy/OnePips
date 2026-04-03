@@ -8,8 +8,9 @@ import { calculateScore, getLeadStatus } from '../../common/utils/scoring.js';
 export class LeadsService {
   constructor(private prisma: PrismaService) { }
 
-  async findAll(query?: { page?: number; limit?: number; status?: string; score?: number; search?: string }) {
+  async findAll(query?: { page?: number; limit?: number; status?: string; score?: number; search?: string, minScore?: number; maxScore?: number }) {
     const where: any = {};
+    console.log('[API] Query received in service:', query);
 
     if (query?.status) {
       where.status = query.status;
@@ -24,6 +25,30 @@ export class LeadsService {
         { name: { contains: query.search, mode: 'insensitive' } },
         { email: { contains: query.search, mode: 'insensitive' } },
       ];
+    }
+    if (query?.minScore) {
+      where.score = { ...where.score, gte: Number(query.minScore) };
+      const [data, total] = await this.prisma.$transaction([
+        this.prisma.lead.findMany({
+          where,
+          skip: ((query?.page || 1) - 1) * (query?.limit || 10),
+          take: query?.limit || 10,
+          orderBy: { createdAt: "desc" },
+        }),
+        this.prisma.lead.count({ where }),
+      ]);
+      
+      return {
+        data,
+        meta: {
+          total,
+          page: query?.page || 1,
+          lastPage: Math.ceil(total / (query?.limit || 10)),
+        },
+      };
+    }
+    if (query?.maxScore) {
+      where.score = { ...where.score, lte: Number(query.maxScore) };
     }
 
     const [data, total] = await this.prisma.$transaction([

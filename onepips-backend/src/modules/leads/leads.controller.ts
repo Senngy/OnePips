@@ -15,6 +15,8 @@ export class LeadsController {
     @Query('status') status?: string,
     @Query('score') score?: number,
     @Query('search') search?: string,
+    @Query('minScore') minScore?: number,
+    @Query('maxScore') maxScore?: number,
   ) {
     return this.leadsService.findAll({
       page: Number(page),
@@ -22,6 +24,8 @@ export class LeadsController {
       search,
       status,
       score: score ? Number(score) : undefined,
+      minScore: minScore ? Number(minScore) : undefined,
+      maxScore: maxScore ? Number(maxScore) : undefined,
     });
   }
 
