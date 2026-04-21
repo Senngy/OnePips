@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 
@@ -70,9 +72,11 @@ export default function OffresPage() {
                   <span>Communauté Discord VIP</span>
                 </div>
               </div>
-              <button className="w-full py-4 bg-surface-container-highest border border-outline-variant/20 text-on-surface font-bold hover:bg-primary hover:text-on-primary transition-all duration-300">
+              <Link
+                href=""
+                className="w-full py-4 bg-surface-container-highest text-center border border-outline-variant/20 text-on-surface font-bold hover:bg-primary hover:text-on-primary transition-all duration-300">
                 S'abonner
-              </button>
+              </Link>
             </div>
 
             {/* Card 2: Coaching Privé */}
@@ -112,9 +116,11 @@ export default function OffresPage() {
                   <span>Support Direct Post-Session</span>
                 </div>
               </div>
-              <button className="w-full py-4 bg-primary-container text-on-primary-container font-bold hover:brightness-110 active:scale-[0.98] transition-all duration-300">
+              <Link
+                href=""
+                className="w-full py-4 bg-primary-container text-on-primary-container text-center font-bold hover:brightness-110 active:scale-[0.98] transition-all duration-300">
                 Réserver un créneau
-              </button>
+              </Link>
             </div>
 
             {/* Card 3: Mentorat Elite */}
@@ -146,9 +152,11 @@ export default function OffresPage() {
                   <span>Gestion de Portefeuille</span>
                 </div>
               </div>
-              <button className="w-full py-4 border border-primary text-primary font-bold hover:bg-primary/10 transition-all duration-300">
+              <Link
+                href="/candidature"
+                className="w-full py-4 border border-primary text-primary text-center font-bold hover:bg-primary/10 transition-all duration-300">
                 Candidater
-              </button>
+              </Link>
             </div>
           </div>
         </section>
