@@ -1,15 +1,41 @@
+"use client";
+
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
+import NewLiveModal from "@/components/admin/live/new-live-modal";
+import { useState } from "react";
 
 export default function AdminEventsPage() {
+  const [isNewLiveModalOpen, setIsNewLiveModalOpen] = useState(false);
+
+  const handleCreateLive = () => {
+    setIsNewLiveModalOpen(true);
+  };
+
   return (
     <div className="font-body selection:bg-primary/30">
+      {isNewLiveModalOpen && <NewLiveModal setIsOpen={setIsNewLiveModalOpen} />}
       <Sidebar />
       <main className="ml-64 min-h-screen">
         <Navbar />
         <div className="p-8 max-w-[1600px] mx-auto">
-          <h1 className="text-4xl font-headline font-bold mb-8">Gestion des Lives</h1>
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-4xl font-headline font-bold">Gestion des Lives</h1>
+            <div className="flex items-center gap-3">
+              <button
+                className="bg-surface-variant/50 text-on-surface px-5 py-2 rounded-lg font-bold text-sm hover:bg-surface-variant transition-colors border border-outline-variant/10">
+                Désactiver les Lives
+              </button>
+              <button
+                onClick={handleCreateLive}
+                className="flex items-center gap-2 bg-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-bold text-sm active:scale-95 transition-all shadow-[0_0_15px_rgba(124,58,237,0.25)]">
+                <span className="material-symbols-outlined text-sm">add</span>
+                Créer un Live
+              </button>
+            </div>
+          </div>
           <section>
+
             <div className="flex items-end justify-between mb-8">
               <div>
                 <span className="text-primary text-xs font-bold tracking-[0.2em] uppercase">Status: Live

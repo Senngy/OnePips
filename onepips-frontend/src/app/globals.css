@@ -92,6 +92,8 @@
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
 
+  @import 'react-datepicker/dist/react-datepicker.css';
+
   .glass-card,
   .glass-effect,
   .glass-highlight {
@@ -147,9 +149,38 @@
   }
 }
 
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 120, 120, 0.4);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(120, 120, 120, 0.7);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 120, 120, 0.4) transparent;
+}
+
 .glass-overlay {
   backdrop-filter: blur(20px);
   background: rgba(19, 19, 23, 0.85);
+}
+
+.modal-overlay {
+  background: rgba(14, 14, 18, 0.85);
+  backdrop-filter: blur(8px);
 }
 
 .material-symbols-outlined {

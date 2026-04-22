@@ -15,12 +15,18 @@ export default function LeadTab() {
         maxScore: "",
     });
 
-    const { leads, isLoading, error } = useLeads(filters);
+    const { leads, isLoading, error, total, page, lastPage } = useLeads(filters);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
     };
+
+    const nextPages = [
+        page,
+        page + 1,
+        page + 2
+    ].filter(p => p <= lastPage);
 
     return (
         <>
@@ -133,17 +139,29 @@ export default function LeadTab() {
 
                 {/* Pagination */}
                 <div className="bg-surface-container-lowest px-6 py-4 flex items-center justify-between">
-                    <span className="text-xs text-outline">Displaying 1-10 of 1,284 results</span>
+                    <span className="text-xs text-outline">{`Displaying ${leads.length} of ${total} leads`}</span>
                     <div className="flex items-center gap-2">
-                        <button className="p-2 text-outline hover:text-on-surface disabled:opacity-30" disabled>
+                        <button
+                            onClick={() => setFilters(prev => ({ ...prev, page: prev.page - 1 }))}
+                            className="p-2 text-outline hover:text-on-surface disabled:opacity-30"
+                            disabled={page === 1}>
                             <span className="material-symbols-outlined">chevron_left</span>
                         </button>
-                        <button className="w-8 h-8 rounded bg-primary-container text-on-primary-container text-xs font-bold">1</button>
-                        <button className="w-8 h-8 rounded bg-surface-container-high text-on-surface text-xs font-bold hover:bg-surface-variant transition-colors">2</button>
-                        <button className="w-8 h-8 rounded bg-surface-container-high text-on-surface text-xs font-bold hover:bg-surface-variant transition-colors">3</button>
-                        <span className="text-outline mx-1">...</span>
-                        <button className="w-8 h-8 rounded bg-surface-container-high text-on-surface text-xs font-bold hover:bg-surface-variant transition-colors">128</button>
-                        <button className="p-2 text-outline hover:text-on-surface">
+                        {nextPages.map((p) => (
+                            <button
+                                key={p}
+                                onClick={() => setFilters(prev => ({ ...prev, page: p }))}
+                                className={`w-8 h-8 rounded text-xs font-bold transition-colors ${p === page
+                                    ? "bg-primary-container text-on-primary-container"
+                                    : "bg-surface-container-high text-on-surface hover:bg-surface-variant"
+                                    }`}>
+                                {p}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setFilters(prev => ({ ...prev, page: prev.page + 1 }))}
+                            className="p-2 text-outline hover:text-on-surface"
+                            disabled={page === lastPage}>
                             <span className="material-symbols-outlined">chevron_right</span>
                         </button>
                     </div>

@@ -131,24 +131,6 @@ export default function AdminApplicationsPage() {
                   <button className="px-8 py-4 text-xs font-bold tracking-widest text-outline hover:text-on-surface transition-colors uppercase">Strategy Documents</button>
                 </div>
                 <div className="p-8 space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                    <div>
-                      <label className="text-[10px] font-black text-outline uppercase tracking-widest block mb-2">Core Trading Methodology</label>
-                      <p className="text-on-surface text-sm leading-relaxed">Systematic scalp strategy utilizing order flow imbalance and institutional liquidity pockets. Focused on EUR/USD and GBP/JPY during New York overlap.</p>
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-black text-outline uppercase tracking-widest block mb-2">Monthly Volume Projection</label>
-                      <p className="text-on-surface text-sm leading-relaxed">$50M - $120M Notional. Requires high-leverage execution environment with sub-5ms latency.</p>
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-black text-outline uppercase tracking-widest block mb-2">Previous Funding</label>
-                      <p className="text-on-surface text-sm leading-relaxed">FTMO ($200k), MyForexFunds ($300k). Successfully withdrew over $140k in 18 months.</p>
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-black text-outline uppercase tracking-widest block mb-2">Crisis Management Protocol</label>
-                      <p className="text-on-surface text-sm leading-relaxed">Auto-kill switch at 2% daily drawdown. Hard stop for all positions during NFP and FOMC announcements.</p>
-                    </div>
-                  </div>
 
                   {/* Interaction Timeline */}
                   <div className="pt-8 border-t border-outline-variant/10">
