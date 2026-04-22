@@ -125,9 +125,26 @@ model Event {
   id          String   @id @default(uuid())
   title       String
   date        DateTime
-  participants Json?
-
+  description String?
+  participants EventParticipant
+  status      EventStatus @default(SCHEDULED)
+  
   createdAt   DateTime @default(now())
+}
+
+enum EventStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELED
+}
+
+model EventParticipant {
+  id        String @id @default(uuid())
+  eventId   String
+  userId    String
+  joinedAt  DateTime?
+  event Event @relation(fields: [eventId], references: [id])
 }
 
 model Result {
