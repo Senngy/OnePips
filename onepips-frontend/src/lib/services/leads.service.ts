@@ -57,7 +57,14 @@ export const getLeads = async (params: GetLeadsParams = {}) => {
     const query = new URLSearchParams(cleanParams as Record<string, string>).toString();
     const res = await api(`/leads${query ? `?${query}` : ""}`);
     const leads = res.data;
-    return leads;
+    const total = res.meta.total;
+    const page = res.meta.page;
+    const lastPage = res.meta.lastPage;
+    console.log("[LOG] getLeads (service) leads:", leads);
+    console.log("[LOG] getLeads (service) total:", total);
+    console.log("[LOG] getLeads (service) page:", page);
+    console.log("[LOG] getLeads (service) lastPage:", lastPage);
+    return { leads, total, page, lastPage };
 };
 
 export const getLeadById = async (id: string) => api(`/leads/${id}`);

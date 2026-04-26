@@ -154,6 +154,8 @@ export default function MethodePage() {
                   <iframe
                     width="560"
                     height="315"
+                    loading="lazy"
+                    style={{ width: "100%" }}
                     src="https://www.youtube.com/embed/-zUjH8Ecjwo?si=VHcfxbd_hbUmCWQG"
                     title="YouTube video player"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -166,6 +168,8 @@ export default function MethodePage() {
                   <iframe
                     width="560"
                     height="315"
+                    loading="lazy"
+                    style={{ width: "100%" }}
                     src="https://www.youtube.com/embed/WeEf9zNjlOs?si=W9ToI4i1FGoMXeY5"
                     title="YouTube video player"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -178,6 +182,8 @@ export default function MethodePage() {
                   <iframe
                     width="560"
                     height="315"
+                    loading="lazy"
+                    style={{ width: "100%" }}
                     src="https://www.youtube.com/embed/wIYzkairDTs?si=O7K_cnOjOdh-l94c"
                     title="YouTube video player"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -199,12 +205,16 @@ export default function MethodePage() {
                 Le trading avec la méthode OnePips demande de l'engagement et rigueur. Nous sélectionnons nos membres sur leur motivation et leur capacité de discipline.
               </p>
               <div className="flex flex-wrap justify-center gap-6">
-                <button className="bg-primary-container text-on-primary-container px-10 py-4 rounded-md font-bold text-lg active:scale-95 transition-transform hover:bg-primary-container/90">
+                <Link
+                  href="/candidature"
+                  className="bg-primary-container text-on-primary-container px-10 py-4 rounded-md font-bold text-lg active:scale-95 transition-transform hover:bg-primary-container/90">
                   Déposer une Candidature
-                </button>
-                <button className="border border-outline/30 text-on-surface px-10 py-4 rounded-md font-bold text-lg hover:bg-surface-container transition-colors">
+                </Link>
+                <Link
+                  href="/resultats"
+                  className="border border-outline/30 text-on-surface px-10 py-4 rounded-md font-bold text-lg hover:bg-surface-container transition-colors">
                   Consulter les Résultats
-                </button>
+                </Link>
               </div>
             </div>
           </div>

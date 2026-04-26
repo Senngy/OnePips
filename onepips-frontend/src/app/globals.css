@@ -56,6 +56,12 @@
   --color-inverse-primary: #732ee4;
   --color-outline: #958da1;
   --color-on-error-container: #ffdad6;
+  --color-budget-text: #9790fd;
+  --color-budget-text-light: #c7c4d9;
+
+  --color-budget-container: #6259e0dc;
+  --color-budget-border: #5d55c2;
+  ;
 
   --radius-DEFAULT: 0.125rem;
   --radius-lg: 0.25rem;
@@ -68,6 +74,7 @@
   --foreground: #e4e1e7;
   --primary: #AE4074;
   --secondary: #eda5c1;
+  --budget: #5d55c2;
 }
 
 @layer base {
@@ -84,6 +91,8 @@
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
+
+  @import 'react-datepicker/dist/react-datepicker.css';
 
   .glass-card,
   .glass-effect,
@@ -138,4 +147,46 @@
   .headline-font {
     @apply font-headline;
   }
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 120, 120, 0.4);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(120, 120, 120, 0.7);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 120, 120, 0.4) transparent;
+}
+
+.glass-overlay {
+  backdrop-filter: blur(20px);
+  background: rgba(19, 19, 23, 0.85);
+}
+
+.modal-overlay {
+  background: rgba(14, 14, 18, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.etched-edge {
+  border-top: 0.5px solid rgba(228, 225, 231, 0.1);
 }
