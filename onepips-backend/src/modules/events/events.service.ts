@@ -50,7 +50,7 @@ export class EventsService {
       nextEvent, // details of the next event or null if none
     };
   }
-  async register(eventId: string, dto: CreateLeadDto) {
+  async register( dto: CreateLeadDto, eventId?: string,) {
     const lead = await this.prisma.lead.upsert({
       where: { email: dto.email },
       create: {
@@ -59,7 +59,14 @@ export class EventsService {
       },
       update: dto,
     });
-
+    
+    if(!eventId) {
+      const nextEvent = await this.getNextEvent();
+      if (!nextEvent) {
+        throw new Error('No upcoming event found for registration');
+      }
+      eventId = nextEvent.id;
+    }
     const participant = await this.prisma.eventParticipant.create({
       data: {
         eventId,

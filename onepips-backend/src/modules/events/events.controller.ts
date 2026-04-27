@@ -25,6 +25,6 @@ export class EventsController {
 
   @Post(':id/register')
   async register(@Param('id') eventId: string, @Body() dto: CreateLeadDto) {
-    return this.eventsService.register(eventId, dto);
+    return this.eventsService.register(dto, eventId);
   }
 }
