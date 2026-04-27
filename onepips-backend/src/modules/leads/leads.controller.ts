@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Patch, Param, Delete, BadRequestException } from '@nestjs/common';
 import { LeadsService } from './leads.service.js';
 import { CreateLeadDto } from './dto/create-lead.dto.js';
 import { UpdateLeadDto } from './dto/update-lead.dto.js';
@@ -34,6 +34,14 @@ export class LeadsController {
     return this.leadsService.create(dto);
   }
 
+  @Patch(':id/status')
+  async updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: LeadStatus,
+  ) {
+    return this.leadsService.updateStatus(id, status);
+  }
+
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -42,11 +50,16 @@ export class LeadsController {
     return this.leadsService.update(id, dto);
   }
 
-  @Patch(':id/status')
-  async updateStatus(
-    @Param('id') id: string,
-    @Body('status') status: LeadStatus,
-  ) {
-    return this.leadsService.updateStatus(id, status);
+  @Delete('bulk')
+  async deleteBulk(@Body('ids') ids: string[]) {
+    if (!ids || ids.length === 0) {
+      throw new BadRequestException('At least one ID is required');
+    }
+    return this.leadsService.deleteBulk(ids);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return this.leadsService.delete(id);
   }
 }

@@ -124,10 +124,24 @@ model Payment {
 model Event {
   id          String   @id @default(uuid())
   title       String
-  date        DateTime
-  participants Json?
+  startsAt        DateTime
+  description String?
+  isPublished Boolean  @default(false)
+  isCanceled  Boolean  @default(false)
 
+  participants EventParticipant[]
+  
   createdAt   DateTime @default(now())
+}
+
+model EventParticipant {
+  id        String @id @default(uuid())
+  eventId   String
+  userId    String
+  joinedAt  DateTime?
+
+  event Event @relation(fields: [eventId], references: [id])
+  @@unique([eventId, userId]) 
 }
 
 model Result {

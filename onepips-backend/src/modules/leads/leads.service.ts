@@ -37,7 +37,7 @@ export class LeadsService {
         }),
         this.prisma.lead.count({ where }),
       ]);
-      
+
       return {
         data,
         meta: {
@@ -60,7 +60,7 @@ export class LeadsService {
       }),
       this.prisma.lead.count({ where }),
     ]);
-    
+
     return {
       data,
       meta: {
@@ -73,58 +73,70 @@ export class LeadsService {
 
 
   async create(dto: CreateLeadDto) {
-  const score = calculateScore(dto);
-  const status = getLeadStatus(score);
+    const score = calculateScore(dto);
+    const status = getLeadStatus(score);
 
-  const lead = await this.prisma.lead.upsert({
-    where: { email: dto.email },
-    update: {
-      ...dto,
-      score,
-      status,
-    },
-    create: {
-      ...dto,
-      score,
-      status,
-    },
-  });
-  return lead;
-}
-
-  async updateStatus(id: string, status: any) {
-  return this.prisma.lead.update({
-    where: { id },
-    data: { status },
-  });
-}
-
-  async update(id: string, dto: UpdateLeadDto) {
-  const existing = await this.prisma.lead.findUnique({ where: { id } });
-  if (!existing) {
-    throw new NotFoundException(`Lead with ID ${id} not found`);
+    const lead = await this.prisma.lead.upsert({
+      where: { email: dto.email },
+      update: {
+        ...dto,
+        score,
+        status,
+      },
+      create: {
+        ...dto,
+        score,
+        status,
+      },
+    });
+    return lead;
   }
 
-  // Merge existing data with incoming partial data for score calculation
-  const merged = {
-    tradingYears: dto.tradingYears ?? existing.tradingYears ?? undefined,
-    interests: dto.interests ?? existing.interests ?? undefined,
-    markets: dto.markets ?? existing.markets ?? undefined,
-    accountType: dto.accountType ?? existing.accountType ?? undefined,
-    budgetFormation: dto.budgetFormation ?? existing.budgetFormation ?? undefined,
-    budgetTrading: dto.budgetTrading ?? existing.budgetTrading ?? undefined,
-  };
+  async updateStatus(id: string, status: any) {
+    return this.prisma.lead.update({
+      where: { id },
+      data: { status },
+    });
+  }
 
-  const score = calculateScore(merged);
-  const status = getLeadStatus(score);
+  async update(id: string, dto: UpdateLeadDto) {
+    const existing = await this.prisma.lead.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException(`Lead with ID ${id} not found`);
+    }
 
-  return this.prisma.lead.update({
-    where: { id },
-    data: {
-      ...dto,
-      score,
-      status,
-    },
-  });
-}
+    // Merge existing data with incoming partial data for score calculation
+    const merged = {
+      tradingYears: dto.tradingYears ?? existing.tradingYears ?? undefined,
+      interests: dto.interests ?? existing.interests ?? undefined,
+      markets: dto.markets ?? existing.markets ?? undefined,
+      accountType: dto.accountType ?? existing.accountType ?? undefined,
+      budgetFormation: dto.budgetFormation ?? existing.budgetFormation ?? undefined,
+      budgetTrading: dto.budgetTrading ?? existing.budgetTrading ?? undefined,
+    };
+
+    const score = calculateScore(merged);
+    const status = getLeadStatus(score);
+
+    return this.prisma.lead.update({
+      where: { id },
+      data: {
+        ...dto,
+        score,
+        status,
+      },
+    });
+  }
+
+  async delete(id: string) {
+    await this.prisma.lead.delete({ where: { id } });
+    return { message: `Lead with ID ${id} deleted successfully` };
+  }
+
+  async deleteBulk(ids: string[]) {
+    await this.prisma.lead.deleteMany({
+      where: { id: { in: ids } },
+    });
+    return { message: 'Selected leads deleted successfully' };
+  }
 }
