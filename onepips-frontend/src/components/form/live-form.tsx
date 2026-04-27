@@ -4,7 +4,6 @@ import { useState } from "react";
 import { CreateLeadDto, createLead } from "@/lib/services/leads.service";
 import { addParticipantToEvent } from "@/lib/services/events.service";
 import { ApiError } from "@/lib/api-client";
-;
 
 interface LiveFormProps {
     eventId?: string;
