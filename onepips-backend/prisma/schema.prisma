@@ -46,6 +46,8 @@ model Lead {
   createdAt DateTime @default(now())
 
   application Application?
+  participants EventParticipant[]
+
 }
 
 enum LeadStatus {
@@ -137,11 +139,12 @@ model Event {
 model EventParticipant {
   id        String @id @default(uuid())
   eventId   String
-  userId    String
-  joinedAt  DateTime?
+  leadId    String
+  joinedAt  DateTime? @default(now())
 
   event Event @relation(fields: [eventId], references: [id])
-  @@unique([eventId, userId]) 
+  lead Lead @relation(fields: [leadId], references: [id])
+  @@unique([eventId, leadId]) 
 }
 
 model Result {

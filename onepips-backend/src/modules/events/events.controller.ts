@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { EventsService } from './events.service.js';
 import { EventStateDto } from './DTO/event-state.DTO.js';
 import { EventCreateDto } from './DTO/create-event.DTO.js';
+import { CreateLeadDto } from '../leads/dto/create-lead.dto.js';
 
 @Controller('events')
 export class EventsController {
@@ -20,5 +21,10 @@ export class EventsController {
   @Post()
   async create(@Body() body: EventCreateDto) {
     return this.eventsService.create(body);
+  }
+
+  @Post(':id/register')
+  async register(@Param('id') eventId: string, @Body() dto: CreateLeadDto) {
+    return this.eventsService.register(dto, eventId);
   }
 }
