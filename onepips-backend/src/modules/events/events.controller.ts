@@ -10,6 +10,11 @@ export class EventsController {
     return this.eventsService.findAll();
   }
 
+  @Get('state') // endpoint : GET /events/state
+  async getEventState() {
+    return this.eventsService.getEventState();
+  }
+
   @Post()
   async create(@Body() body: any) {
     return this.eventsService.create(body);
