@@ -58,9 +58,7 @@ export default function AdminApplicationsPage() {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -z-0"></div>
                 <div className="flex flex-col md:flex-row gap-6 items-center md:items-start relative z-10">
                   <div className="relative">
-                    <img className="w-24 h-24 rounded-2xl object-cover shadow-2xl"
-                      alt="Portrait of a sophisticated professional male trader"
-                      src="/trading-avatar.jpg" />
+                    {/* TODO: Add applicant image */}
                     <div className="absolute -bottom-2 -right-2 bg-primary p-1 rounded-lg">
                       <span className="material-symbols-outlined text-on-primary text-sm font-bold">verified</span>
                     </div>

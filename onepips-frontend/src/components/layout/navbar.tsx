@@ -15,7 +15,7 @@ export function Navbar() {
 
         <div className="hidden md:flex space-x-8 items-center font-headline font-bold tracking-tight">
           {[
-            { label: "Home", href: "/" },
+            { label: "Accueil", href: "/" },
             { label: "Méthode", href: "/methode" },
             { label: "Résultats", href: "/resultats" },
             { label: "Offres", href: "/offres" },

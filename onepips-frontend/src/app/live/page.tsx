@@ -3,8 +3,20 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { LiveForm } from "@/components/form/live-form";
+import { useEventState } from "@/lib/hooks/useEventState";
+import { useCountdown } from "@/lib/hooks/useLiveCountdown";
 
 export default function LivePage() {
+  const { data: eventState, isLoading, isError, error, isSuccess } = useEventState();
+  const timeLeft = useCountdown(eventState?.nextEvent?.startsAt);
+
+  const hasEvent = eventState?.hasEvent;
+
+  const days = timeLeft?.days;
+  const hours = timeLeft?.hours;
+  const minutes = timeLeft?.minutes;
+  const seconds = timeLeft?.seconds;
+
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container min-h-screen">
       {/* TopNavBar */}
@@ -53,22 +65,42 @@ export default function LivePage() {
               <div className="glass-card p-8 rounded-2xl relative z-10 shadow-[0_40px_40px_0_rgba(210,187,255,0.06)]">
                 {/* Countdown */}
                 <div className="mb-10 text-center">
-                  <p className="text-[10px] uppercase tracking-widest text-outline mb-4 font-label">Prochaine session dans :</p>
+                  {hasEvent ? (
+                    <p className="text-[0.6rem] uppercase tracking-widest text-outline mb-4 font-label">Prochaine session dans :</p>
+                  ) : (
+                    <p
+                      className="text-[0.6rem] uppercase tracking-widest text-outline mb-4 font-label">
+                      Inscris toi pour la prochaine session live
+                    </p>
+                  )}
                   <div className="flex justify-center gap-4">
-                    <div className="flex flex-col items-center">
-                      <span className="font-headline text-3xl font-bold text-on-surface">02</span>
-                      <span className="text-[8px] uppercase tracking-tighter text-outline font-label">Jours</span>
-                    </div>
-                    <span className="text-3xl text-primary/30">:</span>
-                    <div className="flex flex-col items-center">
-                      <span className="font-headline text-3xl font-bold text-on-surface">14</span>
-                      <span className="text-[8px] uppercase tracking-tighter text-outline font-label">Heures</span>
-                    </div>
-                    <span className="text-3xl text-primary/30">:</span>
-                    <div className="flex flex-col items-center">
-                      <span className="font-headline text-3xl font-bold text-on-surface">45</span>
-                      <span className="text-[8px] uppercase tracking-tighter text-outline font-label">Min</span>
-                    </div>
+                    {hasEvent ? (
+                      <>
+                        <div className="flex flex-col items-center">
+                          <span className="font-headline text-3xl font-bold text-on-surface">{days}</span>
+                          <span className="text-[8px] uppercase tracking-tighter text-outline font-label">Jours</span>
+                        </div>
+                        <span className="text-3xl text-primary/30">:</span>
+                        <div className="flex flex-col items-center">
+                          <span className="font-headline text-3xl font-bold text-on-surface">{hours}</span>
+                          <span className="text-[8px] uppercase tracking-tighter text-outline font-label">Heures</span>
+                        </div>
+                        <span className="text-3xl text-primary/30">:</span>
+                        <div className="flex flex-col items-center">
+                          <span className="font-headline text-3xl font-bold text-on-surface">{minutes}</span>
+                          <span className="text-[8px] uppercase tracking-tighter text-outline font-label">Min</span>
+                        </div>
+                        <span className="text-3xl text-primary/30">:</span>
+                        <div className="flex flex-col items-center">
+                          <span className="font-headline text-3xl font-bold text-on-surface">{seconds}</span>
+                          <span className="text-[8px] uppercase tracking-tighter text-outline font-label">Sec</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <span className="text-[1rem] uppercase tracking-tighter text-outline font-label">Bientôt disponible</span>
+                      </div>
+                    )}
                   </div>
                   <LiveForm />
                 </div>
@@ -124,9 +156,7 @@ export default function LivePage() {
                   <span key={s} className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                 ))}
               </div>
-              <blockquote className="text-2xl font-headline font-medium italic text-on-surface leading-snug">
-                &quot;La session live a radicalement changé ma perception du risque. Voir la stratégie One Pips appliquée en direct sur le NASDAQ a été le déclic qu&apos;il me fallait.&quot;
-              </blockquote>
+              <blockquote className="text-2xl font-headline font-medium italic text-on-surface leading-snug">{"\"La session live a radicalement changé ma perception du risque. Voir la stratégie One Pips appliquée en direct sur le NASDAQ a été le déclic qu'il me fallait.\""}</blockquote>
               <div className="mt-8 flex items-center justify-center gap-4">
                 <div className="w-12 h-12 rounded-full overflow-hidden">
                   <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAn9piH0ZYNt0qKjf7U1H0PU-_w9F0syROzyudoUwp5f4drxLFX-ygC7o_q2J7SbJf5Mb1Z94sk0C5cneZstFd37-nhcSi1-89Y2-hCJ4XbELy1LVv8Cp-nIX0vCxXwNLuFLx1cmB5nxtKx50UtlwfMQaFbPWcMSdILBnKy1zRbaZVc1BeFiTJ4HcMIBQYgyrUw_jerKnAT6scLCyca4D5CPQu4bsC-MlHUyCZgCpRg0Sp1c3UWsPR8a5NnXR--tVxN3JULTJV85VQ" alt="Marc-Antoine D." />

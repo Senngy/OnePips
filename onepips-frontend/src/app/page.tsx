@@ -13,7 +13,6 @@ export default function Home() {
 
       <main className="pt-24 min-h-screen">
         <Hero />
-        <ProofSection />
         <ProblemSolution />
         <OffersSection />
         <CTASection />
