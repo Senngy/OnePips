@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { createEvent } from '@/lib/services/events.service';
 
 export default function NewLiveModal({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) {
     const [selectedDate, setSelectedDate] = useState<string>('');
@@ -9,6 +10,20 @@ export default function NewLiveModal({ setIsOpen }: { setIsOpen: (isOpen: boolea
     const [description, setDescription] = useState('');
 
     const combinedDate = new Date(`${selectedDate}T${selectedTime}:00Z`);
+
+    const handleSubmitCreateEvent = async () => {
+        try {
+            const event = await createEvent({
+                title: title,
+                description: description,
+                startsAt: combinedDate.toISOString(),
+            });
+            console.log("(handleSubmitCreateEvent) Event created: ", event);
+            setIsOpen(false);
+        } catch (error) {
+            console.error("(handleSubmitCreateEvent) Error creating event: ", error);
+        }
+    };
 
     return (
         /* Modal Overlay */
@@ -97,6 +112,7 @@ export default function NewLiveModal({ setIsOpen }: { setIsOpen: (isOpen: boolea
                     </button>
                     <button
                         type="button"
+                        onClick={handleSubmitCreateEvent}
                         className="bg-primary-container text-on-primary-container px-8 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-[0_0_20px_rgba(124,58,237,0.3)] active:scale-[0.98]"
                     >
                         Créer un Live

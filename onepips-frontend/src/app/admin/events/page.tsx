@@ -4,12 +4,27 @@ import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
 import NewLiveModal from "@/components/admin/live/new-live-modal";
 import { useState } from "react";
+import { useEvents } from "@/lib/hooks/useEvents";
+import { getTimeLeft } from "@/lib/utils/getEventTimeLeft";
 
 export default function AdminEventsPage() {
   const [isNewLiveModalOpen, setIsNewLiveModalOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [openOptionsMenuId, setOpenOptionsMenuId] = useState<string | null>(null);
+  const { data: events, isLoading, isError, error, refetch, isFetching, isStale, isSuccess, status } = useEvents();
+  console.log("[ADMIN/EVENTS/PAGE.TSX] events", events);
+
+  const displayedEvent = events?.find(e => e.id === selectedEventId) || events?.[0];
+  const displayedEventTimeLeft = getTimeLeft(displayedEvent?.startsAt as string);
+  const displayedEventParticipantsList = displayedEvent?.participants || [];
 
   const handleCreateLive = () => {
     setIsNewLiveModalOpen(true);
+  };
+
+  const toggleOptionsMenu = (e: React.MouseEvent, eventId: string) => {
+    e.stopPropagation();
+    setOpenOptionsMenuId(openOptionsMenuId === eventId ? null : eventId);
   };
 
   return (
@@ -23,10 +38,6 @@ export default function AdminEventsPage() {
             <h1 className="text-4xl font-headline font-bold">Gestion des Lives</h1>
             <div className="flex items-center gap-3">
               <button
-                className="bg-surface-variant/50 text-on-surface px-5 py-2 rounded-lg font-bold text-sm hover:bg-surface-variant transition-colors border border-outline-variant/10">
-                Désactiver les Lives
-              </button>
-              <button
                 onClick={handleCreateLive}
                 className="flex items-center gap-2 bg-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-bold text-sm active:scale-95 transition-all shadow-[0_0_15px_rgba(124,58,237,0.25)]">
                 <span className="material-symbols-outlined text-sm">add</span>
@@ -34,8 +45,8 @@ export default function AdminEventsPage() {
               </button>
             </div>
           </div>
+          {/* Next Event par defaut ou event selectionné */}
           <section>
-
             <div className="flex items-end justify-between mb-8">
               <div>
                 <span className="text-primary text-xs font-bold tracking-[0.2em] uppercase">Status: Live
@@ -48,95 +59,102 @@ export default function AdminEventsPage() {
               </button>
             </div>
             <div className="asymmetric-grid">
-              {/* Main Event Card */}
-              <div
-                className="surface-container rounded-xl p-8 relative overflow-hidden flex flex-col justify-between min-h-[400px]">
-                <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-                  <img alt="Trading Chart Background" className="w-full h-full object-cover"
-                    data-alt="abstract financial data visualization with glowing purple and blue lines representing stock market movements and technical analysis"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDe6-pFlK-9mJWR36BPTPCMtxcSCn3VNLaQHS3rzfbXKeCoyuDecM45a9R7finx4MayDYOa8bLbrHTRyoKEGBI-GrOmRf-zD_Gic2B30PkulhWjHCDY9VYgMvUYZ6NEnu-QJkRqsRYT2fekniievCDHU7392Q3WLd4czxF-927iAt0DqWJON7Q9TlO3whaQN0X_1KxjI8gUrP-___2JA2B5nlXw57KNkfzNVL9n_dyIswJ20zORkDNadrbL9jl_1FDciXCh4V71yJ0" />
-                  <div
-                    className="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/80 to-transparent">
-                  </div>
-                </div>
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-6">
-                    <span
-                      className="bg-primary/10 text-primary px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest border border-primary/20">Masterclass</span>
-                    <span
-                      className="flex items-center gap-1.5 text-tertiary text-[10px] font-bold uppercase tracking-widest">
-                      <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
-                      Live in 02:45:12
-                    </span>
-                  </div>
-                  <h3 className="text-5xl font-headline font-bold leading-tight max-w-2xl">Liquidity Grabs &amp;
-                    institutional Orderflow: Q4 Strategies</h3>
-                  <p className="text-on-surface-variant mt-4 text-lg max-w-xl">Deep dive into the psychological
-                    levels of institutional selling in current volatility environments.</p>
-                </div>
-                <div className="relative z-10 mt-8 flex items-center justify-between">
-                  <div className="flex -space-x-3 overflow-hidden">
-                    <img alt="Panelist"
-                      className="inline-block h-10 w-10 rounded-full ring-2 ring-surface-container"
-                      data-alt="close-up portrait of a professional man with a neutral expression in high-quality business attire"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEAncYWiqAotKYFX9t2NUcEuXHA9n2qTewtrF9x3chn89BxuYBj2QiR5PI3FuSt9p9s9eeNDAlKA3C149nAwG9H3qi0KSjFTJGuuJ2Roe97yts6jiY6T84JDYlx2irnKmPD_3NGCyZFOgGJnVUvtZeyt5MvQL_5w-Fb9TvtQPkeO9pHpXQVI7kPbyyw4WKojU0oeeaA-4cWYn73KXzU32MbqXcFKmLj_J1U3dKnxjzqfzJxlE5DJRT92v2D7uzkpvUvQl_HOkl9uk" />
-                    <img alt="Panelist"
-                      className="inline-block h-10 w-10 rounded-full ring-2 ring-surface-container"
-                      data-alt="headshot of a young professional woman with a slight smile, natural lighting, outdoors"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOLX30Jbrzguo3t9NnLyE4_N-ATWo1GPVC_8ZPHLqZq8L-0cqkqST1kyM8ISK6xaAhVC9dqrOFIBJ3SDzIFQBkLCQznY5AhwNGg9_wPf9UlQCsEYYJCO4siNbGzEwyK6KKx-0CQru3x4LDRS8_DU-OqY0bLVtdk11bht3F1PJU8PzwyYS1bQNyA69bpDnZdp-mj2hA_TBgCZ3xfJShzWAXGNqF_rzMWUOkA9dq5ghq8wUtl1adxta_tZ_eo1qFwjeugHKPVqdFsiY" />
+              {displayedEvent && (
+                <div
+                  key={displayedEvent.id ?? 'default'}
+                  className="surface-container rounded-xl p-8 relative overflow-hidden flex flex-col justify-between min-h-[400px]"
+                  style={{ animation: 'applicant-reveal 0.35s cubic-bezier(0.22, 1, 0.36, 1) both' }}>
+                  <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+                    <img alt="Trading Chart Background" className="w-full h-full object-cover"
+                      data-alt="abstract financial data visualization with glowing purple and blue lines representing stock market movements and technical analysis"
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDe6-pFlK-9mJWR36BPTPCMtxcSCn3VNLaQHS3rzfbXKeCoyuDecM45a9R7finx4MayDYOa8bLbrHTRyoKEGBI-GrOmRf-zD_Gic2B30PkulhWjHCDY9VYgMvUYZ6NEnu-QJkRqsRYT2fekniievCDHU7392Q3WLd4czxF-927iAt0DqWJON7Q9TlO3whaQN0X_1KxjI8gUrP-___2JA2B5nlXw57KNkfzNVL9n_dyIswJ20zORkDNadrbL9jl_1FDciXCh4V71yJ0" />
                     <div
-                      className="flex items-center justify-center h-10 w-10 rounded-full ring-2 ring-surface-container bg-surface-container-highest text-[10px] font-bold text-outline">
-                      +1.2k</div>
+                      className="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/80 to-transparent">
+                    </div>
                   </div>
-                  <div className="flex gap-4">
-                    <button
-                      className="bg-surface-variant text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright transition-colors active:scale-95">
-                      Send Reminders
-                    </button>
-                    <button
-                      className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 shadow-lg shadow-primary-container/20">
-                      Enter Green Room
-                    </button>
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-6">
+                      <span
+                        className="bg-primary/10 text-primary px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest border border-primary/20">Masterclass</span>
+                      <span
+                        className="flex items-center gap-1.5 text-tertiary text-[10px] font-bold uppercase tracking-widest">
+                        <span className="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+                        Live commence dans {displayedEventTimeLeft?.days}j {displayedEventTimeLeft?.hours}h {displayedEventTimeLeft?.minutes}m
+                      </span>
+                    </div>
+                    <h3 className="text-5xl font-headline font-bold leading-tight max-w-2xl">{displayedEvent.title}</h3>
+                    <p className="text-on-surface-variant mt-4 text-lg max-w-xl">{displayedEvent.description}</p>
+                  </div>
+                  <div className="relative z-10 mt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="flex -space-x-3 overflow-hidden">
+                      <img alt="Panelist"
+                        className="inline-block h-10 w-10 rounded-full ring-2 ring-surface-container"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEAncYWiqAotKYFX9t2NUcEuXHA9n2qTewtrF9x3chn89BxuYBj2QiR5PI3FuSt9p9s9eeNDAlKA3C149nAwG9H3qi0KSjFTJGuuJ2Roe97yts6jiY6T84JDYlx2irnKmPD_3NGCyZFOgGJnVUvtZeyt5MvQL_5w-Fb9TvtQPkeO9pHpXQVI7kPbyyw4WKojU0oeeaA-4cWYn73KXzU32MbqXcFKmLj_J1U3dKnxjzqfzJxlE5DJRT92v2D7uzkpvUvQl_HOkl9uk" />
+                      <div
+                        className="flex items-center justify-center h-10 w-10 rounded-full ring-2 ring-surface-container bg-surface-container-highest text-[10px] font-bold text-outline">
+                        +{displayedEvent.participants?.length || 0}</div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 shadow-lg shadow-primary-container/20">
+                        Mettre à jour
+                      </button>
+                      <button
+                        className="bg-surface-variant text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright transition-colors active:scale-95">
+                        Publier
+                      </button>
+                      <button
+                        className="bg-transparent border border-error/30 text-error px-6 py-2.5 rounded-md font-bold text-sm hover:bg-error/10 transition-colors active:scale-95">
+                        Annuler
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              {/* Secondary Events / Sidebar List */}
+              )}
+              {/* Other coming Events / Sidebar List */}
               <div className="space-y-4">
-                <div className="surface-container rounded-xl p-5 border-l-4 border-primary">
-                  <p className="text-[10px] font-bold text-outline uppercase tracking-wider mb-2">Tomorrow • 14:00
-                    UTC</p>
-                  <h4 className="font-bold text-on-surface leading-tight mb-3">Forex Weekly Outlook: Major Pairs
-                    Analysis</h4>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-on-surface-variant">420 Registered</span>
-                    <span className="material-symbols-outlined text-outline text-lg"
-                      data-icon="more_vert">more_vert</span>
+                {events?.map((event) => (
+                  <div
+                    key={event.id}
+                    onClick={() => setSelectedEventId(event.id || null)}
+                    className={`surface-container rounded-xl p-5 border-l-4 cursor-pointer transition-colors ${displayedEvent?.id === event.id ? 'border-primary bg-surface-container-high' : 'border-outline-variant hover:bg-surface-container-high'}`}>
+                    <p className="text-[10px] font-bold text-outline uppercase tracking-wider mb-2">
+                      {new Date(event.startsAt).toLocaleString()}
+                    </p>
+                    <h4 className="font-bold text-on-surface leading-tight mb-3">{event.title}</h4>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-on-surface-variant">{event.participants?.length || 0} Registered</span>
+                      <div className="relative">
+                        <button
+                          onClick={(e) => toggleOptionsMenu(e, event.id!)}
+                          className="material-symbols-outlined text-outline text-lg hover:text-on-surface transition-colors focus:outline-none"
+                          data-icon="more_vert"
+                        >
+                          more_vert
+                        </button>
+                        
+                        {openOptionsMenuId === event.id && (
+                          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-[0_4px_20px_rgba(0,0,0,0.5)] bg-surface-container-highest ring-1 ring-outline/20 z-10 border border-outline-variant/10">
+                            <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenOptionsMenuId(null);
+                                  // TODO: Add logic to open update modal
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-variant hover:text-primary transition-colors flex items-center gap-2"
+                                role="menuitem"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">edit</span>
+                                Mettre à jour
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div
-                  className="surface-container rounded-xl p-5 hover:bg-surface-container-high transition-colors cursor-pointer">
-                  <p className="text-[10px] font-bold text-outline uppercase tracking-wider mb-2">Nov 28 • 09:00
-                    UTC</p>
-                  <h4 className="font-bold text-on-surface leading-tight mb-3">Crypto Volatility Workshop: Hedging
-                    Techniques</h4>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-on-surface-variant">890 Registered</span>
-                    <span className="material-symbols-outlined text-outline text-lg"
-                      data-icon="more_vert">more_vert</span>
-                  </div>
-                </div>
-                <div
-                  className="surface-container rounded-xl p-5 hover:bg-surface-container-high transition-colors cursor-pointer">
-                  <p className="text-[10px] font-bold text-outline uppercase tracking-wider mb-2">Dec 02 • 18:30
-                    UTC</p>
-                  <h4 className="font-bold text-on-surface leading-tight mb-3">Advanced Fibonacci Ext. &amp;
-                    Retracement Mastery</h4>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-on-surface-variant">1,120 Registered</span>
-                    <span className="material-symbols-outlined text-outline text-lg"
-                      data-icon="more_vert">more_vert</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </section>
