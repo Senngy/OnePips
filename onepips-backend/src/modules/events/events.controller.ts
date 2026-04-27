@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { EventsService } from './events.service.js';
+import { EventStateDto } from './DTO/event-state.DTO.js';
 
 @Controller('events')
 export class EventsController {
@@ -11,7 +12,7 @@ export class EventsController {
   }
 
   @Get('state') // endpoint : GET /events/state
-  async getEventState() {
+  async getEventState(): Promise<EventStateDto>  {
     return this.eventsService.getEventState();
   }
 
