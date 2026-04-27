@@ -124,7 +124,7 @@ model Payment {
 model Event {
   id          String   @id @default(uuid())
   title       String
-  startsAt        DateTime
+  startsAt    DateTime
   description String?
   isPublished Boolean  @default(false)
   isCanceled  Boolean  @default(false)
