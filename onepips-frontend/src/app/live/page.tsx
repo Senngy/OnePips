@@ -8,6 +8,11 @@ import { useCountdown } from "@/lib/hooks/useLiveCountdown";
 
 export default function LivePage() {
   const { data: eventState, isLoading, isError, error, isSuccess } = useEventState();
+  console.log("(LivePage) eventState: ", eventState);
+  console.log("(LivePage) eventState.nextEvent: ", eventState?.nextEvent);
+  console.log("(LivePage) eventState.nextEvent.startsAt: ", eventState?.nextEvent?.startsAt);
+  console.log("(LivePage) eventState.hasEvent: ", eventState?.hasEvent);
+
   const timeLeft = useCountdown(eventState?.nextEvent?.startsAt);
 
   const hasEvent = eventState?.hasEvent;
