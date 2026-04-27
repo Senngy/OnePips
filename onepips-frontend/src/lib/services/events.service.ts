@@ -20,10 +20,25 @@ export interface CreateEventDto {
     startsAt: string;
 }
 
+export interface UpdateEventDto {
+    id: string;
+    title?: string;
+    description?: string;
+    startsAt?: string;
+    isPublished?: boolean;
+    isCanceled?: boolean;
+}
+
 // The response shape of /events/state
 export interface EventStateDto {
     hasEvent: boolean;
     nextEvent: EventDto | null;
+}
+
+export class AddParticipantDto {
+    name?: string;
+    email?: string;
+    phone?: string;
 }
 
 export const getEvents = async (): Promise<EventDto[]> => {
@@ -44,3 +59,20 @@ export const createEvent = async (event: CreateEventDto): Promise<EventDto> => {
         body: JSON.stringify(event),
     });
 };
+
+export const updateEvent = async (event: UpdateEventDto): Promise<EventDto> => {
+    return api(`/events/${event.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(event),
+    });
+}
+
+export const addParticipantToEvent = async (eventId: string, participant: AddParticipantDto) => {
+    return api(`/events/${eventId}/register`, {
+        method: "POST",
+        body: JSON.stringify(participant),
+    });
+}
+
+
+

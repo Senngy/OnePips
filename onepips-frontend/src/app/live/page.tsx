@@ -16,6 +16,7 @@ export default function LivePage() {
   const timeLeft = useCountdown(eventState?.nextEvent?.startsAt);
 
   const hasEvent = eventState?.hasEvent;
+  const nextEvent = eventState?.nextEvent;
 
   const days = timeLeft?.days;
   const hours = timeLeft?.hours;
@@ -107,7 +108,7 @@ export default function LivePage() {
                       </div>
                     )}
                   </div>
-                  <LiveForm />
+                  <LiveForm eventId={nextEvent?.id} />
                 </div>
 
               </div>
