@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { EventStateDto } from './DTO/event-state.DTO.js';
 import { EventCreateDto } from './DTO/create-event.DTO.js';
+import { CreateLeadDto } from '../leads/dto/create-lead.dto.js';
 
 
 @Injectable()
@@ -48,5 +49,25 @@ export class EventsService {
       hasEvent: !!nextEvent, // true if there's an upcoming event
       nextEvent, // details of the next event or null if none
     };
+  }
+  async register(eventId: string, dto: CreateLeadDto) {
+    const lead = await this.prisma.lead.upsert({
+      where: { email: dto.email },
+      create: {
+        ...dto,
+        source: "live",
+      },
+      update: dto,
+    });
+
+    const participant = await this.prisma.eventParticipant.create({
+      data: {
+        eventId,
+        leadId: lead.id,
+        joinedAt: new Date(),
+      },
+    });
+
+    return { lead, participant };
   }
 }
