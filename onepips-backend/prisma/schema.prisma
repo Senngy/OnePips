@@ -126,17 +126,12 @@ model Event {
   title       String
   date        DateTime
   description String?
+  isPublished Boolean  @default(false)
+  isCanceled  Boolean  @default(false)
+
   participants EventParticipant[]
-  status      EventStatus @default(SCHEDULED) 
   
   createdAt   DateTime @default(now())
-}
-
-enum EventStatus {
-  SCHEDULED
-  LIVE
-  COMPLETED
-  CANCELED
 }
 
 model EventParticipant {
