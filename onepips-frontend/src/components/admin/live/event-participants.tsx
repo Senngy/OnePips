@@ -2,8 +2,14 @@
 
 import { useEventParticipants } from "@/lib/hooks/useEventParticipant";
 
-export function EventParticipants({ eventId }: { eventId: string }) {
-    useEventParticipants(eventId);
+interface EventParticipantsProps {
+    eventId: string;
+    participantCount: number;
+}
+
+export function EventParticipants({ eventId, participantCount }: EventParticipantsProps) {
+    const { data: participants, isLoading } = useEventParticipants(eventId);
+    console.log("[ADMIN/LIVE/EVENT-PARTICIPANTS.TSX] participants", participants);
     return (
         <>
             <div className="lg:col-span-2 space-y-6">
@@ -22,110 +28,60 @@ export function EventParticipants({ eventId }: { eventId: string }) {
                                 <th className="px-6 py-4 text-[10px] font-bold text-outline uppercase tracking-widest">
                                     Participant</th>
                                 <th className="px-6 py-4 text-[10px] font-bold text-outline uppercase tracking-widest">
-                                    Status</th>
+                                    Email</th>
                                 <th className="px-6 py-4 text-[10px] font-bold text-outline uppercase tracking-widest">
-                                    Engagement</th>
+                                    Téléphone</th>
                                 <th
                                     className="px-6 py-4 text-[10px] font-bold text-outline uppercase tracking-widest text-right">
                                     Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-outline-variant/5">
-                            <tr className="hover:bg-surface-container/50 transition-colors">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div
-                                            className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                                            AK</div>
-                                        <div>
-                                            <p className="text-sm font-bold">Avery Kinsley</p>
-                                            <p className="text-[10px] text-outline">Pro Tier Member</p>
-                                        </div>
+                            {isLoading && <tr>
+                                <td colSpan={4} className="text-center py-4">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <div className="w-4 h-4 rounded-full bg-primary animate-pulse"></div>
+                                        <div className="w-4 h-4 rounded-full bg-primary animate-pulse"></div>
+                                        <div className="w-4 h-4 rounded-full bg-primary animate-pulse"></div>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <span
-                                        className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">CONNECTED</span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex gap-1">
-                                        <div className="w-4 h-1 bg-primary rounded-full"></div>
-                                        <div className="w-4 h-1 bg-primary rounded-full"></div>
-                                        <div className="w-4 h-1 bg-primary rounded-full"></div>
-                                        <div className="w-4 h-1 bg-primary/20 rounded-full"></div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <button
-                                        className="material-symbols-outlined text-outline text-lg hover:text-on-surface"
-                                        data-icon="chat">chat</button>
-                                </td>
-                            </tr>
-                            <tr className="hover:bg-surface-container/50 transition-colors">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div
-                                            className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-secondary">
-                                            JH</div>
-                                        <div>
-                                            <p className="text-sm font-bold">Julian Hearst</p>
-                                            <p className="text-[10px] text-outline">Analyst Tier</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span
-                                        className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">CONNECTED</span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex gap-1">
-                                        <div className="w-4 h-1 bg-primary rounded-full"></div>
-                                        <div className="w-4 h-1 bg-primary rounded-full"></div>
-                                        <div className="w-4 h-1 bg-primary/20 rounded-full"></div>
-                                        <div className="w-4 h-1 bg-primary/20 rounded-full"></div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <button
-                                        className="material-symbols-outlined text-outline text-lg hover:text-on-surface"
-                                        data-icon="chat">chat</button>
-                                </td>
-                            </tr>
-                            <tr className="hover:bg-surface-container/50 transition-colors">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
-                                        <div
-                                            className="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-[10px] font-bold text-primary">
-                                            MS</div>
-                                        <div>
-                                            <p className="text-sm font-bold">Mila Sorensen</p>
-                                            <p className="text-[10px] text-outline">Founder Elite</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span
-                                        className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-surface-variant text-outline border border-outline-variant/30">IDLE</span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex gap-1">
-                                        <div className="w-4 h-1 bg-primary rounded-full"></div>
-                                        <div className="w-4 h-1 bg-primary rounded-full"></div>
-                                        <div className="w-4 h-1 bg-primary rounded-full"></div>
-                                        <div className="w-4 h-1 bg-primary rounded-full"></div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <button
-                                        className="material-symbols-outlined text-outline text-lg hover:text-on-surface"
-                                        data-icon="chat">chat</button>
-                                </td>
-                            </tr>
+                            </tr>}
+                            {participants?.map((participant) => (
+                                <>
+                                    <tr key={participant.id} className="hover:bg-surface-container/50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                                                    {participant?.name
+                                                        ? (participant.name.charAt(0).toUpperCase() + (participant.name.charAt(1)?.toUpperCase() ?? ""))
+                                                        : "?"}</div>
+                                                <div>
+                                                    <p className="text-sm font-bold">{participant.name}</p>
+
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.email}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.phone}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button
+                                                className="material-symbols-outlined text-outline text-lg hover:text-on-surface"
+                                                data-icon="chat">chat</button>
+                                        </td>
+                                    </tr>
+                                </>
+                            ))}
                         </tbody>
                     </table>
                     <div className="px-6 py-4 border-t border-outline-variant/10 text-center">
                         <button className="text-xs font-bold text-primary tracking-widest uppercase">Load All
-                            Participants (1,242)</button>
+                            Participants ({participantCount})</button>
                     </div>
                 </div>
             </div>
