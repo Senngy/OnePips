@@ -1,6 +1,6 @@
 "use client"
 
-import { useEventParticipants } from "@/lib/hooks/useEventParticipant";
+import { useEventParticipants } from "@/lib/hooks/events/useEventParticipant";
 
 interface EventParticipantsProps {
     eventId: string;
@@ -47,35 +47,33 @@ export function EventParticipants({ eventId, participantCount }: EventParticipan
                                 </td>
                             </tr>}
                             {participants?.map((participant) => (
-                                <>
-                                    <tr key={participant.id} className="hover:bg-surface-container/50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div
-                                                    className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                                                    {participant?.name
-                                                        ? (participant.name.charAt(0).toUpperCase() + (participant.name.charAt(1)?.toUpperCase() ?? ""))
-                                                        : "?"}</div>
-                                                <div>
-                                                    <p className="text-sm font-bold">{participant.name}</p>
+                                <tr key={participant.id} className="hover:bg-surface-container/50 transition-colors">
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <div
+                                                className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                                                {participant?.name
+                                                    ? (participant.name.charAt(0).toUpperCase() + (participant.name.charAt(1)?.toUpperCase() ?? ""))
+                                                    : "?"}</div>
+                                            <div>
+                                                <p className="text-sm font-bold">{participant.name}</p>
 
-                                                </div>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.email}</span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.phone}</span>
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button
-                                                className="material-symbols-outlined text-outline text-lg hover:text-on-surface"
-                                                data-icon="chat">chat</button>
-                                        </td>
-                                    </tr>
-                                </>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span
+                                            className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.email}</span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.phone}</span>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <button
+                                            className="material-symbols-outlined text-outline text-lg hover:text-on-surface"
+                                            data-icon="chat">chat</button>
+                                    </td>
+                                </tr>
                             ))}
                         </tbody>
                     </table>

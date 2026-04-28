@@ -1,6 +1,6 @@
 "use client";
 
-import { useLeads } from "@/lib/hooks/useLeads";
+import { useLeads } from "@/lib/hooks/leads/useLeads";
 import { useState } from "react";
 import { formatDate, formatInterest, formatSource, formatStatus } from "@/lib/helpers/formatData";
 

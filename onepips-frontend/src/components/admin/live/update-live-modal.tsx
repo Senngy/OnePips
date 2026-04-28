@@ -1,29 +1,36 @@
 "use client"
 
 import { useState } from 'react'
-import { useCreateEvent } from '@/lib/hooks/events/useCreateEvent';
+import { useUpdateEvent } from '@/lib/hooks/events/useUpdateEvent';
+import { EventDto } from '@/lib/services/events.service';
 
-export default function NewLiveModal({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) {
-    const [selectedDate, setSelectedDate] = useState<string>('');
-    const [selectedTime, setSelectedTime] = useState<string>('');
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
+interface UpdateLiveModalProps {
+    setIsOpen: (isOpen: boolean) => void;
+    event: EventDto;
+}
 
-    const { mutateAsync: createEvent } = useCreateEvent();
+export default function UpdateLiveModal({ setIsOpen, event }: UpdateLiveModalProps) {
+    const [selectedDate, setSelectedDate] = useState<string>(event.startsAt.split('T')[0]);
+    const [selectedTime, setSelectedTime] = useState<string>(event.startsAt.split('T')[1].substring(0, 5));
+    const [title, setTitle] = useState(event.title);
+    const [description, setDescription] = useState(event.description || '');
+
+    const { mutateAsync: updateEvent } = useUpdateEvent();
     const combinedDate = new Date(`${selectedDate}T${selectedTime}:00Z`);
 
-    const handleSubmitCreateEvent = async () => {
+    const handleSubmitUpdateEvent = async () => {
         try {
-            const event = {
-                title: title,
-                description: description,
-                startsAt: combinedDate.toISOString(),
-            };
-            console.log("(handleSubmitCreateEvent) Event created: ", event);
-            createEvent(event);
+            await updateEvent({
+                id: event.id,
+                data: {
+                    title: title,
+                    description: description,
+                    startsAt: combinedDate.toISOString(),
+                }
+            });
             setIsOpen(false);
         } catch (error) {
-            console.error("(handleSubmitCreateEvent) Error creating event: ", error);
+            console.error("(handleSubmitUpdateEvent) Error updating event: ", error);
         }
     };
 
@@ -114,10 +121,10 @@ export default function NewLiveModal({ setIsOpen }: { setIsOpen: (isOpen: boolea
                     </button>
                     <button
                         type="button"
-                        onClick={handleSubmitCreateEvent}
+                        onClick={handleSubmitUpdateEvent}
                         className="bg-primary-container text-on-primary-container px-8 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-[0_0_20px_rgba(124,58,237,0.3)] active:scale-[0.98]"
                     >
-                        Créer un Live
+                        Mettre à jour le Live
                     </button>
                 </div>
             </div>

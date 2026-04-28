@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getEventState, EventStateDto } from "../services/events.service";
+import { getEventState, EventStateDto } from "@/lib/services/events.service";
 // We use useQuery because it will return for us an object with the following properties:
 // data: The data returned by the query
 // isLoading: Whether the query is loading
