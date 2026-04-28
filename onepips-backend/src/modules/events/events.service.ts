@@ -12,6 +12,11 @@ export class EventsService {
     return this.prisma.event.findMany({
       orderBy: {
         startsAt: 'asc'
+      },
+      include : {
+        _count: {
+          select: { participants: true }
+        } 
       }
     });
   }
@@ -76,5 +81,35 @@ export class EventsService {
     });
 
     return { lead, participant };
+  }
+
+  async cancelEvent(eventId: string) {
+    return this.prisma.event.update({
+      where: { id: eventId },
+      data: { 
+        isCanceled: true,
+        isPublished: false, // Optionally unpublish the event when canceled
+      },
+    });
+  }
+
+  async publishEvent(eventId: string) {
+    return this.prisma.event.update({
+      where: { id: eventId },
+      data: { 
+        isPublished: true,
+        isCanceled: false, // Ensure the event is not marked as canceled when published
+      },
+    });
+  }
+
+  async getEventParticipants(eventId: string) {
+    return this.prisma.eventParticipant.findMany({
+      where: { eventId },
+      include: {
+        lead: true, // Include lead details for each participant
+      },
+      orderBy: { joinedAt: 'asc' }, 
+    });
   }
 }
