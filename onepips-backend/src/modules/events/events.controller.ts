@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { EventsService } from './events.service.js';
 import { EventStateDto } from './DTO/event-state.DTO.js';
 import { EventCreateDto } from './DTO/create-event.DTO.js';
@@ -18,6 +18,11 @@ export class EventsController {
     return this.eventsService.getEventState();
   }
 
+  @Get(':id/participants')
+  async getEventParticipants(@Param('id') eventId: string) {
+    return this.eventsService.getEventParticipants(eventId);
+  }
+
   @Post()
   async create(@Body() body: EventCreateDto) {
     return this.eventsService.create(body);
@@ -26,5 +31,15 @@ export class EventsController {
   @Post(':id/register')
   async register(@Param('id') eventId: string, @Body() dto: CreateLeadDto) {
     return this.eventsService.register(dto, eventId);
+  }
+
+  @Patch(':id/cancel')
+  async cancelEvent(@Param('id') eventId: string) {
+    return this.eventsService.cancelEvent(eventId);
+  }
+
+  @Patch(':id/publish')
+  async publishEvent(@Param('id') eventId: string) {
+    return this.eventsService.publishEvent(eventId);
   }
 }
