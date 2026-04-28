@@ -3,6 +3,7 @@ import { EventsService } from './events.service.js';
 import { EventStateDto } from './DTO/event-state.DTO.js';
 import { EventCreateDto } from './DTO/create-event.DTO.js';
 import { CreateLeadDto } from '../leads/dto/create-lead.dto.js';
+import { EventUpdateDto } from './DTO/update-event.DTO.js';
 
 @Controller('events')
 export class EventsController {
@@ -31,6 +32,11 @@ export class EventsController {
   @Post(':id/register')
   async register(@Param('id') eventId: string, @Body() dto: CreateLeadDto) {
     return this.eventsService.register(dto, eventId);
+  }
+
+  @Patch(':id')
+  async update(@Param('id') eventId: string, @Body() body: EventUpdateDto) {
+    return this.eventsService.update(eventId, body);
   }
 
   @Patch(':id/cancel')

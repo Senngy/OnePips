@@ -3,6 +3,7 @@ import { PrismaService } from '../../../prisma/prisma.service.js';
 import { EventStateDto } from './DTO/event-state.DTO.js';
 import { EventCreateDto } from './DTO/create-event.DTO.js';
 import { CreateLeadDto } from '../leads/dto/create-lead.dto.js';
+import { EventUpdateDto } from './DTO/update-event.DTO.js';
 
 
 @Injectable()
@@ -29,6 +30,17 @@ export class EventsService {
         startsAt: dto.startsAt,
         isPublished: dto.isPublished ?? false,
         isCanceled: dto.isCanceled ?? false,
+      }
+    });
+  }
+
+  async update(eventId: string, dto: EventUpdateDto) {
+    return this.prisma.event.update({
+      where: { id: eventId },
+      data: {
+        title: dto.title,
+        description: dto.description,
+        startsAt: dto.startsAt,
       }
     });
   }
