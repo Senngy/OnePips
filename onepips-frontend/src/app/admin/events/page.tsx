@@ -3,20 +3,29 @@
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
 import NewLiveModal from "@/components/admin/live/new-live-modal";
+import { EventParticipants } from "@/components/admin/live/event-participants";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { useState } from "react";
 import { useEvents } from "@/lib/hooks/useEvents";
 import { getTimeLeft } from "@/lib/utils/getEventTimeLeft";
+import { usePublishEvent } from "@/lib/hooks/usePublishEvent";
+import { useCancelEvent } from "@/lib/hooks/useCancelEvent";
 
 export default function AdminEventsPage() {
   const [isNewLiveModalOpen, setIsNewLiveModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [openOptionsMenuId, setOpenOptionsMenuId] = useState<string | null>(null);
+  const [confirmType, setConfirmType] = useState<"publish" | "cancel" | null>(null);
+
   const { data: events, isLoading, isError, error, refetch, isFetching, isStale, isSuccess, status } = useEvents();
   console.log("[ADMIN/EVENTS/PAGE.TSX] events", events);
 
   const displayedEvent = events?.find(e => e.id === selectedEventId) || events?.[0];
   const displayedEventTimeLeft = getTimeLeft(displayedEvent?.startsAt as string);
   const displayedEventParticipantsList = displayedEvent?.participants || [];
+
+  const { mutate: publish } = usePublishEvent();
+  const { mutate: cancel } = useCancelEvent();
 
   const handleCreateLive = () => {
     setIsNewLiveModalOpen(true);
@@ -49,9 +58,7 @@ export default function AdminEventsPage() {
           <section>
             <div className="flex items-end justify-between mb-8">
               <div>
-                <span className="text-primary text-xs font-bold tracking-[0.2em] uppercase">Status: Live
-                  Monitoring</span>
-                <h2 className="text-4xl font-headline font-bold mt-2">Upcoming Lives</h2>
+                <span className="text-primary text-xs font-bold tracking-[0.2em] uppercase">Statut: {displayedEvent?.isPublished ? "Publié" : "Non publié"}</span>
               </div>
               <button className="text-outline hover:text-primary flex items-center gap-2 text-sm font-medium">
                 View Schedule <span className="material-symbols-outlined text-sm"
@@ -96,15 +103,53 @@ export default function AdminEventsPage() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
-                        className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 shadow-lg shadow-primary-container/20">
+                        className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 shadow-lg shadow-primary-container/20"
+                      >
                         Mettre à jour
                       </button>
                       <button
-                        className="bg-surface-variant text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright transition-colors active:scale-95">
+                        className="bg-surface-variant text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright transition-colors active:scale-95"
+                        onClick={() => {
+                          setSelectedEventId(displayedEvent.id!);
+                          setConfirmType("publish");
+                        }}>
                         Publier
                       </button>
+                      <ConfirmModal
+                        open={!!confirmType}
+                        title={
+                          confirmType === "publish"
+                            ? "Confirmer la publication"
+                            : "Confirmer l’annulation"
+                        }
+                        description={
+                          confirmType === "publish"
+                            ? "Confirmer la publication de cet événement live ?"
+                            : "Confirmer l’annulation de cet événement live ?"
+                        }
+                        onConfirm={() => {
+                          if (!selectedEventId) return;
+
+                          if (confirmType === "publish") {
+                            publish(selectedEventId);
+                          } else {
+                            cancel(selectedEventId);
+                          }
+
+                          setConfirmType(null);
+                          setSelectedEventId(null);
+                        }}
+                        onCancel={() => {
+                          setConfirmType(null);
+                          setSelectedEventId(null);
+                        }}
+                      />
                       <button
-                        className="bg-transparent border border-error/30 text-error px-6 py-2.5 rounded-md font-bold text-sm hover:bg-error/10 transition-colors active:scale-95">
+                        className="bg-transparent border border-error/30 text-error px-6 py-2.5 rounded-md font-bold text-sm hover:bg-error/10 transition-colors active:scale-95"
+                        onClick={() => {
+                          setSelectedEventId(displayedEvent.id!);
+                          setConfirmType("cancel");
+                        }}>
                         Annuler
                       </button>
                     </div>
@@ -119,11 +164,11 @@ export default function AdminEventsPage() {
                     onClick={() => setSelectedEventId(event.id || null)}
                     className={`surface-container rounded-xl p-5 border-l-4 cursor-pointer transition-colors ${displayedEvent?.id === event.id ? 'border-primary bg-surface-container-high' : 'border-outline-variant hover:bg-surface-container-high'}`}>
                     <p className="text-[10px] font-bold text-outline uppercase tracking-wider mb-2">
-                      {new Date(event.startsAt).toLocaleString()}
+                      Date prévue : {new Date(event.startsAt).toLocaleString()}
                     </p>
                     <h4 className="font-bold text-on-surface leading-tight mb-3">{event.title}</h4>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-on-surface-variant">{event.participants?.length || 0} Registered</span>
+                      <span className="text-xs text-on-surface-variant">{event._count?.participants || "N/A"} inscrits</span>
                       <div className="relative">
                         <button
                           onClick={(e) => toggleOptionsMenu(e, event.id!)}
@@ -132,7 +177,7 @@ export default function AdminEventsPage() {
                         >
                           more_vert
                         </button>
-                        
+
                         {openOptionsMenuId === event.id && (
                           <div className="absolute right-0 mt-2 w-48 rounded-md shadow-[0_4px_20px_rgba(0,0,0,0.5)] bg-surface-container-highest ring-1 ring-outline/20 z-10 border border-outline-variant/10">
                             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
@@ -203,129 +248,7 @@ export default function AdminEventsPage() {
           </section>
           {/* Section: Participant List & Analytics */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-headline font-bold">Active Participant Feed</h3>
-                <div className="flex gap-2">
-                  <button className="text-xs px-3 py-1.5 bg-surface-container-high rounded text-on-surface">Top
-                    Engagers</button>
-                  <button className="text-xs px-3 py-1.5 text-outline">Latest</button>
-                </div>
-              </div>
-              <div className="bg-surface-container-low rounded-xl overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-surface-container border-b border-outline-variant/10">
-                      <th className="px-6 py-4 text-[10px] font-bold text-outline uppercase tracking-widest">
-                        Participant</th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-outline uppercase tracking-widest">
-                        Status</th>
-                      <th className="px-6 py-4 text-[10px] font-bold text-outline uppercase tracking-widest">
-                        Engagement</th>
-                      <th
-                        className="px-6 py-4 text-[10px] font-bold text-outline uppercase tracking-widest text-right">
-                        Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-outline-variant/5">
-                    <tr className="hover:bg-surface-container/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                            AK</div>
-                          <div>
-                            <p className="text-sm font-bold">Avery Kinsley</p>
-                            <p className="text-[10px] text-outline">Pro Tier Member</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">CONNECTED</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-1">
-                          <div className="w-4 h-1 bg-primary rounded-full"></div>
-                          <div className="w-4 h-1 bg-primary rounded-full"></div>
-                          <div className="w-4 h-1 bg-primary rounded-full"></div>
-                          <div className="w-4 h-1 bg-primary/20 rounded-full"></div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          className="material-symbols-outlined text-outline text-lg hover:text-on-surface"
-                          data-icon="chat">chat</button>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-surface-container/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-secondary">
-                            JH</div>
-                          <div>
-                            <p className="text-sm font-bold">Julian Hearst</p>
-                            <p className="text-[10px] text-outline">Analyst Tier</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">CONNECTED</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-1">
-                          <div className="w-4 h-1 bg-primary rounded-full"></div>
-                          <div className="w-4 h-1 bg-primary rounded-full"></div>
-                          <div className="w-4 h-1 bg-primary/20 rounded-full"></div>
-                          <div className="w-4 h-1 bg-primary/20 rounded-full"></div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          className="material-symbols-outlined text-outline text-lg hover:text-on-surface"
-                          data-icon="chat">chat</button>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-surface-container/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center text-[10px] font-bold text-primary">
-                            MS</div>
-                          <div>
-                            <p className="text-sm font-bold">Mila Sorensen</p>
-                            <p className="text-[10px] text-outline">Founder Elite</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-surface-variant text-outline border border-outline-variant/30">IDLE</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-1">
-                          <div className="w-4 h-1 bg-primary rounded-full"></div>
-                          <div className="w-4 h-1 bg-primary rounded-full"></div>
-                          <div className="w-4 h-1 bg-primary rounded-full"></div>
-                          <div className="w-4 h-1 bg-primary rounded-full"></div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          className="material-symbols-outlined text-outline text-lg hover:text-on-surface"
-                          data-icon="chat">chat</button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div className="px-6 py-4 border-t border-outline-variant/10 text-center">
-                  <button className="text-xs font-bold text-primary tracking-widest uppercase">Load All
-                    Participants (1,242)</button>
-                </div>
-              </div>
-            </div>
+            <EventParticipants eventId={displayedEvent?.id || ""} participantCount={displayedEvent?._count?.participants || 0} />
             {/* Past Events Archive (Asymmetric Sidebar) */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">

@@ -1,4 +1,5 @@
 import { api } from "../api-client";
+import { LeadDto } from "./leads.service";
 
 // A single event entity returned by the API
 export interface EventDto {
@@ -11,6 +12,9 @@ export interface EventDto {
     createdAt?: string;
     updatedAt?: string;
     participants?: string[];
+    _count?: {
+        participants: number;
+    };
 }
 
 // The payload sent when creating a new event
@@ -53,6 +57,10 @@ export const getEventById = async (id: string): Promise<EventDto> => {
     return api(`/events/${id}`);
 };
 
+export const getEventParticipants = async (eventId: string): Promise<LeadDto[]> => {
+    return api(`/events/${eventId}/participants`);
+}
+
 export const createEvent = async (event: CreateEventDto): Promise<EventDto> => {
     return api("/events", {
         method: "POST",
@@ -73,6 +81,21 @@ export const addParticipantToEvent = async (eventId: string, participant: AddPar
         body: JSON.stringify(participant),
     });
 }
+
+export const cancelEvent = async (eventId: string): Promise<EventDto> => {
+    return api(`/events/${eventId}/cancel`, {
+        method: "PATCH",
+    });
+}
+
+export const publishEvent = async (eventId: string): Promise<EventDto> => {
+    return api(`/events/${eventId}/publish`, {
+        method: "PATCH",
+    });
+}
+
+
+
 
 
 
