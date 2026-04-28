@@ -3,20 +3,28 @@
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
 import NewLiveModal from "@/components/admin/live/new-live-modal";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
 import { useState } from "react";
 import { useEvents } from "@/lib/hooks/useEvents";
 import { getTimeLeft } from "@/lib/utils/getEventTimeLeft";
+import { usePublishEvent } from "@/lib/hooks/usePublishEvent";
+import { useCancelEvent } from "@/lib/hooks/useCancelEvent";
 
 export default function AdminEventsPage() {
   const [isNewLiveModalOpen, setIsNewLiveModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [openOptionsMenuId, setOpenOptionsMenuId] = useState<string | null>(null);
+  const [confirmType, setConfirmType] = useState<"publish" | "cancel" | null>(null);
+
   const { data: events, isLoading, isError, error, refetch, isFetching, isStale, isSuccess, status } = useEvents();
   console.log("[ADMIN/EVENTS/PAGE.TSX] events", events);
 
   const displayedEvent = events?.find(e => e.id === selectedEventId) || events?.[0];
   const displayedEventTimeLeft = getTimeLeft(displayedEvent?.startsAt as string);
   const displayedEventParticipantsList = displayedEvent?.participants || [];
+
+  const { mutate: publish } = usePublishEvent();
+  const { mutate: cancel } = useCancelEvent();
 
   const handleCreateLive = () => {
     setIsNewLiveModalOpen(true);
@@ -49,9 +57,7 @@ export default function AdminEventsPage() {
           <section>
             <div className="flex items-end justify-between mb-8">
               <div>
-                <span className="text-primary text-xs font-bold tracking-[0.2em] uppercase">Status: Live
-                  Monitoring</span>
-                <h2 className="text-4xl font-headline font-bold mt-2">Upcoming Lives</h2>
+                <span className="text-primary text-xs font-bold tracking-[0.2em] uppercase">Statut: {displayedEvent?.isPublished ? "Publié" : "Non publié"}</span>
               </div>
               <button className="text-outline hover:text-primary flex items-center gap-2 text-sm font-medium">
                 View Schedule <span className="material-symbols-outlined text-sm"
@@ -96,15 +102,53 @@ export default function AdminEventsPage() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
-                        className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 shadow-lg shadow-primary-container/20">
+                        className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 shadow-lg shadow-primary-container/20"
+                      >
                         Mettre à jour
                       </button>
                       <button
-                        className="bg-surface-variant text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright transition-colors active:scale-95">
+                        className="bg-surface-variant text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright transition-colors active:scale-95"
+                        onClick={() => {
+                          setSelectedEventId(displayedEvent.id!);
+                          setConfirmType("publish");
+                        }}>
                         Publier
                       </button>
+                      <ConfirmModal
+                        open={!!confirmType}
+                        title={
+                          confirmType === "publish"
+                            ? "Confirmer la publication"
+                            : "Confirmer l’annulation"
+                        }
+                        description={
+                          confirmType === "publish"
+                            ? "Confirmer la publication de cet événement live ?"
+                            : "Confirmer l’annulation de cet événement live ?"
+                        }
+                        onConfirm={() => {
+                          if (!selectedEventId) return;
+
+                          if (confirmType === "publish") {
+                            publish(selectedEventId);
+                          } else {
+                            cancel(selectedEventId);
+                          }
+
+                          setConfirmType(null);
+                          setSelectedEventId(null);
+                        }}
+                        onCancel={() => {
+                          setConfirmType(null);
+                          setSelectedEventId(null);
+                        }}
+                      />
                       <button
-                        className="bg-transparent border border-error/30 text-error px-6 py-2.5 rounded-md font-bold text-sm hover:bg-error/10 transition-colors active:scale-95">
+                        className="bg-transparent border border-error/30 text-error px-6 py-2.5 rounded-md font-bold text-sm hover:bg-error/10 transition-colors active:scale-95"
+                        onClick={() => {
+                          setSelectedEventId(displayedEvent.id!);
+                          setConfirmType("cancel");
+                        }}>
                         Annuler
                       </button>
                     </div>
@@ -119,11 +163,11 @@ export default function AdminEventsPage() {
                     onClick={() => setSelectedEventId(event.id || null)}
                     className={`surface-container rounded-xl p-5 border-l-4 cursor-pointer transition-colors ${displayedEvent?.id === event.id ? 'border-primary bg-surface-container-high' : 'border-outline-variant hover:bg-surface-container-high'}`}>
                     <p className="text-[10px] font-bold text-outline uppercase tracking-wider mb-2">
-                      {new Date(event.startsAt).toLocaleString()}
+                      Date prévue : {new Date(event.startsAt).toLocaleString()}
                     </p>
                     <h4 className="font-bold text-on-surface leading-tight mb-3">{event.title}</h4>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-on-surface-variant">{event.participants?.length || 0} Registered</span>
+                      <span className="text-xs text-on-surface-variant">{event._count?.participants || "N/A"} inscrits</span>
                       <div className="relative">
                         <button
                           onClick={(e) => toggleOptionsMenu(e, event.id!)}
@@ -132,7 +176,7 @@ export default function AdminEventsPage() {
                         >
                           more_vert
                         </button>
-                        
+
                         {openOptionsMenuId === event.id && (
                           <div className="absolute right-0 mt-2 w-48 rounded-md shadow-[0_4px_20px_rgba(0,0,0,0.5)] bg-surface-container-highest ring-1 ring-outline/20 z-10 border border-outline-variant/10">
                             <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">

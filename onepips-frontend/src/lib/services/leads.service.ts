@@ -1,5 +1,28 @@
 import { api } from "../api-client";
 
+
+export type LeadDto = {
+    id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    source?: string;
+    interests?: string[];
+    tradingYears?: number;
+    budgetFormation?: number;
+    budgetTrading?: number;
+    markets?: string[];
+    accountType?: string[];
+    createdAt?: string;
+    updatedAt?: string;
+    _count?: {
+        applications: number;
+        bookings: number;
+        payments: number;
+        events: number;
+    };
+}
+
 export type CreateLeadDto = {
     name: string;
     email: string;
