@@ -27,8 +27,6 @@ export class EventsService {
         startsAt: {
           gte: new Date()
         },
-        isPublished: true,
-        isCanceled: false,
       },
       orderBy: {
         startsAt: 'asc'
@@ -36,9 +34,9 @@ export class EventsService {
       include : {
         _count: {
           select: { participants: true }
-        } 
-      }
-    })
+        }, 
+      },
+    });
   }
 
   async create(dto: EventCreateDto) {
@@ -149,7 +147,6 @@ export class EventsService {
         },
       },
     });
-
   }
 
   async getArchivedEvents() {
@@ -158,8 +155,6 @@ export class EventsService {
         startsAt: {
           lt: new Date()
         },
-        isPublished: true,
-        isCanceled: false,
       },
       orderBy: {
         startsAt: 'desc'
@@ -167,8 +162,8 @@ export class EventsService {
       include : {
         _count: {
           select: { participants: true }
-        } 
-      }
-    })
+        }, 
+      },
+    });
   }
 }
