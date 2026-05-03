@@ -3,8 +3,8 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { LiveForm } from "@/components/form/live-form";
-import { useEventState } from "@/lib/hooks/useEventState";
-import { useCountdown } from "@/lib/hooks/useLiveCountdown";
+import { useEventState } from "@/lib/hooks/events/useEventState";
+import { useCountdown } from "@/lib/hooks/events/useLiveCountdown";
 
 export default function LivePage() {
   const { data: eventState, isLoading, isError, error, isSuccess } = useEventState();

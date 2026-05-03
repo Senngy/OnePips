@@ -68,10 +68,10 @@ export const createEvent = async (event: CreateEventDto): Promise<EventDto> => {
     });
 };
 
-export const updateEvent = async (event: UpdateEventDto): Promise<EventDto> => {
-    return api(`/events/${event.id}`, {
+export const updateEvent = async (id: string, data: UpdateEventDto): Promise<EventDto> => {
+    return api(`/events/${id}`, {
         method: "PATCH",
-        body: JSON.stringify(event),
+        body: JSON.stringify(data),
     });
 }
 

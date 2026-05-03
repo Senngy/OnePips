@@ -5,14 +5,16 @@ import Navbar from "@/components/admin/layout/navbar";
 import NewLiveModal from "@/components/admin/live/new-live-modal";
 import { EventParticipants } from "@/components/admin/live/event-participants";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
+import UpdateLiveModal from "@/components/admin/live/update-live-modal";
 import { useState } from "react";
-import { useEvents } from "@/lib/hooks/useEvents";
+import { useEvents } from "@/lib/hooks/events/useEvents";
 import { getTimeLeft } from "@/lib/utils/getEventTimeLeft";
-import { usePublishEvent } from "@/lib/hooks/usePublishEvent";
-import { useCancelEvent } from "@/lib/hooks/useCancelEvent";
+import { usePublishEvent } from "@/lib/hooks/events/usePublishEvent";
+import { useCancelEvent } from "@/lib/hooks/events/useCancelEvent";
 
 export default function AdminEventsPage() {
   const [isNewLiveModalOpen, setIsNewLiveModalOpen] = useState(false);
+  const [isUpdateLiveModalOpen, setIsUpdateLiveModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [openOptionsMenuId, setOpenOptionsMenuId] = useState<string | null>(null);
   const [confirmType, setConfirmType] = useState<"publish" | "cancel" | null>(null);
@@ -104,9 +106,18 @@ export default function AdminEventsPage() {
                     <div className="flex flex-wrap gap-2">
                       <button
                         className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 shadow-lg shadow-primary-container/20"
+                        onClick={() => {
+                          setIsUpdateLiveModalOpen(true);
+                        }}
                       >
                         Mettre à jour
                       </button>
+                      {isUpdateLiveModalOpen && displayedEvent && (
+                        <UpdateLiveModal 
+                          setIsOpen={setIsUpdateLiveModalOpen} 
+                          event={displayedEvent} 
+                        />
+                      )}
                       <button
                         className="bg-surface-variant text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright transition-colors active:scale-95"
                         onClick={() => {

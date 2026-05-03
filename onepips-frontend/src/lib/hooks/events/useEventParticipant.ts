@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getEventParticipants } from "../services/events.service";
+import { getEventParticipants } from "@/lib/services/events.service";
 
 export const useEventParticipants = (eventId?: string) => {
     return useQuery({
