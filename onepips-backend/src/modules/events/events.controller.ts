@@ -14,6 +14,11 @@ export class EventsController {
     return this.eventsService.findAll();
   }
 
+  @Get('upcoming')
+  async getUpcomingEvents() {
+    return this.eventsService.getUpcomingEvents();
+  }
+
   @Get('state') // endpoint : GET /events/state
   async getEventState(): Promise<EventStateDto>  {
     return this.eventsService.getEventState();
@@ -22,6 +27,11 @@ export class EventsController {
   @Get(':id/participants')
   async getEventParticipants(@Param('id') eventId: string) {
     return this.eventsService.getEventParticipants(eventId);
+  }
+
+  @Get('archived')
+  async getArchivedEvents() {
+    return this.eventsService.getArchivedEvents();
   }
 
   @Post()
@@ -48,4 +58,6 @@ export class EventsController {
   async publishEvent(@Param('id') eventId: string) {
     return this.eventsService.publishEvent(eventId);
   }
+
+
 }

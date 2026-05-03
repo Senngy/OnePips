@@ -5,7 +5,6 @@ import { EventCreateDto } from './DTO/create-event.DTO.js';
 import { CreateLeadDto } from '../leads/dto/create-lead.dto.js';
 import { EventUpdateDto } from './DTO/update-event.DTO.js';
 
-
 @Injectable()
 export class EventsService {
   constructor(private prisma: PrismaService) { }
@@ -20,6 +19,26 @@ export class EventsService {
         } 
       }
     });
+  }
+
+  async getUpcomingEvents() {
+    return this.prisma.event.findMany({
+      where: {
+        startsAt: {
+          gte: new Date()
+        },
+        isPublished: true,
+        isCanceled: false,
+      },
+      orderBy: {
+        startsAt: 'asc'
+      },
+      include : {
+        _count: {
+          select: { participants: true }
+        } 
+      }
+    })
   }
 
   async create(dto: EventCreateDto) {
@@ -115,13 +134,41 @@ export class EventsService {
     });
   }
 
-  async getEventParticipants(eventId: string) {
-    return this.prisma.eventParticipant.findMany({
+  async getEventParticipants(eventId: string, page: number = 1, limit: number = 10) {
+    const eventParticipants = await this.prisma.eventParticipant.findMany({
       where: { eventId },
       include: {
         lead: true, // Include lead details for each participant
       },
       orderBy: { joinedAt: 'asc' }, 
     });
+    return this.prisma.lead.findMany({
+      where: {
+        id: {
+          in: eventParticipants.map(ep => ep.leadId),
+        },
+      },
+    });
+
+  }
+
+  async getArchivedEvents() {
+    return this.prisma.event.findMany({
+      where: {
+        startsAt: {
+          lt: new Date()
+        },
+        isPublished: true,
+        isCanceled: false,
+      },
+      orderBy: {
+        startsAt: 'desc'
+      },
+      include : {
+        _count: {
+          select: { participants: true }
+        } 
+      }
+    })
   }
 }
