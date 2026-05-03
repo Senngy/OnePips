@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ApplicationDto, getApplications } from "../services/applications.service";
+import { ApplicationDto, getApplications } from "@/lib/services/applications.service";
 
 export const useApplicants = () => {
     const [applicants, setApplicants] = useState<ApplicationDto[]>([]);

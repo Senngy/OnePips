@@ -7,7 +7,8 @@ import { EventParticipants } from "@/components/admin/live/event-participants";
 import { ConfirmModal } from "@/components/modals/confirm-modal";
 import UpdateLiveModal from "@/components/admin/live/update-live-modal";
 import { useState } from "react";
-import { useEvents } from "@/lib/hooks/events/useEvents";
+import { useUpcomingEvents } from "@/lib/hooks/events/useEvents";
+import { useArchivedEvents } from "@/lib/hooks/events/useArchivedEvent";
 import { getTimeLeft } from "@/lib/utils/getEventTimeLeft";
 import { usePublishEvent } from "@/lib/hooks/events/usePublishEvent";
 import { useCancelEvent } from "@/lib/hooks/events/useCancelEvent";
@@ -19,8 +20,10 @@ export default function AdminEventsPage() {
   const [openOptionsMenuId, setOpenOptionsMenuId] = useState<string | null>(null);
   const [confirmType, setConfirmType] = useState<"publish" | "cancel" | null>(null);
 
-  const { data: events, isLoading, isError, error, refetch, isFetching, isStale, isSuccess, status } = useEvents();
+  const { data: events, isLoading, isError, error, refetch, isFetching, isStale, isSuccess, status } = useUpcomingEvents();
+  const { data: archivedEvents } = useArchivedEvents();
   console.log("[ADMIN/EVENTS/PAGE.TSX] events", events);
+  console.log("[ADMIN/EVENTS/PAGE.TSX] archivedEvents", archivedEvents);
 
   const displayedEvent = events?.find(e => e.id === selectedEventId) || events?.[0];
   const displayedEventTimeLeft = getTimeLeft(displayedEvent?.startsAt as string);
@@ -113,9 +116,9 @@ export default function AdminEventsPage() {
                         Mettre à jour
                       </button>
                       {isUpdateLiveModalOpen && displayedEvent && (
-                        <UpdateLiveModal 
-                          setIsOpen={setIsUpdateLiveModalOpen} 
-                          event={displayedEvent} 
+                        <UpdateLiveModal
+                          setIsOpen={setIsUpdateLiveModalOpen}
+                          event={displayedEvent}
                         />
                       )}
                       <button
@@ -263,10 +266,33 @@ export default function AdminEventsPage() {
             {/* Past Events Archive (Asymmetric Sidebar) */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-headline font-bold">Past Archive</h3>
+                <h3 className="text-xl font-headline font-bold">Evenements Archivés</h3>
                 <span className="material-symbols-outlined text-outline" data-icon="history">history</span>
               </div>
               <div className="space-y-4">
+                {archivedEvents?.map((event) => (
+                  <div
+                    key={event.id}
+                    className="surface-container rounded-xl p-5 group cursor-pointer hover:bg-surface-container transition-all">
+                    <div className="flex items-start justify-between mb-2">
+                      <span className="text-[10px] font-bold text-outline">{new Date(event.startsAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</span>
+                      <span className="bg-surface-bright text-[8px] font-black px-1.5 py-0.5 rounded">HD
+                        REPLAY</span>
+                    </div>
+                    <h5 className="text-sm font-bold group-hover:text-primary transition-colors mb-4 leading-snug">
+                      {event.title}</h5>
+                    <div className="grid grid-cols-2 gap-2 text-[10px] font-medium text-outline">
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[14px]" data-icon="group">group</span>
+                        {event._count?.participants} Views
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[14px]" data-icon="star">star</span> 4.9
+                        Rating
+                      </div>
+                    </div>
+                  </div>
+                ))}
                 {/* Archived Item */}
                 <div
                   className="glass-card rounded-xl p-5 group cursor-pointer hover:bg-surface-container transition-all">
@@ -284,48 +310,6 @@ export default function AdminEventsPage() {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-[14px]" data-icon="star">star</span> 4.9
-                      Rating
-                    </div>
-                  </div>
-                </div>
-                {/* Archived Item */}
-                <div
-                  className="glass-card rounded-xl p-5 group cursor-pointer hover:bg-surface-container transition-all">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-[10px] font-bold text-outline">OCT 15, 2023</span>
-                    <span className="bg-surface-bright text-[8px] font-black px-1.5 py-0.5 rounded">HD
-                      REPLAY</span>
-                  </div>
-                  <h5 className="text-sm font-bold group-hover:text-primary transition-colors mb-4 leading-snug">
-                    Scalping Gold: 15-Minute Entry Strategies</h5>
-                  <div className="grid grid-cols-2 gap-2 text-[10px] font-medium text-outline">
-                    <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[14px]" data-icon="group">group</span>
-                      1.8k Views
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[14px]" data-icon="star">star</span> 4.7
-                      Rating
-                    </div>
-                  </div>
-                </div>
-                {/* Archived Item */}
-                <div
-                  className="glass-card rounded-xl p-5 group cursor-pointer hover:bg-surface-container transition-all">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-[10px] font-bold text-outline">OCT 08, 2023</span>
-                    <span className="bg-surface-bright text-[8px] font-black px-1.5 py-0.5 rounded">HD
-                      REPLAY</span>
-                  </div>
-                  <h5 className="text-sm font-bold group-hover:text-primary transition-colors mb-4 leading-snug">
-                    The Elliott Wave Theory: Mastering Market Cycles</h5>
-                  <div className="grid grid-cols-2 gap-2 text-[10px] font-medium text-outline">
-                    <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[14px]" data-icon="group">group</span>
-                      3.1k Views
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[14px]" data-icon="star">star</span> 5.0
                       Rating
                     </div>
                   </div>

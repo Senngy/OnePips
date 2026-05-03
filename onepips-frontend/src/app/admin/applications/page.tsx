@@ -4,7 +4,7 @@ import Navbar from "@/components/admin/layout/navbar";
 import ApplicantTable from "@/components/admin/candidatures/applicant-table";
 import AcceptCandidateModal from "@/components/admin/candidatures/accept-candidate-modal";
 
-import { useApplicants } from "@/lib/hooks/useApplicants";
+import { useApplicants } from "@/lib/hooks/applicants/useApplicants";
 import { useState } from "react";
 import { ApplicationDto } from "@/lib/services/applications.service";
 import { formatInterest, formatAccountType } from "@/lib/helpers/formatData";

@@ -63,10 +63,10 @@ export function EventParticipants({ eventId, participantCount }: EventParticipan
                                     </td>
                                     <td className="px-6 py-4">
                                         <span
-                                            className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.email}</span>
+                                            className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.email || "N/A"}</span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.phone}</span>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">{participant.phone || "N/A"}</span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button

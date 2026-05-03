@@ -49,6 +49,18 @@ export const getEvents = async (): Promise<EventDto[]> => {
     return api("/events");
 };
 
+export const getUpcomingEvents = async (): Promise<EventDto[]> => {
+    const data = await api("/events/upcoming");
+    console.log("[EVENTS SERVICE] Upcoming events data", data);
+    return data as EventDto[];
+}
+
+export const getArchivedEvents = async (): Promise<EventDto[]> => {
+    const data = await api("/events/archived");
+    console.log("[EVENTS SERVICE] Archived events data", data);
+    return data as EventDto[];
+}
+
 export const getEventState = async (): Promise<EventStateDto> => {
     return api("/events/state");
 };

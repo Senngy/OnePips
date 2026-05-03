@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { getUpcomingEvents } from "@/lib/services/events.service";
+import { getArchivedEvents } from "@/lib/services/events.service";
 
-export function useUpcomingEvents() {
+export function useArchivedEvents() {
     return useQuery({
-        queryKey: ["upcoming-events"],
-        queryFn: getUpcomingEvents,
+        queryKey: ["archived-events"],
+        queryFn: getArchivedEvents,
         staleTime: 1000 * 60 * 5,
         refetchInterval: 1000 * 60 * 5,
         refetchOnWindowFocus: false,
     });
 }
-
