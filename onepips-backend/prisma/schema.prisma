@@ -147,17 +147,6 @@ model EventParticipant {
   @@unique([eventId, leadId]) 
 }
 
-model Result {
-  id          String   @id @default(uuid())
-  title       String
-  image       String
-  description String?
-  date        DateTime
-  participants Json?
-
-  createdAt   DateTime @default(now())
-}
-
 model YoutubeCourse {
   id          String   @id @default(uuid())
   title       String
@@ -175,10 +164,33 @@ model Service {
   createdAt   DateTime @default(now())
 }
 
-model Community {
+model Result {
   id          String   @id @default(uuid())
   title       String
-  stat        Int
+  image       String
+  gain        Float    // +142.5%
+  pair        String   // XAUUSD, EURUSD
   description String?
+  date        DateTime
+
+  isVisible   Boolean  @default(true)
+
   createdAt   DateTime @default(now())
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  name        String
+  role        String   // Gold, Elite, Beginner...
+  rating      Int      // 1 à 5
+  content     String
+  isVisible   Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+}
+
+model CommunityStat {
+  id    String @id @default(uuid())
+  label String
+  value Int
 }
