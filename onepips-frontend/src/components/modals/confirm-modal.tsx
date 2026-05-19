@@ -14,7 +14,7 @@ interface ConfirmModalProps {
     variant?: "default" | "danger";
 }
 
-export function ConfirmModal({
+export default function ConfirmModal({
     open,
     title = "Confirmation",
     description = "Êtes-vous sûr de vouloir continuer ?",

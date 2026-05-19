@@ -4,7 +4,7 @@ import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
 import NewLiveModal from "@/components/admin/live/new-live-modal";
 import { EventParticipants } from "@/components/admin/live/event-participants";
-import { ConfirmModal } from "@/components/modals/confirm-modal";
+import ConfirmModal from "@/components/modals/confirm-modal";
 import UpdateLiveModal from "@/components/admin/live/update-live-modal";
 import { useState } from "react";
 import { useUpcomingEvents } from "@/lib/hooks/events/useEvents";
