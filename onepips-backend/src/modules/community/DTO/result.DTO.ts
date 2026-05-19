@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional } from "class-validator";
+import { IsString, IsNumber, IsOptional, IsDateString } from 'class-validator';
 
 export class ResultDto {
 
@@ -12,7 +12,14 @@ export class ResultDto {
   gain: number = 0;
 
   @IsString()
-  content: string = '';
+  pair: string = '';
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsDateString()
+  date: string = new Date().toISOString();
 
   @IsOptional()
   isVisible?: boolean;

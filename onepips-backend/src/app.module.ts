@@ -8,6 +8,7 @@ import { BookingModule } from './modules/booking/booking.module.js';
 import { PaymentsModule } from './modules/payments/payments.module.js';
 import { EventsModule } from './modules/events/events.module.js';
 import { AnalyticsModule } from './modules/analytics/analytics.module.js';
+import { CommunityModule } from './modules/community/community.module.js';
 import { CronService } from './jobs/cron.service.js';
 import databaseConfig from './config/database.config.js';
 import jwtConfig from './config/jwt.config.js';
@@ -29,6 +30,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
     PaymentsModule,
     EventsModule,
     AnalyticsModule,
+    CommunityModule,
     PrismaModule,
   ],
   controllers: [],
