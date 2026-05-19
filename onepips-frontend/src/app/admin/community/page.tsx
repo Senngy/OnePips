@@ -6,19 +6,20 @@ import ConfirmModal from "@/components/modals/confirm-modal";
 import { useState } from "react";
 import { useCommunityStats } from "@/lib/hooks/community/useCommunityStats";
 import { useTestimonials, useCreateTestimonial, useDeleteTestimonial } from "@/lib/hooks/community/useTestimonials";
-import { useResults, useCreateResult, useDeleteResult } from "@/lib/hooks/community/useResults";
+import { useResults, useDeleteResult } from "@/lib/hooks/community/useResults";
 import { TestimonialDto } from "@/lib/services/community.service";
 import { ResultDto } from "@/lib/services/community.service";
 import FormTestimony from "@/components/admin/community/form-testimony";
+import NewResultModal from "@/components/admin/community/new-result-modal";
 
 export default function AdminCommunityPage() {
     const { data: stats, isLoading: statsLoading } = useCommunityStats();
     const { data: testimonials, isLoading: testimonialsLoading } = useTestimonials();
     const { mutate: deleteTestimonial } = useDeleteTestimonial();
     const { data: results, isLoading: resultsLoading } = useResults();
-    const { mutate: createResult } = useCreateResult();
     const { mutate: deleteResult } = useDeleteResult();
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [newResultOpen, setNewResultOpen] = useState(false);
 
     const getStatValue = (label: string) => {
         return stats?.find(s => s.label === label)?.value ?? 0;
@@ -153,20 +154,10 @@ export default function AdminCommunityPage() {
                             <p className="text-sm text-outline">Performance screenshots et analyses partagées.</p>
                         </div>
                         <button
-                            onClick={() => {
-                                // Mock create result for now
-                                createResult({
-                                    title: "Nouveau Trade",
-                                    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDTqDnGMpZSNCH4uSCEdOtWLQ1YdxwkTcWUIjCL84vossmPXNuZBXvixncUjsCLwOxxTAEzT1eOoSwbgnMwSeiLyQkI4IpSLGLfl_pcYyBND37epWHSMhH3U0J0qOvo8MuL-9pzHfuXb4UtOKCestxJ2kzSTiSDb_TPqWBLV_6OGuabKg4U60Og0zGhSTuHZd740K6Gh2nf5ooC2MA3HnnsN_WwKN5T8eIwWrvdj1XMsUPVx9DG9oqCHGasIhMS3IK3ixIrg_eRDQw",
-                                    gain: 100.0,
-                                    pair: "XAUUSD",
-                                    description: "Setup: Breakout",
-                                    date: new Date().toISOString()
-                                });
-                            }}
+                            onClick={() => setNewResultOpen(true)}
                             className="flex items-center gap-2 text-primary font-headline text-sm font-semibold hover:opacity-80 transition-opacity">
                             <span className="material-symbols-outlined">cloud_upload</span>
-                            UPLOADER UN RÉSULTAT (MOCK)
+                            UPLOADER UN RÉSULTAT
                         </button>
                     </div>
                     {/* Performance Grid */}
@@ -207,9 +198,7 @@ export default function AdminCommunityPage() {
                         )}
                         {/* Add New Placeholder */}
                         <div
-                            onClick={() => {
-                                // Another mock create trigger if clicking placeholder
-                            }}
+                            onClick={() => setNewResultOpen(true)}
                             className="bg-surface-container-low border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center p-8 group hover:border-primary/50 transition-colors cursor-pointer">
                             <div
                                 className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
@@ -221,6 +210,7 @@ export default function AdminCommunityPage() {
                     </div>
                 </div>
             </main>
+            <NewResultModal isOpen={newResultOpen} onClose={() => setNewResultOpen(false)} />
         </div>
     );
 }
