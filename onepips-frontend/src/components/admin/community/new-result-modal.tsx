@@ -1,9 +1,15 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useRef, useState, useEffect } from "react";
 import { useCreateResult } from "@/lib/hooks/community/useResults";
 import { useToast } from "@/lib/hooks/useToast";
 import { uploadImage } from "@/lib/services/upload.service";
+import ImageLightbox from "@/components/ui/image-lightbox";
+import DatePicker, { registerLocale } from "react-datepicker";
+import { fr } from "date-fns/locale/fr";
+import "react-datepicker/dist/react-datepicker.css";
+
+registerLocale("fr", fr);
 
 interface NewResultModalProps {
     isOpen: boolean;
@@ -23,6 +29,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
     const [imageMode, setImageMode] = useState<"url" | "file">("url");
     const [uploading, setUploading] = useState(false);
     const [dragOver, setDragOver] = useState(false);
+    const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [resultForm, setResultForm] = useState({
@@ -31,9 +38,20 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
         gain: "" as string | number,
         pair: "XAUUSD",
         description: "",
-        date: new Date().toISOString().split("T")[0],
+        date: new Date(),
         isVisible: true,
     });
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -47,7 +65,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                 gain: "",
                 pair: "XAUUSD",
                 description: "",
-                date: new Date().toISOString().split("T")[0],
+                date: new Date(),
                 isVisible: true,
             });
             onClose();
@@ -72,7 +90,12 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
         setUploading(true);
         try {
             const url = await uploadImage(file);
+            console.log("[UPLOAD SUCCESS] backend returned:", url);
             setResultForm(prev => ({ ...prev, image: url }));
+            toastSuccess({
+                title: "Upload réussi",
+                description: "L'image a été chargée avec succès.",
+            });
         } catch (err: unknown) {
             setResultForm(prev => ({ ...prev, image: "" }));
             toastError({
@@ -100,7 +123,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                 gain: gainVal,
                 pair: resultForm.pair,
                 description: resultForm.description || undefined,
-                date: new Date(resultForm.date).toISOString(),
+                date: resultForm.date.toISOString(),
                 isVisible: resultForm.isVisible,
             },
             {
@@ -126,7 +149,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
         <>
             {/* ── Overlay ── */}
             <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 glass-overlay ${exitAnim}`}>
-                <div className="w-full max-w-xl bg-surface-container-low rounded-2xl shadow-[0_0_80px_rgba(0,0,0,0.85)] border border-outline-variant/15 overflow-hidden animate-in fade-in zoom-in duration-300">
+                <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto bg-surface-container-low rounded-2xl shadow-[0_0_80px_rgba(0,0,0,0.85)] border border-outline-variant/15 animate-in fade-in zoom-in duration-300">
 
                     {/* ── Header ── */}
                     <div className="px-8 pt-8 pb-4 flex justify-between items-start">
@@ -169,7 +192,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                                     <select
                                         required
                                         disabled={isPending}
-                                        value={resultForm.pair}
+                                        value={resultForm.pair || ""}
                                         onChange={e => setResultForm({ ...resultForm, pair: e.target.value })}
                                         className="w-full bg-surface-container-lowest border border-outline-variant/15 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-4 py-3 text-sm text-on-surface outline-none transition-all disabled:opacity-50"
                                     >
@@ -187,7 +210,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                                             type="number"
                                             step="0.01"
                                             disabled={isPending}
-                                            value={resultForm.gain}
+                                            value={resultForm.gain || ""}
                                             onChange={e => setResultForm({ ...resultForm, gain: e.target.value })}
                                             placeholder="ex: 4.75"
                                             className="w-full bg-surface-container-lowest border border-outline-variant/15 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg pl-4 pr-10 py-3 text-sm text-on-surface outline-none transition-all disabled:opacity-50 placeholder:text-outline/30"
@@ -196,15 +219,16 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                                     </div>
                                 </div>
                                 {/* Date */}
-                                <div className="space-y-1.5">
+                                <div className="space-y-1.5 flex flex-col">
                                     <label className="text-[10px] font-label uppercase tracking-widest text-outline">Date</label>
-                                    <input
-                                        required
-                                        type="date"
+                                    <DatePicker
+                                        selected={resultForm.date}
+                                        onChange={(date: Date | null) => date && setResultForm({ ...resultForm, date })}
+                                        dateFormat="dd/MM/yyyy"
+                                        locale="fr"
                                         disabled={isPending}
-                                        value={resultForm.date}
-                                        onChange={e => setResultForm({ ...resultForm, date: e.target.value })}
                                         className="w-full bg-surface-container-lowest border border-outline-variant/15 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-4 py-3 text-sm text-on-surface outline-none transition-all disabled:opacity-50"
+                                        wrapperClassName="w-full"
                                     />
                                 </div>
                                 {/* Title */}
@@ -214,7 +238,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                                         required
                                         type="text"
                                         disabled={isPending}
-                                        value={resultForm.title}
+                                        value={resultForm.title || ""}
                                         onChange={e => setResultForm({ ...resultForm, title: e.target.value })}
                                         placeholder="ex: Breakout XAUUSD"
                                         className="w-full bg-surface-container-lowest border border-outline-variant/15 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-4 py-3 text-sm text-on-surface outline-none transition-all disabled:opacity-50 placeholder:text-outline/30"
@@ -253,13 +277,16 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                                             required={!resultForm.image}
                                             type="url"
                                             disabled={isBusy}
-                                            value={resultForm.image}
+                                            value={resultForm.image || ""}
                                             onChange={e => setResultForm({ ...resultForm, image: e.target.value })}
                                             placeholder="https://…"
                                             className="flex-1 bg-surface-container-lowest border border-outline-variant/15 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg px-4 py-3 text-sm text-on-surface outline-none transition-all disabled:opacity-50 placeholder:text-outline/30"
                                         />
                                         {resultForm.image && (
-                                            <div className="w-12 h-12 rounded-lg overflow-hidden border border-outline-variant/20 shrink-0">
+                                            <div
+                                                className="w-12 h-12 rounded-lg overflow-hidden border border-outline-variant/20 shrink-0 cursor-zoom-in hover:opacity-80 transition-opacity"
+                                                onClick={() => setLightboxSrc(resultForm.image)}
+                                            >
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img src={resultForm.image} alt="preview"
                                                     className="w-full h-full object-cover"
@@ -302,7 +329,10 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                                         ) : resultForm.image ? (
                                             /* Uploaded preview */
                                             <>
-                                                <div className="w-24 h-16 rounded-lg overflow-hidden border border-outline-variant/20">
+                                                <div
+                                                    className="w-24 h-16 rounded-lg overflow-hidden border border-outline-variant/20 cursor-zoom-in hover:opacity-80 transition-opacity"
+                                                    onClick={(e) => { e.stopPropagation(); setLightboxSrc(resultForm.image); }}
+                                                >
                                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                                     <img src={resultForm.image} alt="preview" className="w-full h-full object-cover" />
                                                 </div>
@@ -336,7 +366,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                                 <label className="text-[10px] font-label uppercase tracking-widest text-outline">Description / Analyse <span className="text-outline/50 normal-case">(optionnel)</span></label>
                                 <textarea
                                     disabled={isPending}
-                                    value={resultForm.description}
+                                    value={resultForm.description || ""}
                                     onChange={e => setResultForm({ ...resultForm, description: e.target.value })}
                                     placeholder="Setup: Breakout sur résistance H4, RR 1:3…"
                                     rows={3}
@@ -410,6 +440,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
                     </form>
                 </div>
             </div>
+            <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
         </>
     );
 }

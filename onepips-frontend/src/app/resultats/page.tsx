@@ -3,8 +3,17 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
+import { useResults } from "@/lib/hooks/community/useResults";
+import { useTestimonials } from "@/lib/hooks/community/useTestimonials";
+import { TestimonialCarousel } from "@/components/ui/carousel";
 
 export default function ResultatsPage() {
+  const { data: resultsData, isLoading: resultsLoading } = useResults();
+  const { data: testimonialsData, isLoading: testimonialsLoading } = useTestimonials();
+
+  const results = resultsData?.filter(r => r.isVisible) || [];
+  const testimonials = testimonialsData?.filter(t => t.isVisible) || [];
+
   return (
     <>
       <Navbar />
@@ -120,33 +129,36 @@ export default function ResultatsPage() {
               <p className="text-outline max-w-xl mx-auto">Par souci de confidentialité et de protection des stratégies propriétaires, certaines données sont partiellement floutées. Accès complet disponible via notre espace membre.</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-              {[
-                { gain: "+4.2%", pair: "EUR/USD Session" },
-                { gain: "+12.8%", pair: "Weekly PNL Recap" },
-                { gain: "+2.1%", pair: "Gold Scalp" },
-                { gain: "+7.5%", pair: "Swing Position" },
-              ].map((res, i) => (
-                <div key={i} className="group relative aspect-square rounded overflow-hidden bg-surface-container-lowest flex flex-col items-center justify-center p-4">
-                  <div className="absolute inset-0 blur-md opacity-30 group-hover:opacity-50 transition-opacity">
-                    <img className="w-full h-full object-cover" src={`https://lh3.googleusercontent.com/aida-public/AB6AXuDo4zWlLqsuZlWzzWZe0NZazj3bY5rrA7YJAgoVQczLo2DLXsseSnerNZhgqK02Jtv3ZPjmLCn4xHbtR9xFu04autgab-OnmahPhFS4Pz4699U5FnqzFzlZFb31fpwLPPBASWgX7MVgt5AIdw0AeKAVo06oP7N8K5TeMcAnnyCAfyNbH9RkF9crJ76i9kdGFfN1fCsdpyCb3BGuAhCjGm8W_YH-WL6Y2qNuurA9VdFN4Nl8bBuMkD5Gpo1aUgWFpm_sDMnfOe0iwgc`} alt={`Result ${i}`} />
+              {resultsLoading ? (
+                <div className="col-span-full text-center text-outline py-12">Chargement des résultats...</div>
+              ) : results.length === 0 ? (
+                <div className="col-span-full text-center text-outline py-12">Aucun résultat publié pour le moment.</div>
+              ) : (
+                results.map((res) => (
+                  <div key={res.id} className="group relative aspect-square rounded overflow-hidden bg-surface-container-lowest flex flex-col items-center justify-center p-4">
+                    <div className="absolute inset-0 blur-md opacity-30 group-hover:opacity-50 transition-opacity bg-black/20">
+                      {res.image && <img className="w-full h-full object-cover" src={res.image} alt={res.title} />}
+                    </div>
+                    <div className="relative z-10 text-center">
+                      <div className="text-primary font-headline font-bold text-3xl mb-1">+{res.gain}%</div>
+                      <div className="text-xs uppercase tracking-tighter text-outline font-label">{res.pair}</div>
+                    </div>
+                    <div className="absolute top-3 right-3">
+                      <span className="material-symbols-outlined text-outline-variant text-sm">visibility_off</span>
+                    </div>
                   </div>
-                  <div className="relative z-10 text-center">
-                    <div className="text-primary font-headline font-bold text-3xl mb-1">{res.gain}</div>
-                    <div className="text-xs uppercase tracking-tighter text-outline font-label">{res.pair}</div>
-                  </div>
-                  <div className="absolute top-3 right-3">
-                    <span className="material-symbols-outlined text-outline-variant text-sm">visibility_off</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-16 flex justify-center">
-              <button className="bg-surface-container border border-outline-variant/30 px-8 py-4 rounded-full flex items-center gap-3 hover:bg-surface-container-high transition-all group">
-                <span className="text-on-surface font-semibold">Voir plus de résultats (Espace Membre)</span>
-                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-              </button>
+                ))
+              )}
             </div>
           </div>
+        </section>
+        {/* Testimonial Highlight */}
+        <section className="py-24 max-w-7xl mx-auto">
+          {testimonialsLoading ? (
+            <div className="text-center text-outline py-12">Chargement des témoignages...</div>
+          ) : (
+            <TestimonialCarousel testimonials={testimonials} />
+          )}
         </section>
 
         {/* CTA Section */}
