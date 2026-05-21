@@ -9,6 +9,7 @@ import { PaymentsModule } from './modules/payments/payments.module.js';
 import { EventsModule } from './modules/events/events.module.js';
 import { AnalyticsModule } from './modules/analytics/analytics.module.js';
 import { CommunityModule } from './modules/community/community.module.js';
+import { UploadModule } from './modules/upload/upload.module.js';
 import { CronService } from './jobs/cron.service.js';
 import databaseConfig from './config/database.config.js';
 import jwtConfig from './config/jwt.config.js';
@@ -31,6 +32,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
     EventsModule,
     AnalyticsModule,
     CommunityModule,
+    UploadModule,
     PrismaModule,
   ],
   controllers: [],
