@@ -179,12 +179,7 @@ model Result {
 }
 
 model Testimonial {
-  id          String   @id @default(uuid())
-  name        String
-  role        String   // Gold, Elite, Beginner...
-  rating      Int      // 1 à 5
-  content     String
-  isVisible   Boolean  @default(true)
+ 
 
   createdAt   DateTime @default(now())
 }

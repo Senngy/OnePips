@@ -73,8 +73,10 @@ export class LeadsService {
 
 
   async create(dto: CreateLeadDto) {
+    console.log('[API lead service] create : called')
     const score = calculateScore(dto);
     const status = getLeadStatus(score);
+    console.log('[API lead service] create', dto)
 
     const lead = await this.prisma.lead.upsert({
       where: { email: dto.email },
@@ -89,6 +91,7 @@ export class LeadsService {
         status,
       },
     });
+    console.log('[API] Lead created or updated:', lead);
     return lead;
   }
 
