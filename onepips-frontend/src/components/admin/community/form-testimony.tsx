@@ -55,7 +55,7 @@ export default function FormTestimony() {
                     <input
                         required
                         disabled={isBusy}
-                        value={testiForm.name}
+                        value={testiForm.name || ""}
                         onChange={e => setTestiForm({ ...testiForm, name: e.target.value })}
                         className="w-full bg-surface-container-lowest border-none ring-1 ring-white/10 focus:ring-primary text-sm rounded-md px-4 py-3 text-on-surface placeholder:text-outline/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="ex: Jean Dupont"
@@ -67,7 +67,7 @@ export default function FormTestimony() {
                     <label className="text-[10px] font-label uppercase tracking-widest text-outline">Rôle / Badge</label>
                     <select
                         disabled={isBusy}
-                        value={testiForm.role}
+                        value={testiForm.role || ""}
                         onChange={e => setTestiForm({ ...testiForm, role: e.target.value })}
                         className="w-full bg-surface-container-lowest border-none ring-1 ring-white/10 focus:ring-primary text-sm rounded-md px-4 py-3 text-on-surface transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -98,7 +98,7 @@ export default function FormTestimony() {
                     <textarea
                         required
                         disabled={isBusy}
-                        value={testiForm.content}
+                        value={testiForm.content || ""}
                         onChange={e => setTestiForm({ ...testiForm, content: e.target.value })}
                         className="w-full bg-surface-container-lowest border-none ring-1 ring-white/10 focus:ring-primary text-sm rounded-md px-4 py-3 text-on-surface placeholder:text-outline/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="Tapez ici le contenu du message..."

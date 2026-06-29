@@ -11,6 +11,7 @@ import { TestimonialDto } from "@/lib/services/community.service";
 import { ResultDto } from "@/lib/services/community.service";
 import FormTestimony from "@/components/admin/community/form-testimony";
 import NewResultModal from "@/components/admin/community/new-result-modal";
+import ImageLightbox from "@/components/ui/image-lightbox";
 
 export default function AdminCommunityPage() {
     const { data: stats, isLoading: statsLoading } = useCommunityStats();
@@ -20,6 +21,7 @@ export default function AdminCommunityPage() {
     const { mutate: deleteResult } = useDeleteResult();
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [newResultOpen, setNewResultOpen] = useState(false);
+    const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
     const getStatValue = (label: string) => {
         return stats?.find(s => s.label === label)?.value ?? 0;
@@ -112,7 +114,7 @@ export default function AdminCommunityPage() {
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-5">
-                                                        <p className="text-xs text-on-surface-variant max-w-[240px] truncate italic">"{t.content}"</p>
+                                                        <p className="text-xs text-on-surface-variant max-w-[240px] truncate italic">&quot;{t.content}&quot;</p>
                                                     </td>
                                                     <td className="px-6 py-5">
                                                         <span className={`px-2 py-1 rounded text-[10px] font-label uppercase ${t.isVisible ? "bg-primary/10 text-primary" : "bg-surface-container-highest text-outline"}`}>
@@ -169,13 +171,19 @@ export default function AdminCommunityPage() {
                         ) : (
                             results?.map((r: ResultDto) => (
                                 <div key={r.id} className="bg-surface-container rounded-xl overflow-hidden group border border-white/5">
-                                    <div className="h-40 overflow-hidden relative bg-black/20">
+                                    <div 
+                                        className="h-40 overflow-hidden relative bg-black/20 cursor-zoom-in"
+                                        onClick={() => setLightboxSrc(r.image)}
+                                    >
                                         {r.image && (
-                                            <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                src={r.image} alt={r.title} />
+                                            <div className="w-full h-full overflow-hidden border border-outline-variant/20">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                    src={r.image} alt="preview" />
+                                            </div>
                                         )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                                        <span className="absolute top-4 left-4 px-2 py-1 bg-primary text-on-primary text-[10px] font-bold rounded">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+                                        <span className="absolute top-4 left-4 px-2 py-1 bg-primary text-on-primary text-[10px] font-bold rounded pointer-events-none">
                                             {r.pair}
                                         </span>
                                     </div>
@@ -186,9 +194,10 @@ export default function AdminCommunityPage() {
                                                 {new Date(r.date).toLocaleDateString()}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-xs text-on-surface-variant truncate">{r.description || r.title}</span>
-                                            <div className="flex gap-2">
+                                        <div className="flex flex-col justify-between items-center">
+                                            <span className="text-sm text-on-surface-variant font-bold">{r.title}</span>
+                                            <span className="text-xs text-on-surface-variant truncate">{r.description}</span>
+                                            <div className="flex gap-2 pt-2">
                                                 <span onClick={() => deleteResult(r.id)} className="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-tertiary">delete</span>
                                             </div>
                                         </div>
@@ -211,6 +220,7 @@ export default function AdminCommunityPage() {
                 </div>
             </main>
             <NewResultModal isOpen={newResultOpen} onClose={() => setNewResultOpen(false)} />
+            <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
         </div>
     );
 }
