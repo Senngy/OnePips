@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Query, Patch, Param, Delete, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Patch, Param, Delete, BadRequestException, UseGuards } from '@nestjs/common';
 import { LeadsService } from './leads.service.js';
 import { CreateLeadDto } from './dto/create-lead.dto.js';
 import { UpdateLeadDto } from './dto/update-lead.dto.js';
 import { LeadStatus } from '../../../prisma/index.js';
+import { TurnstileGuard } from '../../common/guards/turnstile.guard.js';
 
 @Controller('leads')
 export class LeadsController {
@@ -30,6 +31,7 @@ export class LeadsController {
   }
 
   @Post()
+  @UseGuards(TurnstileGuard)
   async create(@Body() dto: CreateLeadDto) {
     return this.leadsService.create(dto);
   }

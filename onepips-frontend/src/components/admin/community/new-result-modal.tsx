@@ -26,6 +26,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
     const { success: toastSuccess, error: toastError } = useToast();
 
     const [exitAnim, setExitAnim] = useState("");
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout>>();
     const [imageMode, setImageMode] = useState<"url" | "file">("url");
     const [uploading, setUploading] = useState(false);
     const [dragOver, setDragOver] = useState(false);
@@ -50,6 +51,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
         }
         return () => {
             document.body.style.overflow = "unset";
+            if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
         };
     }, [isOpen]);
 
@@ -57,7 +59,7 @@ export default function NewResultModal({ isOpen, onClose }: NewResultModalProps)
 
     const closeModal = () => {
         setExitAnim("animate-out fade-out zoom-out duration-300");
-        setTimeout(() => {
+        closeTimerRef.current = setTimeout(() => {
             setExitAnim("");
             setResultForm({
                 title: "",

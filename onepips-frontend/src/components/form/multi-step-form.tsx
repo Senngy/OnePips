@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createLead, updateLead, CreateLeadDto } from "@/lib/services/leads.service";
+import { createLead, updateLead, getLeadById, CreateLeadDto } from "@/lib/services/leads.service";
 import { createApplication } from "@/lib/services/applications.service";
 import { ApiError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { detectSource } from "@/lib/helpers/detectSource";
+import Turnstile from "@/components/ui/turnstile";
 
 const TOTAL_STEPS = 4;
 
@@ -17,12 +19,16 @@ const STEPS_INFO = [
     { id: "04", title: "Validation", label: "Validation" },
 ];
 
+const LEAD_ID_KEY = "onepips_lead_id";
+
 export default function MultiStepForm() {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [leadId, setLeadId] = useState<string | null>(null);
+    const [cfToken, setCfToken] = useState<string>("");
+    const [resuming, setResuming] = useState(false);
 
     const [form, setForm] = useState<CreateLeadDto>({
         name: "",
@@ -35,8 +41,98 @@ export default function MultiStepForm() {
         markets: [],
         accountType: [],
     });
+    const [consent, setConsent] = useState(false);
+
+    // Session persistence: restore leadId from localStorage on mount
+    useEffect(() => {
+        const saved = localStorage?.getItem(LEAD_ID_KEY);
+        if (saved) {
+            setLeadId(saved);
+            setResuming(true);
+        }
+    }, []);
+
+    const handleResume = async () => {
+        if (!leadId) return;
+        setLoading(true);
+        try {
+            const lead = await getLeadById(leadId);
+            if (lead) {
+                setForm({
+                    name: lead.name || "",
+                    email: lead.email || "",
+                    phone: lead.phone || "",
+                    tradingYears: lead.tradingYears ?? 0,
+                    interests: lead.interests ?? [],
+                    budgetFormation: lead.budgetFormation ?? 0,
+                    budgetTrading: lead.budgetTrading ?? 0,
+                    markets: lead.markets ?? [],
+                    accountType: lead.accountType ?? [],
+                });
+                // If they already applied, redirect to success
+                if (lead.application) {
+                    setSuccess(true);
+                    return;
+                }
+                setResuming(false);
+            }
+        } catch {
+            localStorage.removeItem(LEAD_ID_KEY);
+            setLeadId(null);
+            setResuming(false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRestart = () => {
+        localStorage.removeItem(LEAD_ID_KEY);
+        setLeadId(null);
+        setResuming(false);
+        setForm({
+            name: "",
+            email: "",
+            phone: "",
+            tradingYears: 0,
+            interests: [],
+            budgetFormation: 0,
+            budgetTrading: 0,
+            markets: [],
+            accountType: [],
+        });
+        setStep(1);
+    };
 
     const progress = (step / TOTAL_STEPS) * 100;
+
+    if (resuming) {
+        return (
+            <div className="bg-surface-container p-8 md:p-12 rounded-xl glass-highlight shadow-2xl text-center space-y-6">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span className="material-symbols-outlined text-primary text-4xl">redo</span>
+                </div>
+                <h2 className="font-headline text-3xl font-bold text-on-surface">Reprendre ma candidature</h2>
+                <p className="text-on-surface-variant max-w-md mx-auto">
+                    Vous avez une candidature en cours. Souhaitez-vous la reprendre ou recommencer ?
+                </p>
+                <div className="flex gap-4 justify-center">
+                    <Button
+                        className="bg-primary-container text-on-primary-container hover:scale-[1.02] transition-transform"
+                        onClick={handleResume}
+                        disabled={loading}
+                    >
+                        {loading ? "Chargement..." : "Reprendre"}
+                    </Button>
+                    <Button
+                        className="bg-surface-container border border-outline-variant/30 text-on-surface hover:bg-surface-container-high"
+                        onClick={handleRestart}
+                    >
+                        Recommencer
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     const next = async () => {
         setLoading(true);
@@ -44,14 +140,21 @@ export default function MultiStepForm() {
 
         try {
             if (step === 1) {
-                // Step 1 → CREATE lead
+                if (!cfToken) {
+                    setError("Veuillez compléter la vérification anti-bot.");
+                    setLoading(false);
+                    return;
+                }
                 const lead = await createLead({
                     name: form.name,
                     email: form.email,
                     phone: form.phone,
-                    source: "funnel_multistep",
+                    source: detectSource(),
+                    cfTurnstileToken: cfToken,
                 });
+                console.log("[MultiStepForm (next)] Lead created:", lead);
                 setLeadId(lead.id);
+                localStorage.setItem(LEAD_ID_KEY, lead.id);
             } else if (step === 2 && leadId) {
                 // Step 2 → UPDATE with experience data only
                 await updateLead(leadId, {
@@ -69,9 +172,12 @@ export default function MultiStepForm() {
             }
 
             setStep((s) => Math.min(s + 1, TOTAL_STEPS));
-        } catch (e: any) {
-            console.error(e);
-            setError(e.message || "Une erreur est survenue. Réessayez.");
+        } catch (e: unknown) {
+            if (e instanceof ApiError) {
+                setError(e.message);
+            } else {
+                setError("Une erreur réseau est survenue. Vérifiez que le serveur est en cours d'exécution.");
+            }
         } finally {
             setLoading(false);
         }
@@ -112,22 +218,33 @@ export default function MultiStepForm() {
             return;
         }
 
+        if (!consent) {
+            setError("Veuillez accepter les conditions de traitement de vos données.");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
         try {
-            await createApplication({
+            const application = await createApplication({
                 leadId,
-                answers: form, // On envoie tout le state form comme answers
+                answers: form,
                 interests: form.interests,
                 budgetFormation: form.budgetFormation,
                 capitalTrading: form.budgetTrading,
             });
+            console.log("[MultiStepForm (handleSubmit)] Application created:", application);
+            localStorage.removeItem(LEAD_ID_KEY);
             setSuccess(true);
         } catch (e: any) {
             console.error(e);
             if (e instanceof ApiError) {
-                setError(e.message);
+                if (e.status === 409) {
+                    setError("Vous avez déjà soumis une candidature. Notre équipe va vous recontacter sous 48h.");
+                } else {
+                    setError(e.message);
+                }
             } else {
                 setError("Une erreur inattendue est survenue lors de l'envoi de la candidature.");
             }
@@ -264,6 +381,9 @@ export default function MultiStepForm() {
                                             onChange={(e) => setForm({ ...form, phone: e.target.value })}
                                         />
                                     </div>
+                                </div>
+                                <div className="flex justify-center col-span-full">
+                                    <Turnstile onToken={setCfToken} />
                                 </div>
                             </div>
                         )}
@@ -430,6 +550,19 @@ export default function MultiStepForm() {
                                         </span>
                                     </div>
                                 </div>
+                                <label className="flex items-start gap-3 p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/10 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={consent}
+                                        onChange={(e) => setConsent(e.target.checked)}
+                                        className="mt-0.5 w-4 h-4 rounded border-outline-variant/30 text-primary focus:ring-primary"
+                                    />
+                                    <span className="text-[11px] text-on-surface-variant leading-relaxed">
+                                        J&apos;accepte que mes données personnelles soient collectées et utilisées conformément à la{" "}
+                                        <a href="/legal/privacy" target="_blank" className="text-primary underline">politique de confidentialité</a>
+                                        {" "}pour être recontacté par l&apos;équipe One Pips.
+                                    </span>
+                                </label>
                                 <p className="text-[10px] text-outline-variant leading-relaxed text-center px-4">
                                     En cliquant sur "Confirmer la Candidature", vous certifiez l'exactitude des informations fournies.
                                 </p>

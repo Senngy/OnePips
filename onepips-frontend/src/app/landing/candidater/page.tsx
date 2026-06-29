@@ -170,7 +170,7 @@ export default function CandidaterLandingPage() {
             </p>
           </div>
           <div className="flex flex-col items-center gap-6">
-            <a className="group relative w-full max-w-md" href="#">
+            <a className="group relative w-full max-w-md" href="/candidature">
               <div className="absolute inset-0 bg-primary-container blur-2xl opacity-50 group-hover:opacity-80 transition-opacity"></div>
               <button className="relative w-full bg-primary-container hover:bg-primary-container/90 text-on-primary-container py-8 rounded-lg font-headline text-2xl font-black uppercase tracking-[0.2em] transition-all transform hover:-translate-y-1 active:translate-y-0 shadow-2xl">
                 Candidater maintenant

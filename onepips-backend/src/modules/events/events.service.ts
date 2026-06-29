@@ -85,13 +85,16 @@ export class EventsService {
     };
   }
   async register( dto: CreateLeadDto, eventId?: string,) {
+    // Exclude cfTurnstileToken from persistence (it's only for validation)
+    const { cfTurnstileToken, ...safeDto } = dto;
+    
     const lead = await this.prisma.lead.upsert({
-      where: { email: dto.email },
+      where: { email: safeDto.email },
       create: {
-        ...dto,
+        ...safeDto,
         source: "live",
       },
-      update: dto,
+      update: safeDto,
     });
     
     if(!eventId) {

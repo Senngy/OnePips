@@ -76,15 +76,18 @@ export class LeadsService {
     const score = calculateScore(dto);
     const status = getLeadStatus(score);
 
+    // Exclude cfTurnstileToken from persistence (it's only for validation)
+    const { cfTurnstileToken, ...safeDto } = dto;
+
     const lead = await this.prisma.lead.upsert({
       where: { email: dto.email },
       update: {
-        ...dto,
+        ...safeDto,
         score,
         status,
       },
       create: {
-        ...dto,
+        ...safeDto,
         score,
         status,
       },

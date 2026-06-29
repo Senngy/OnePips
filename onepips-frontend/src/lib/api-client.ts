@@ -16,8 +16,9 @@ export class ApiError extends Error {
 }
 
 export async function api(endpoint: string, options: FetchOptions = {}) {
-  console.log("api endpoint called", endpoint);
+  console.log("[API Client] Request sent:", `${API_URL}${endpoint}`, options);
   const { auth = false, ...rest } = options;
+  console.log("[API Client] Request sent auth and rest:", auth, rest);
 
   const headers = new Headers(options.headers);
 
@@ -32,14 +33,16 @@ export async function api(endpoint: string, options: FetchOptions = {}) {
       headers.set("Authorization", `Bearer ${token}`);
     }
   }
-
+  console.log("[API Client] Request sent:", `${API_URL}${endpoint}`, rest);
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...rest,
     headers,
   });
+  console.log("[API Client] Request res:", `${API_URL}${endpoint}`, res);
   let data;
   try {
     data = await res.json();
+    console.log("[API Client] Request data:", data);
   } catch (error) {
     data = null;
     console.error("error", error);

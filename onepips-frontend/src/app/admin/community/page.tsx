@@ -19,7 +19,7 @@ export default function AdminCommunityPage() {
     const { mutate: deleteTestimonial } = useDeleteTestimonial();
     const { data: results, isLoading: resultsLoading } = useResults();
     const { mutate: deleteResult } = useDeleteResult();
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
     const [newResultOpen, setNewResultOpen] = useState(false);
     const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
@@ -122,15 +122,15 @@ export default function AdminCommunityPage() {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-5 text-right">
-                                                        <button onClick={() => setDeleteModalOpen(true)} className="text-outline hover:text-tertiary">
+                                                        <button onClick={() => setDeleteTargetId(t.id)} className="text-outline hover:text-tertiary">
                                                             <span className="material-symbols-outlined text-lg">delete</span>
                                                         </button>
                                                         <ConfirmModal
-                                                            open={deleteModalOpen}
-                                                            onCancel={() => setDeleteModalOpen(false)}
+                                                            open={deleteTargetId === t.id}
+                                                            onCancel={() => setDeleteTargetId(null)}
                                                             onConfirm={() => {
                                                                 deleteTestimonial(t.id);
-                                                                setDeleteModalOpen(false);
+                                                                setDeleteTargetId(null);
                                                             }}
                                                             title="Supprimer le témoignage"
                                                             description="Êtes-vous sûr de vouloir supprimer ce témoignage ?"

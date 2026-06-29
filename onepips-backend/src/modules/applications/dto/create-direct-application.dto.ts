@@ -1,6 +1,7 @@
 import { IsEmail, IsOptional, IsString, IsArray, IsInt } from 'class-validator';
+import { InterestType, MarketType, AccountType } from '../../../../prisma/index.js';
 
-export class CreateLeadDto {
+export class CreateDirectApplicationDto {
     @IsOptional()
     @IsString()
     cfTurnstileToken?: string;
@@ -20,12 +21,12 @@ export class CreateLeadDto {
     source?: string;
 
     @IsOptional()
-    @IsArray()
-    interests?: ('PRIVATE_COACHING' | 'SIGNALS' | 'LIVES_SUBSCRIPTION' | 'ONE_TO_ONE')[];
-
-    @IsOptional()
     @IsInt()
     tradingYears?: number;
+
+    @IsOptional()
+    @IsArray()
+    interests?: InterestType[];
 
     @IsOptional()
     @IsInt()
@@ -37,9 +38,9 @@ export class CreateLeadDto {
 
     @IsOptional()
     @IsArray()
-    markets?: ('CFD' | 'CRYPTO' | 'FUTURES')[];
+    markets?: MarketType[];
 
     @IsOptional()
     @IsArray()
-    accountType?: ('PERSONAL' | 'DEMO' | 'PROPFIRM')[];
+    accountType?: AccountType[];
 }

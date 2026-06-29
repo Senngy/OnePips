@@ -1,8 +1,10 @@
 "use client";
 
-import { useLeads } from "@/lib/hooks/leads/useLeads";
+import { useLeads, useDeleteLead } from "@/lib/hooks/leads/useLeads";
 import { useState } from "react";
 import { formatDate, formatInterest, formatSource, formatStatus } from "@/lib/helpers/formatData";
+import { useToast } from "@/lib/hooks/useToast";
+import ConfirmModal from "@/components/modals/confirm-modal";
 
 
 export default function LeadTab() {
@@ -16,6 +18,9 @@ export default function LeadTab() {
     });
 
     const { leads, isLoading, error, total, page, lastPage } = useLeads(filters);
+    const { success: toastSuccess, error: toastError } = useToast();
+    const { mutate: deleteLead, isPending: isDeleting } = useDeleteLead();
+    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -125,9 +130,28 @@ export default function LeadTab() {
                                             <button className="p-2 text-outline hover:text-primary hover:bg-surface-container transition-all rounded" title="Contacter">
                                                 <span className="material-symbols-outlined text-lg">mail</span>
                                             </button>
-                                            <button className="p-2 text-outline hover:text-error hover:bg-error-container/10 transition-all rounded" title="Supprimer">
+                                            <button onClick={() => setDeleteTargetId(lead.id)} className="p-2 text-outline hover:text-error hover:bg-error-container/10 transition-all rounded" title="Supprimer">
                                                 <span className="material-symbols-outlined text-lg">delete</span>
                                             </button>
+                                            <ConfirmModal
+                                                open={deleteTargetId === lead.id}
+                                                onCancel={() => setDeleteTargetId(null)}
+                                                onConfirm={() => {
+                                                    deleteLead(lead.id, {
+                                                        onSuccess: () => {
+                                                            toastSuccess({ title: "Lead supprimé", description: `${lead.name} a été supprimé.` });
+                                                            setDeleteTargetId(null);
+                                                        },
+                                                        onError: (err) => {
+                                                            toastError({ title: "Erreur", description: err?.message ?? "Impossible de supprimer le lead." });
+                                                            setDeleteTargetId(null);
+                                                        },
+                                                    });
+                                                }}
+                                                title="Supprimer le lead"
+                                                description={`Êtes-vous sûr de vouloir supprimer ${lead.name} ?`}
+                                                variant="danger"
+                                            />
                                             <button className="ml-2 px-3 py-1.5 bg-surface-container-highest text-on-surface text-xs font-bold rounded-md hover:bg-primary transition-all hover:text-on-primary">Details</button>
                                         </div>
                                     </td>

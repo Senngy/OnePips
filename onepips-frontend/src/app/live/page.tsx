@@ -8,6 +8,7 @@ import { useCountdown } from "@/lib/hooks/events/useLiveCountdown";
 
 export default function LivePage() {
   const { data: eventState, isLoading, isError, error, isSuccess } = useEventState();
+
   console.log("(LivePage) eventState: ", eventState);
   console.log("(LivePage) eventState.nextEvent: ", eventState?.nextEvent);
   console.log("(LivePage) eventState.nextEvent.startsAt: ", eventState?.nextEvent?.startsAt);
@@ -80,7 +81,7 @@ export default function LivePage() {
                     </p>
                   )}
                   <div className="flex justify-center gap-4">
-                    {hasEvent ? (
+                    {hasEvent && timeLeft ? (
                       <>
                         <div className="flex flex-col items-center">
                           <span className="font-headline text-3xl font-bold text-on-surface">{days}</span>

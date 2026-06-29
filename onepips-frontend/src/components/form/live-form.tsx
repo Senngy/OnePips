@@ -1,9 +1,10 @@
-"use-client"
+"use client"
 
 import { useState } from "react";
 import { CreateLeadDto, createLead } from "@/lib/services/leads.service";
 import { addParticipantToEvent } from "@/lib/services/events.service";
 import { ApiError } from "@/lib/api-client";
+import Turnstile from "@/components/ui/turnstile";
 
 interface LiveFormProps {
     eventId?: string;
@@ -15,6 +16,7 @@ export function LiveForm({
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [cfToken, setCfToken] = useState<string>("");
     const [formData, setFormData] = useState<CreateLeadDto>({
         name: "",
         email: "",
@@ -27,11 +29,12 @@ export function LiveForm({
         setLoading(true);
         setError(null);
         try {
+            const payload = { ...formData, cfTurnstileToken: cfToken };
             if (eventId) {
-                await addParticipantToEvent(eventId, formData);
+                await addParticipantToEvent(eventId, payload);
                 setSuccess(true);
             } else {
-                await createLead(formData); // waitlist fallback
+                await createLead(payload);
                 setSuccess(true);
             }
         } catch (e) {
@@ -93,10 +96,16 @@ export function LiveForm({
                 </select>
             </div>
             {error && <p className="text-red-500 text-center text-sm font-medium p-2 bg-red-500/10 rounded-md mt-2">{error}</p>}
+            <div className="flex justify-center">
+                <Turnstile onToken={setCfToken} />
+            </div>
             {success ? (
-                <div className="text-center mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-md">
-                    <p className="text-green-500 font-bold font-headline">Inscription réussie !</p>
-                    <p className="text-green-500/80 text-xs mt-1">Vous recevrez bientôt vos accès par email.</p>
+                <div className="text-center mt-4 p-6 bg-primary/10 border border-primary/30 rounded-xl space-y-3">
+                    <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
+                        <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    </div>
+                    <p className="text-primary font-bold font-headline text-lg">Inscription confirmée !</p>
+                    <p className="text-primary/80 text-xs">Vous recevrez vos accès par email dès l&apos;ouverture de la session.</p>
                 </div>
             ) : (
                 <button

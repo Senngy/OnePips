@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { CreateApplicationDto } from './dto/create-application.dto.js';
-import { calculateScore } from '../../common/utils/scoring.js';
-import { NotificationsService } from '../notifications/notification.service.js';
+import { CreateDirectApplicationDto } from './dto/create-direct-application.dto.js';
+import { calculateScore, getLeadStatus } from '../../common/utils/scoring.js';
 
 @Injectable()
 export class ApplicationsService {
@@ -20,6 +20,15 @@ export class ApplicationsService {
 
     if (!lead) {
       throw new NotFoundException(`Lead with ID ${dto.leadId} not found`);
+    }
+
+    // 1b. Check if application already exists for this lead
+    const existing = await this.prisma.application.findUnique({
+      where: { leadId: dto.leadId },
+    });
+
+    if (existing) {
+      throw new ConflictException('Cette candidature a déjà été soumise. Vous allez être recontacté par notre équipe.');
     }
 
     // 2. Compute score for the application
@@ -71,6 +80,71 @@ export class ApplicationsService {
     return this.prisma.application.update({
       where: { id },
       data: { status },
+    });
+  }
+
+  async createDirect(dto: CreateDirectApplicationDto) {
+    // Exclude cfTurnstileToken from persistence (it's only for validation)
+    const { cfTurnstileToken, ...safeDto } = dto;
+    
+    const score = calculateScore(safeDto);
+    const status = getLeadStatus(score);
+
+    return this.prisma.$transaction(async (tx) => {
+      const lead = await tx.lead.upsert({
+        where: { email: safeDto.email },
+        update: {
+          name: safeDto.name,
+          phone: safeDto.phone,
+          source: safeDto.source ?? 'direct',
+          interests: safeDto.interests ?? [],
+          tradingYears: safeDto.tradingYears,
+          budgetFormation: safeDto.budgetFormation,
+          budgetTrading: safeDto.budgetTrading,
+          markets: safeDto.markets ?? [],
+          accountType: safeDto.accountType ?? [],
+          score,
+          status,
+        },
+        create: {
+          name: safeDto.name,
+          email: safeDto.email,
+          phone: safeDto.phone,
+          source: safeDto.source ?? 'direct',
+          interests: safeDto.interests ?? [],
+          tradingYears: safeDto.tradingYears,
+          budgetFormation: safeDto.budgetFormation,
+          budgetTrading: safeDto.budgetTrading,
+          markets: safeDto.markets ?? [],
+          accountType: safeDto.accountType ?? [],
+          score,
+          status,
+        },
+      });
+
+      const application = await tx.application.create({
+        data: {
+          leadId: lead.id,
+          answers: {
+            name: safeDto.name,
+            email: safeDto.email,
+            phone: safeDto.phone,
+            tradingYears: safeDto.tradingYears,
+            interests: safeDto.interests,
+            budgetFormation: safeDto.budgetFormation,
+            budgetTrading: safeDto.budgetTrading,
+            markets: safeDto.markets,
+            accountType: safeDto.accountType,
+          },
+          score,
+          status: 'NEW',
+          interests: safeDto.interests ?? [],
+          budgetFormation: safeDto.budgetFormation,
+          capitalTrading: safeDto.budgetTrading,
+        },
+      });
+
+      return { lead, application };
     });
   }
 }

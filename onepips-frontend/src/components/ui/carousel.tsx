@@ -34,7 +34,7 @@ export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps) 
                     ))}
                 </div>
                 <blockquote className="text-2xl font-headline font-medium italic text-on-surface leading-snug">
-                    "{current.content}"
+                    &ldquo;{current.content}&rdquo;
                 </blockquote>
                 <div className="mt-8 flex items-center justify-center gap-4">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-primary/20 flex items-center justify-center text-primary font-bold text-xl">

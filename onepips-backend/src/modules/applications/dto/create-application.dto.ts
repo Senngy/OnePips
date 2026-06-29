@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsArray, IsObject, IsUUID, IsInt } from 'class-validator';
+import { InterestType } from '../../../../prisma/index.js';
 
 export class CreateApplicationDto {
     @IsUUID()
@@ -9,7 +10,7 @@ export class CreateApplicationDto {
 
     @IsOptional()
     @IsArray()
-    interests?: string[];
+    interests?: InterestType[];
 
     @IsOptional()
     @IsInt()

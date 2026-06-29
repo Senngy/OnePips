@@ -28,6 +28,7 @@ export type CreateLeadDto = {
     email: string;
     phone?: string;
     source?: string;
+    cfTurnstileToken?: string;
     interests?: string[];
     tradingYears?: number;
     budgetFormation?: number;
@@ -60,11 +61,16 @@ export type GetLeadsParams = {
     maxScore?: string;
 };
 
-export const createLead = async (data: CreateLeadDto) =>
-    api("/leads", {
+export const createLead = async (data: CreateLeadDto) => {
+    console.log("[Leads Service] Lead created (data sent):", data);
+    const apiCall = await api("/leads", {
         method: "POST",
         body: JSON.stringify(data),
     });
+    console.log("[Leads Service] Lead created:", apiCall);
+    
+    return apiCall;
+};
 
 export const updateLead = async (id: string, data: UpdateLeadDto) =>
     api(`/leads/${id}`, {
@@ -83,12 +89,25 @@ export const getLeads = async (params: GetLeadsParams = {}) => {
     const total = res.meta.total;
     const page = res.meta.page;
     const lastPage = res.meta.lastPage;
-    console.log("[LOG] getLeads (service) leads:", leads);
-    console.log("[LOG] getLeads (service) total:", total);
-    console.log("[LOG] getLeads (service) page:", page);
-    console.log("[LOG] getLeads (service) lastPage:", lastPage);
     return { leads, total, page, lastPage };
 };
 
 export const getLeadById = async (id: string) => api(`/leads/${id}`);
+
+export const updateLeadStatus = async (id: string, status: string) =>
+    api(`/leads/${id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+    });
+
+export const deleteLead = async (id: string) =>
+    api(`/leads/${id}`, {
+        method: "DELETE",
+    });
+
+export const deleteBulkLeads = async (ids: string[]) =>
+    api("/leads/bulk", {
+        method: "DELETE",
+        body: JSON.stringify({ ids }),
+    });
 

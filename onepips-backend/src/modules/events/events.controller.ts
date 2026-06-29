@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, UseGuards } from '@nestjs/common';
 import { EventsService } from './events.service.js';
 import { EventStateDto } from './DTO/event-state.DTO.js';
 import { EventCreateDto } from './DTO/create-event.DTO.js';
 import { CreateLeadDto } from '../leads/dto/create-lead.dto.js';
 import { EventUpdateDto } from './DTO/update-event.DTO.js';
+import { TurnstileGuard } from '../../common/guards/turnstile.guard.js';
 
 @Controller('events')
 export class EventsController {
@@ -40,6 +41,7 @@ export class EventsController {
   }
 
   @Post(':id/register')
+  @UseGuards(TurnstileGuard)
   async register(@Param('id') eventId: string, @Body() dto: CreateLeadDto) {
     return this.eventsService.register(dto, eventId);
   }

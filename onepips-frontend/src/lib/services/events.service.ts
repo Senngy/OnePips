@@ -43,6 +43,7 @@ export class AddParticipantDto {
     name?: string;
     email?: string;
     phone?: string;
+    cfTurnstileToken?: string;
 }
 
 export const getEvents = async (): Promise<EventDto[]> => {

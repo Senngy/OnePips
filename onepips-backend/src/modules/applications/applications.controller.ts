@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
 import { ApplicationsService } from './applications.service.js';
 import { CreateApplicationDto } from './dto/create-application.dto.js';
+import { CreateDirectApplicationDto } from './dto/create-direct-application.dto.js';
 import { ApplicationStatus } from '../../../prisma/index.js';
+import { TurnstileGuard } from '../../common/guards/turnstile.guard.js';
 
 @Controller('applications')
 export class ApplicationsController {
@@ -15,6 +17,12 @@ export class ApplicationsController {
   @Post()
   async create(@Body() dto: CreateApplicationDto) {
     return this.applicationsService.create(dto);
+  }
+
+  @Post('direct')
+  @UseGuards(TurnstileGuard)
+  async createDirect(@Body() dto: CreateDirectApplicationDto) {
+    return this.applicationsService.createDirect(dto);
   }
 
   @Patch(':id/status')
