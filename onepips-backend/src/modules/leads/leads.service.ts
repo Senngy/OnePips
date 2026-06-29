@@ -73,8 +73,10 @@ export class LeadsService {
 
 
   async create(dto: CreateLeadDto) {
+    console.log('[API lead service] create : called')
     const score = calculateScore(dto);
     const status = getLeadStatus(score);
+    console.log('[API lead service] create', dto)
 
     // Exclude cfTurnstileToken from persistence (it's only for validation)
     const { cfTurnstileToken, ...safeDto } = dto;
@@ -92,6 +94,7 @@ export class LeadsService {
         status,
       },
     });
+    console.log('[API] Lead created or updated:', lead);
     return lead;
   }
 
