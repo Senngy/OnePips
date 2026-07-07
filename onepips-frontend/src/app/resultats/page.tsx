@@ -126,7 +126,7 @@ export default function ResultatsPage() {
           <div className="max-w-7xl mx-auto px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-headline font-bold mb-4">Captures d&apos;Écran <span className="text-primary">Directes</span></h2>
-              <p className="text-outline max-w-xl mx-auto">Retrouvez nos dernières captures d&apos;écran directes. Accès complet disponible via notre espace membre.</p>
+              <p className="text-outline max-w-xl mx-auto">Retrouvez nos dernières captures d&apos;écran directes     . Accès complet disponible via notre espace membre.</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
               {resultsLoading ? (

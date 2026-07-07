@@ -82,6 +82,11 @@ export default function QuickApplyForm() {
             return;
         }
 
+        if (!cfToken) {
+            setError("Veuillez valider le captcha avant de continuer.");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -121,7 +126,7 @@ export default function QuickApplyForm() {
                     className="bg-primary-container text-on-primary-container hover:scale-[1.02] transition-transform"
                     onClick={() => window.location.href = "/"}
                 >
-                    Retour à l'accueil
+                    Retour à l&apos;accueil
                 </Button>
             </div>
         );
@@ -220,7 +225,7 @@ export default function QuickApplyForm() {
                                     {["CFD", "CRYPTO", "FUTURES"].map((item) => (
                                         <button key={item} type="button" onClick={() => toggleMarket(item)}
                                             className={cn("py-3 px-2 rounded-md border transition-all text-[9px] font-bold tracking-widest uppercase text-center",
-                                                form.markets.includes(item as any)
+                                                form.markets.includes(item)
                                                     ? "bg-primary-container text-on-primary-container border-primary shadow-lg shadow-primary/20"
                                                     : "bg-surface-container-low border-outline-variant/20 text-on-surface-variant hover:border-primary/50"
                                             )}>
@@ -238,12 +243,14 @@ export default function QuickApplyForm() {
                                         { value: "PRIVATE_COACHING", label: "ACCOMPAGNEMENT" },
                                         { value: "ONE_TO_ONE", label: "ONE TO ONE" }
                                     ].map((item) => (
-                                        <button key={item.value} type="button" onClick={() => toggleInterest(item.value)}
-                                            className={cn("py-3 px-4 rounded-md border transition-all text-[10px] font-bold tracking-widest uppercase text-center flex items-center justify-center",
-                                                form.interests.includes(item.value)
-                                                    ? "bg-primary-container text-on-primary-container border-primary shadow-lg shadow-primary/20"
-                                                    : "bg-surface-container-low border-outline-variant/20 text-on-surface-variant hover:border-primary/50"
-                                            )}>
+                                        <button
+                                            key={item.value}
+                                            type="button"
+                                            onClick={() => toggleInterest(item.value)}
+                                            className={`py-3 px-4 rounded-md border transition-all text-[10px] font-bold tracking-widest uppercase text-center flex items-center justify-center ${form.interests.includes(item.value)
+                                                ? "bg-primary-container text-on-primary-container border-primary shadow-lg shadow-primary/20"
+                                                : "bg-surface-container-low border-outline-variant/20 text-on-surface-variant hover:border-primary/50"}`}
+                                        >
                                             {item.label}
                                         </button>
                                     ))}
@@ -254,13 +261,13 @@ export default function QuickApplyForm() {
                                     <label className="font-label text-[10px] uppercase tracking-widest text-outline">Budget Formation (€)</label>
                                     <input className="w-full sunken-field border-outline-variant/15 focus:border-primary-fixed-dim focus:ring-0 text-on-surface placeholder:text-outline-variant/40 rounded-md py-4 px-6 transition-all"
                                         type="number" placeholder="Ex: 1500" value={form.budgetFormation || ""}
-                                        onChange={(e) => setForm({ ...form, budgetFormation: Number(e.target.value) }} />
+                                        onChange={(e) => setForm({ ...form, budgetFormation: Number(e.target.value) })} />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="font-label text-[10px] uppercase tracking-widest text-outline">Capital Trading (€)</label>
                                     <input className="w-full sunken-field border-outline-variant/15 focus:border-primary-fixed-dim focus:ring-0 text-on-surface placeholder:text-outline-variant/40 rounded-md py-4 px-6 transition-all"
                                         type="number" placeholder="Ex: 5000" value={form.budgetTrading || ""}
-                                        onChange={(e) => setForm({ ...form, budgetTrading: Number(e.target.value) }} />
+                                        onChange={(e) => setForm({ ...form, budgetTrading: Number(e.target.value) })} />
                                 </div>
                             </div>
                         </div>
@@ -313,7 +320,7 @@ export default function QuickApplyForm() {
                             onClick={prev}>
                             <span className="material-symbols-outlined text-sm">arrow_back</span> Retour
                         </button>
-                        <button type="button" disabled={loading}
+                        <button type="button" disabled={loading || (step === TOTAL_STEPS && !cfToken)}
                             className={cn("group relative inline-flex items-center justify-center px-10 py-4 font-headline font-bold text-on-primary-container bg-primary-container rounded-md overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary-container/20 disabled:opacity-50",
                                 loading && "cursor-not-allowed")}
                             onClick={step === TOTAL_STEPS ? handleSubmit : next}>

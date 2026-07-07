@@ -48,6 +48,7 @@ export async function api(endpoint: string, options: FetchOptions = {}) {
     console.error("error", error);
   }
   if (!res.ok) {
+    console.error("[API Client] Request error:", `${API_URL}${endpoint}`, res.status, data);
     throw new ApiError(
       data?.message || "Une erreur est survenue",
       res.status,

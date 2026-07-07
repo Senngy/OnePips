@@ -26,6 +26,11 @@ export function LiveForm({
     });
 
     const handleSubmit = async () => {
+        if (!cfToken) {
+            setError("Veuillez valider le captcha avant de continuer.");
+            return;
+        }
+
         setLoading(true);
         setError(null);
         try {
@@ -112,7 +117,7 @@ export function LiveForm({
                     className="w-full relative flex items-center justify-center gap-2 bg-primary-container text-on-primary-container font-headline font-bold py-4 rounded-md mt-4 hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_10px_20px_-5px_rgba(124,58,237,0.4)] disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:brightness-100"
                     onClick={handleSubmit}
                     type="button"
-                    disabled={loading}
+                    disabled={loading || !cfToken}
                 >
                     {loading ? (
                         <>
