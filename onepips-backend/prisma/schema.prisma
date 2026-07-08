@@ -13,19 +13,28 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String?
-  profilePic String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
 
-  bookings  Booking[]
-  payments  Payment[]
+  id String @id @default(uuid())
+
+  email String @unique
+  name String?
+
+  role Role @default(CLIENT)
+
+  stripeCustomerId String? @unique
+
+  payments Payment[]
+  subscriptions Subscription[]
+  convertedLeads Lead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
 
 enum Role {
   ADMIN
+  CLIENT
   USER
 }
 
@@ -45,7 +54,14 @@ model Lead {
   accountType AccountType[]
   createdAt DateTime @default(now())
 
+  convertedUserId String?
+
+  convertedUser User? @relation(fields: [convertedUserId], references: [id])
+
   application Application?
+
+  bookings Booking[]
+
   participants EventParticipant[]
 
 }
@@ -55,6 +71,7 @@ enum LeadStatus {
   MID
   COLD
   PENDING
+  CONVERTED
 }
 
 enum InterestType {
@@ -97,30 +114,183 @@ enum ApplicationStatus {
   CHECKED
   QUALIFIED
   PENDING
+  ACCEPTED
+  REFUSED
 }
 
-model Booking {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+model Product {
 
-  date      DateTime
-  status    String
-  notes     String?
+  id String @id @default(uuid())
+
+
+  name String
+
+  description String?
+
+
+  type ProductType
+
+
+  price Int
+
+  currency String @default("eur")
+
+
+  stripeProductId String?
+
+  stripePriceId String?
+
+
+  active Boolean @default(true)
+
+
+
+  payments Payment[]
+
+  subscriptions Subscription[]
+
+
+  courses YoutubeCourse[]
+
 
   createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+}
+
+
+enum ProductType {
+
+  SUBSCRIPTION
+
+  COACHING
+
+  MENTORING
+
+  COURSE
+
 }
 
 model Payment {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+  productId String
 
-  amount    Float
+  product Product @relation(fields: [productId], references: [id])
+
+  amount Int
+
+  currency String @default("eur")
+
+  stripePaymentIntentId String? @unique
+
+  stripeInvoiceId String?
+
+  stripeChargeId String?
+
   type      String
-  status    String
+  status PaymentStatus
 
   createdAt DateTime @default(now())
+}
+
+enum PaymentStatus {
+
+  PENDING
+
+  SUCCESS
+
+  FAILED
+
+  REFUNDED
+
+}
+
+model Subscription {
+
+
+  id String @id @default(uuid())
+
+
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id])
+
+  productId String
+
+  product Product @relation(fields: [productId], references: [id])
+
+
+
+  stripeSubscriptionId String @unique
+
+
+
+  status SubscriptionStatus
+
+
+
+  currentPeriodStart DateTime?
+
+  currentPeriodEnd DateTime?
+
+
+
+  cancelAtPeriodEnd Boolean @default(false)
+
+
+
+  createdAt DateTime @default(now())
+
+
+  updatedAt DateTime @updatedAt
+
+}
+
+
+
+enum SubscriptionStatus {
+
+  ACTIVE
+
+  TRIALING
+
+  PAST_DUE
+
+  CANCELED
+
+}
+
+model Booking {
+
+
+  id String @id @default(uuid())
+  leadId String?
+  lead Lead? @relation(fields: [leadId], references: [id])
+
+  calBookingId String @unique
+
+  eventType String?
+  startsAt DateTime?
+  status BookingStatus
+
+  createdAt DateTime @default(now())
+
+
+}
+
+
+enum BookingStatus {
+
+  CONFIRMED
+
+  CANCELLED
+
+  COMPLETED
+
 }
 
 model Event {
@@ -152,6 +322,8 @@ model YoutubeCourse {
   title       String
   description String?
   embededLink String
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
 
   createdAt   DateTime @default(now())
 }
@@ -179,9 +351,13 @@ model Result {
 }
 
 model Testimonial {
- 
-
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  name      String
+  content   String
+  rating    Int
+  role      String
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 model CommunityStat {
