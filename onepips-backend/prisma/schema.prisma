@@ -13,57 +13,111 @@ datasource db {
 }
 
 model User {
-
   id String @id @default(uuid())
 
-  email String @unique
-  name String?
+  email String  @unique
+  name  String?
 
-  role Role @default(CLIENT)
+  role Role @default(ADMIN)
 
-  stripeCustomerId String? @unique
-
-  payments Payment[]
-  subscriptions Subscription[]
-  convertedLeads Lead[]
+  sessions Session[]
+  accounts Account[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Session {
+  id String @id @default(uuid())
+
+  token String @unique
+
+  expiresAt DateTime
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id String @id @default(uuid())
+
+  accountId  String
+  providerId String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  password String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Verification {
+  id String @id @default(uuid())
+
+  identifier String
+
+  value String
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id String @id @default(uuid())
+
+  email String  @unique
+  name  String?
+
+  stripeCustomerId String @unique
+
+  payments      Payment[]
+  subscriptions Subscription[]
+  bookings      Booking[]
+
+  leadId String? @unique
+  lead   Lead?   @relation(fields: [leadId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 enum Role {
   ADMIN
-  CLIENT
-  USER
 }
 
 model Lead {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  source    String?
-  phone     String?
-  status    LeadStatus @default(PENDING)
-  score     Int?       @default(0)
-  interests InterestType[]
-  tradingYears Int?
+  id              String         @id @default(uuid())
+  name            String
+  email           String         @unique
+  source          String?
+  phone           String?
+  status          LeadStatus     @default(PENDING)
+  score           Int?           @default(0)
+  interests       InterestType[]
+  tradingYears    Int?
   budgetFormation Int?
-  budgetTrading Int?
-  markets MarketType[]
-  accountType AccountType[]
-  createdAt DateTime @default(now())
-
-  convertedUserId String?
-
-  convertedUser User? @relation(fields: [convertedUserId], references: [id])
+  budgetTrading   Int?
+  markets         MarketType[]
+  accountType     AccountType[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   application Application?
+  customer    Customer?
 
   bookings Booking[]
 
   participants EventParticipant[]
 
+  @@index([status])
+  @@index([createdAt])
 }
 
 enum LeadStatus {
@@ -94,19 +148,20 @@ enum AccountType {
 }
 
 model Application {
-  id                String   @id @default(uuid())
-  leadId            String   @unique
-  lead              Lead     @relation(fields: [leadId], references: [id])
+  id     String @id @default(uuid())
+  leadId String @unique
+  lead   Lead   @relation(fields: [leadId], references: [id])
 
-  answers           Json
-  score             Int
-  status            ApplicationStatus
+  answers Json
+  score   Int
+  status  ApplicationStatus @default(NEW)
 
-  interests         String[]
-  budgetFormation   Int?
-  capitalTrading    Int?
+  interests       String[]
+  budgetFormation Int?
+  capitalTrading  Int?
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum ApplicationStatus {
@@ -119,85 +174,64 @@ enum ApplicationStatus {
 }
 
 model Product {
-
   id String @id @default(uuid())
 
-
-  name String
-
+  name        String
   description String?
+  type        ProductType
 
-
-  type ProductType
-
-
-  price Int
-
+  price    Int
   currency String @default("eur")
 
-
-  stripeProductId String?
-
-  stripePriceId String?
-
+  stripeProductId String? @unique
+  stripePriceId   String? @unique
 
   active Boolean @default(true)
 
+  billingType BillingType
 
-
-  payments Payment[]
-
+  payments      Payment[]
   subscriptions Subscription[]
-
 
   courses YoutubeCourse[]
 
-
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
-
 }
 
-
 enum ProductType {
-
   SUBSCRIPTION
 
-  COACHING
+  CALL_SERVICE
 
   MENTORING
 
   COURSE
-
 }
 
 model Payment {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
   productId String
+  product   Product @relation(fields: [productId], references: [id])
 
-  product Product @relation(fields: [productId], references: [id])
-
-  amount Int
-
+  amount   Int
   currency String @default("eur")
 
-  stripePaymentIntentId String? @unique
-
   stripeInvoiceId String?
+  stripeChargeId  String?
 
-  stripeChargeId String?
-
-  type      String
   status PaymentStatus
 
   createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 enum PaymentStatus {
-
   PENDING
 
   SUCCESS
@@ -205,55 +239,34 @@ enum PaymentStatus {
   FAILED
 
   REFUNDED
-
 }
 
 model Subscription {
-
-
   id String @id @default(uuid())
 
-
-
-  userId String
-
-  user User @relation(fields: [userId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
 
   productId String
-
-  product Product @relation(fields: [productId], references: [id])
-
-
+  product   Product @relation(fields: [productId], references: [id])
 
   stripeSubscriptionId String @unique
 
-
-
   status SubscriptionStatus
 
-
-
   currentPeriodStart DateTime?
-
-  currentPeriodEnd DateTime?
-
-
+  currentPeriodEnd   DateTime?
 
   cancelAtPeriodEnd Boolean @default(false)
 
-
-
   createdAt DateTime @default(now())
-
-
   updatedAt DateTime @updatedAt
 
+  @@index([status])
+  @@index([createdAt])
 }
 
-
-
 enum SubscriptionStatus {
-
   ACTIVE
 
   TRIALING
@@ -261,36 +274,41 @@ enum SubscriptionStatus {
   PAST_DUE
 
   CANCELED
+}
 
+enum BillingType {
+  ONE_TIME
+
+  MONTHLY
+
+  YEARLY
+
+  HOURLY
 }
 
 model Booking {
-
-
-  id String @id @default(uuid())
-  leadId String?
-  lead Lead? @relation(fields: [leadId], references: [id])
+  id         String    @id @default(uuid())
+  leadId     String?
+  lead       Lead?     @relation(fields: [leadId], references: [id])
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
 
   calBookingId String @unique
 
   eventType String?
-  startsAt DateTime?
-  status BookingStatus
+  startsAt  DateTime?
+  status    BookingStatus
 
   createdAt DateTime @default(now())
-
-
+  updatedAt DateTime @updatedAt
 }
 
-
 enum BookingStatus {
-
   CONFIRMED
 
   CANCELLED
 
   COMPLETED
-
 }
 
 model Event {
@@ -302,19 +320,20 @@ model Event {
   isCanceled  Boolean  @default(false)
 
   participants EventParticipant[]
-  
-  createdAt   DateTime @default(now())
+
+  createdAt DateTime @default(now())
 }
 
 model EventParticipant {
-  id        String @id @default(uuid())
-  eventId   String
-  leadId    String
-  joinedAt  DateTime? @default(now())
+  id       String    @id @default(uuid())
+  eventId  String
+  leadId   String
+  joinedAt DateTime? @default(now())
 
   event Event @relation(fields: [eventId], references: [id])
-  lead Lead @relation(fields: [leadId], references: [id])
-  @@unique([eventId, leadId]) 
+  lead  Lead  @relation(fields: [leadId], references: [id])
+
+  @@unique([eventId, leadId])
 }
 
 model YoutubeCourse {
@@ -325,29 +344,21 @@ model YoutubeCourse {
   productId   String?
   product     Product? @relation(fields: [productId], references: [id])
 
-  createdAt   DateTime @default(now())
-}
-
-model Service {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  price       Float
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Result {
   id          String   @id @default(uuid())
   title       String
   image       String
-  gain        Float    // +142.5%
-  pair        String   // XAUUSD, EURUSD
+  gain        Float // +142.5%
+  pair        String // XAUUSD, EURUSD
   description String?
   date        DateTime
 
-  isVisible   Boolean  @default(true)
+  isVisible Boolean @default(true)
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Testimonial {

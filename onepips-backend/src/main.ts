@@ -5,7 +5,9 @@ import { join } from 'node:path';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false, // Requis par Better Auth
+  });
   app.setGlobalPrefix('api');
   app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
   app.useGlobalPipes(new ValidationPipe({
@@ -14,7 +16,10 @@ async function bootstrap() {
     forbidNonWhitelisted: false,
   }));
 
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
 
   const port = process.env.PORT || 3001;
   await app.listen(port);
