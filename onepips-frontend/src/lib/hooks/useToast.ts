@@ -1,4 +1,4 @@
-import { useToastContext, type ToastVariant, type ToastAction } from "@/lib/context/toast.context";
+import { useToastContext, type ToastVariant, type ToastAction } from "@/lib/contexts/toast.context";
 
 interface ToastOptions {
     title: string;
