@@ -18,6 +18,7 @@ import jwtConfig from './config/jwt.config.js';
 import appConfig from './config/app.config.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
+import { auth } from "./modules/auth/auth.js";
 
 @Module({
   imports: [
