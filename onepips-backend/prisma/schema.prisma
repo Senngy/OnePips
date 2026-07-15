@@ -15,10 +15,11 @@ datasource db {
 model User {
   id String @id @default(uuid())
 
-  email String  @unique
-  name  String?
+  email         String  @unique
+  emailVerified Boolean @default(false)
+  name          String?
 
-  role Role @default(ADMIN)
+  role Role @default(USER)
 
   sessions Session[]
   accounts Account[]
@@ -33,6 +34,9 @@ model Session {
   token String @unique
 
   expiresAt DateTime
+
+  ipAddress String?
+  userAgent String?
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -50,6 +54,14 @@ model Account {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  accessToken  String?
+  refreshToken String?
+  idToken      String?
+
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+
+  scope    String?
   password String?
 
   createdAt DateTime @default(now())
@@ -89,6 +101,7 @@ model Customer {
 }
 
 enum Role {
+  USER
   ADMIN
 }
 

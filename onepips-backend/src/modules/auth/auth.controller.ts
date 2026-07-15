@@ -20,7 +20,7 @@ export class AuthController {
     return this.authService.register(body);
   }
 
-  @All('api/auth/*')
+  @All('auth/*')
   async proxyBetterAuth(@Req() req: Request, @Res() res: Response) {
     try {
       await betterAuthHandler(req as any, res as any);
