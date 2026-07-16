@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
-import { ToastProvider } from "@/lib/context/toast.context";
+import { ToastProvider } from "@/lib/contexts/toast.context";
 // L'utilité de QueryClientProvider est de fournir un QueryClient à l'application.
 // Le QueryClient est un objet qui gère l'état des requêtes.
 

@@ -7,16 +7,34 @@ interface TurnstileProps {
   options?: Record<string, string>;
 }
 
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+interface TurnstileWidget {
+  render: (container: HTMLElement, options: Record<string, unknown>) => string;
+  remove: (widgetId: string) => void;
+}
+
+interface TurnstileWindow extends Window {
+  turnstile?: TurnstileWidget;
+}
+
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim();
 
 export default function Turnstile({ onToken, options = {} }: TurnstileProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | undefined>();
 
+  const clearToken = useCallback(() => {
+    onToken("");
+  }, [onToken]);
+
   const init = useCallback(() => {
     if (typeof window === "undefined") return;
-    const tw = (window as any).turnstile;
+    const tw = (window as TurnstileWindow).turnstile;
     if (!tw || !containerRef.current) return;
+
+    if (!SITE_KEY) {
+      clearToken();
+      return;
+    }
 
     if (widgetId.current) {
       tw.remove(widgetId.current);
@@ -25,14 +43,16 @@ export default function Turnstile({ onToken, options = {} }: TurnstileProps) {
     widgetId.current = tw.render(containerRef.current, {
       sitekey: SITE_KEY,
       callback: onToken,
+      "expired-callback": clearToken,
+      "error-callback": clearToken,
       ...options,
     });
-  }, [onToken, options]);
+  }, [clearToken, onToken, options]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    if ((window as any).turnstile) {
+    if ((window as TurnstileWindow).turnstile) {
       init();
       return;
     }
@@ -45,11 +65,20 @@ export default function Turnstile({ onToken, options = {} }: TurnstileProps) {
     document.head.appendChild(script);
 
     return () => {
-      if (widgetId.current && (window as any).turnstile) {
-        (window as any).turnstile.remove(widgetId.current);
+      if (widgetId.current && (window as TurnstileWindow).turnstile) {
+        (window as TurnstileWindow).turnstile?.remove(widgetId.current);
       }
     };
   }, [init]);
 
-  return <div ref={containerRef} />;
+  return (
+    <div className="flex flex-col items-center gap-2">
+      {!SITE_KEY && (
+        <p className="text-xs text-amber-600 text-center">
+          La vérification Turnstile n’est pas configurée. Ajoutez NEXT_PUBLIC_TURNSTILE_SITE_KEY pour activer le formulaire.
+        </p>
+      )}
+      <div ref={containerRef} />
+    </div>
+  );
 }
