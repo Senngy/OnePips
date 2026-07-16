@@ -13,11 +13,12 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     transform: true,
-    forbidNonWhitelisted: false,
+    forbidNonWhitelisted: true,
   }));
+  const FRONT_URL = process.env.FRONT_URL || 'http://localhost:3000';
 
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: FRONT_URL,
     credentials: true,
   });
 
