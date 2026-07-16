@@ -18,6 +18,7 @@ import jwtConfig from './config/jwt.config.js';
 import appConfig from './config/app.config.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
+import { AuthRateLimitMiddleware } from './common/middleware/auth-rate-limit.middleware.js';
 import { auth } from "./modules/auth/auth.js";
 
 @Module({
@@ -25,6 +26,18 @@ import { auth } from "./modules/auth/auth.js";
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, jwtConfig, appConfig],
+      validate: (config) => {
+        if (!process.env.BETTER_AUTH_SECRET) {
+          throw new Error('Missing required env: BETTER_AUTH_SECRET');
+        }
+        if (!process.env.DATABASE_URL) {
+          throw new Error('Missing required env: DATABASE_URL');
+        }
+        if (!process.env.JWT_SECRET) {
+          throw new Error('Missing required env: JWT_SECRET');
+        }
+        return config;
+      },
     }),
     ThrottlerModule.forRoot([{
       name: 'default',
@@ -56,6 +69,11 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(LoggerMiddleware)
+      .forRoutes('*');
+
+    // Apply auth rate limit middleware globally; middleware itself filters to /api/auth
+    consumer
+      .apply(AuthRateLimitMiddleware)
       .forRoutes('*');
   }
 }
