@@ -19,6 +19,7 @@ import appConfig from './config/app.config.js';
 import { PrismaModule } from '../prisma/prisma.module.js';
 import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
 import { AuthRateLimitMiddleware } from './common/middleware/auth-rate-limit.middleware.js';
+import { SecurityService } from './common/security.service.js';
 import { auth } from "./modules/auth/auth.js";
 
 @Module({
@@ -59,6 +60,7 @@ import { auth } from "./modules/auth/auth.js";
   controllers: [],
   providers: [
     CronService,
+    SecurityService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

@@ -19,13 +19,15 @@ model User {
   emailVerified Boolean @default(false)
   name          String?
 
-  role Role @default(USER)
+  role Role @default(VIEWER)
 
-  sessions Session[]
-  accounts Account[]
+  sessions    Session[]
+  accounts    Account[]
+  permissions UserPermission[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  superAdmin SuperAdmin?
 }
 
 model Session {
@@ -41,8 +43,19 @@ model Session {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  status      UserStatus @default(ACTIVE)
+  lastLoginAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum UserStatus {
+  ACTIVE
+
+  SUSPENDED
+
+  DISABLED
 }
 
 model Account {
@@ -66,6 +79,28 @@ model Account {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model SuperAdmin {
+  id String @id @default(cuid())
+
+  singleton String @unique @default("MAIN")
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model UserPermission {
+  id     String @id @default(cuid())
+  userId String
+
+  permission Permission
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permission])
 }
 
 model Verification {
@@ -101,8 +136,38 @@ model Customer {
 }
 
 enum Role {
-  USER
+  SUPER_ADMIN
   ADMIN
+  MANAGER
+  EDITOR
+  VIEWER
+  CUSTOMER
+}
+
+enum Permission {
+  LEADS_READ
+  LEADS_WRITE
+  LEADS_DELETE
+
+  APPLICATIONS_READ
+  APPLICATIONS_WRITE
+
+  BOOKINGS_READ
+  BOOKINGS_WRITE
+
+  PAYMENTS_READ
+  PAYMENTS_WRITE
+
+  EVENTS_READ
+  EVENTS_WRITE
+  EVENTS_DELETE
+
+  COMMUNITY_READ
+  COMMUNITY_WRITE
+
+  SETTINGS_MANAGE
+
+  USERS_MANAGE
 }
 
 model Lead {

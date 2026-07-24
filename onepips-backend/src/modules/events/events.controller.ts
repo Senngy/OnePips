@@ -5,6 +5,9 @@ import { EventCreateDto } from './DTO/create-event.DTO.js';
 import { CreateLeadDto } from '../leads/dto/create-lead.dto.js';
 import { EventUpdateDto } from './DTO/update-event.DTO.js';
 import { TurnstileGuard } from '../../common/guards/turnstile.guard.js';
+import { AuthGuard } from '../auth/guards/auth.guard.js';
+import { RolesGuard } from '../auth/guards/roles.guard.js';
+import { Roles } from '../auth/decorators/roles.decorator.js';
 
 @Controller('events')
 export class EventsController {
@@ -36,6 +39,8 @@ export class EventsController {
   }
 
   @Post()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   async create(@Body() body: EventCreateDto) {
     return this.eventsService.create(body);
   }
@@ -47,16 +52,22 @@ export class EventsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   async update(@Param('id') eventId: string, @Body() body: EventUpdateDto) {
     return this.eventsService.update(eventId, body);
   }
 
   @Patch(':id/cancel')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   async cancelEvent(@Param('id') eventId: string) {
     return this.eventsService.cancelEvent(eventId);
   }
 
   @Patch(':id/publish')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   async publishEvent(@Param('id') eventId: string) {
     return this.eventsService.publishEvent(eventId);
   }

@@ -1,10 +1,11 @@
-import { BadRequestException, Controller, Get, Post, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Post, Req, Res, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync } from 'node:fs';
 import { basename, extname, join } from 'node:path';
 import type { Request, Response } from 'express';
+import { AuthGuard } from '../auth/guards/auth.guard.js';
 
 const UPLOAD_DIR = join(process.cwd(), 'uploads');
 const ALLOWED_MIME_TYPES: Record<string, string> = {
@@ -46,6 +47,7 @@ export class UploadController {
     return res.sendFile(filePath);
   }
   @Post('upload')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

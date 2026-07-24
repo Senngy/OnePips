@@ -4,6 +4,9 @@ import { CreateLeadDto } from './dto/create-lead.dto.js';
 import { UpdateLeadDto } from './dto/update-lead.dto.js';
 import { LeadStatus } from '../../../prisma/index.js';
 import { TurnstileGuard } from '../../common/guards/turnstile.guard.js';
+import { AuthGuard } from '../auth/guards/auth.guard.js';
+import { RolesGuard } from '../auth/guards/roles.guard.js';
+import { Roles } from '../auth/decorators/roles.decorator.js';
 
 @Controller('leads')
 export class LeadsController {
@@ -37,6 +40,8 @@ export class LeadsController {
   }
 
   @Patch(':id/status')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   async updateStatus(
     @Param('id') id: string,
     @Body('status') status: LeadStatus,
@@ -45,6 +50,8 @@ export class LeadsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateLeadDto,
@@ -53,6 +60,8 @@ export class LeadsController {
   }
 
   @Delete('bulk')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   async deleteBulk(@Body('ids') ids: string[]) {
     if (!ids || ids.length === 0) {
       throw new BadRequestException('At least one ID is required');
@@ -61,6 +70,8 @@ export class LeadsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   async delete(@Param('id') id: string) {
     return this.leadsService.delete(id);
   }

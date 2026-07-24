@@ -35,6 +35,12 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
+    // 🔐 Mettre à jour lastLoginAt pour tracker l'activité
+    await this.prisma.user    .update({
+      where: { id: session.userId },
+      data: { lastLoginAt: now },
+    });
+
     req.user = session.user;
     req.session = session;
     return true;
