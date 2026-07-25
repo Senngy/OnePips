@@ -93,11 +93,11 @@ model SuperAdmin {
 }
 
 model UserPermission {
-  id         String @id @default(cuid())
-  userId     String
+  id     String @id @default(cuid())
+  userId String
 
   permission Permission
-  granted    Boolean @default(true)
+  granted    Boolean    @default(true)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
