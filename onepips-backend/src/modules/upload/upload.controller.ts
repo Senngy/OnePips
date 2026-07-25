@@ -6,6 +6,9 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { basename, extname, join } from 'node:path';
 import type { Request, Response } from 'express';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
+import { PermissionsGuard } from '../permissions/guards/permissions.guard.js';
+import { Permissions } from '../permissions/decorators/permissions.decorator.js';
+import { Permission } from '../../../generated/prisma/client.js';
 
 const UPLOAD_DIR = join(process.cwd(), 'uploads');
 const ALLOWED_MIME_TYPES: Record<string, string> = {
@@ -47,7 +50,8 @@ export class UploadController {
     return res.sendFile(filePath);
   }
   @Post('upload')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.FILES_UPLOAD)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

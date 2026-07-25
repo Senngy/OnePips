@@ -6,8 +6,9 @@ import { CreateLeadDto } from '../leads/dto/create-lead.dto.js';
 import { EventUpdateDto } from './DTO/update-event.DTO.js';
 import { TurnstileGuard } from '../../common/guards/turnstile.guard.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
-import { RolesGuard } from '../auth/guards/roles.guard.js';
-import { Roles } from '../auth/decorators/roles.decorator.js';
+import { PermissionsGuard } from '../permissions/guards/permissions.guard.js';
+import { Permissions } from '../permissions/decorators/permissions.decorator.js';
+import { Permission } from '../../../generated/prisma/client.js';
 
 @Controller('events')
 export class EventsController {
@@ -23,24 +24,28 @@ export class EventsController {
     return this.eventsService.getUpcomingEvents();
   }
 
-  @Get('state') // endpoint : GET /events/state
+  @Get('state')
   async getEventState(): Promise<EventStateDto>  {
     return this.eventsService.getEventState();
   }
 
-  @Get(':id/participants')
-  async getEventParticipants(@Param('id') eventId: string) {
-    return this.eventsService.getEventParticipants(eventId);
-  }
-
   @Get('archived')
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.EVENTS_READ)
   async getArchivedEvents() {
     return this.eventsService.getArchivedEvents();
   }
 
+  @Get(':id/participants')
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.EVENTS_READ)
+  async getEventParticipants(@Param('id') eventId: string) {
+    return this.eventsService.getEventParticipants(eventId);
+  }
+
   @Post()
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.EVENTS_WRITE)
   async create(@Body() body: EventCreateDto) {
     return this.eventsService.create(body);
   }
@@ -52,25 +57,23 @@ export class EventsController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.EVENTS_WRITE)
   async update(@Param('id') eventId: string, @Body() body: EventUpdateDto) {
     return this.eventsService.update(eventId, body);
   }
 
   @Patch(':id/cancel')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.EVENTS_WRITE)
   async cancelEvent(@Param('id') eventId: string) {
     return this.eventsService.cancelEvent(eventId);
   }
 
   @Patch(':id/publish')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.EVENTS_WRITE)
   async publishEvent(@Param('id') eventId: string) {
     return this.eventsService.publishEvent(eventId);
   }
-
-
 }

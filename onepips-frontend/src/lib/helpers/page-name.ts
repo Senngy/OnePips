@@ -8,6 +8,7 @@ export const getPageName = (pathname: string) => {
         "/admin/events": "Events",
         "/admin/analytics": "Analytics",
         "/admin/settings": "Settings",
+        "/admin/users": "Users",
     };
 
     return map[pathname] || "Dashboard";

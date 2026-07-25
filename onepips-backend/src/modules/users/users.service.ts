@@ -1,10 +1,14 @@
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import type { User, Role } from '../../../generated/prisma/client.js';
+import { PermissionsService } from '../permissions/permissions.service.js';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private permissionsService: PermissionsService,
+  ) {}
 
   async findAll() {
     return this.prisma.user.findMany({
@@ -17,6 +21,32 @@ export class UsersService {
         updatedAt: true,
       },
     });
+  }
+
+  async findAllWithPermissions() {
+    const users = await this.prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+        permissions: {
+          select: {
+            permission: true,
+            granted: true,
+          },
+        },
+      },
+    });
+
+    return Promise.all(
+      users.map(async (user) => ({
+        ...user,
+        effectivePermissions: await this.permissionsService.getEffectivePermissions(user.id),
+      })),
+    );
   }
 
   async findOne(id: string) {
@@ -33,23 +63,11 @@ export class UsersService {
     });
   }
 
-  /**
-   * Mettre à jour le rôle d'un utilisateur
-   * 
-   * SÉCURITÉ CRITIQUE:
-   * - Un ADMIN ne peut JAMAIS promouvoir quelqu'un en SUPER_ADMIN
-   * - Seul un SUPER_ADMIN peut donner/retirer le rôle SUPER_ADMIN
-   * 
-   * @param targetUserId - L'utilisateur à modifier
-   * @param newRole - Le nouveau rôle
-   * @param currentUser - L'utilisateur qui effectue la modification
-   */
   async updateRole(
     targetUserId: string,
     newRole: Role,
     currentUser: User,
   ): Promise<User> {
-    // Vérification 1: L'utilisateur existe
     const targetUser = await this.prisma.user.findUnique({
       where: { id: targetUserId },
     });
@@ -58,21 +76,18 @@ export class UsersService {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
-    // Vérification 2: On ne peut pas modifier son propre rôle
     if (currentUser.id === targetUserId) {
       throw new BadRequestException(
         'Vous ne pouvez pas modifier votre propre rôle',
       );
     }
 
-    // Vérification 3 (CRITIQUE): Interdire la promotion vers SUPER_ADMIN
     if (newRole === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
       throw new ForbiddenException(
         'Seul un SUPER_ADMIN peut promouvoir en SUPER_ADMIN',
       );
     }
 
-    // Vérification 4: Interdire la rétrogradation du SUPER_ADMIN
     if (
       targetUser.role === 'SUPER_ADMIN' &&
       newRole !== 'SUPER_ADMIN' &&
@@ -97,4 +112,46 @@ export class UsersService {
       },
     });
   }
-}}
+
+  async updatePermissions(
+    userId: string,
+    overrides: { permission: string; granted: boolean }[],
+  ) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    for (const override of overrides) {
+      await this.prisma.userPermission.upsert({
+        where: {
+          userId_permission: {
+            userId,
+            permission: override.permission as any,
+          },
+        },
+        update: { granted: override.granted },
+        create: {
+          userId,
+          permission: override.permission as any,
+          granted: override.granted,
+        },
+      });
+    }
+
+    return { success: true };
+  }
+
+  async resetPermissions(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    await this.prisma.userPermission.deleteMany({
+      where: { userId },
+    });
+
+    return { success: true };
+  }
+}

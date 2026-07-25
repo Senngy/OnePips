@@ -5,21 +5,24 @@ import { CreateDirectApplicationDto } from './dto/create-direct-application.dto.
 import { ApplicationStatus } from '../../../prisma/index.js';
 import { TurnstileGuard } from '../../common/guards/turnstile.guard.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
-import { RolesGuard } from '../auth/guards/roles.guard.js';
-import { Roles } from '../auth/decorators/roles.decorator.js';
+import { PermissionsGuard } from '../permissions/guards/permissions.guard.js';
+import { Permissions } from '../permissions/decorators/permissions.decorator.js';
+import { Permission } from '../../../generated/prisma/client.js';
 
 @Controller('applications')
 export class ApplicationsController {
   constructor(private readonly applicationsService: ApplicationsService) {}
 
   @Get()
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.APPLICATIONS_READ)
   async findAll() {
     return this.applicationsService.findAll();
   }
 
   @Post()
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.APPLICATIONS_WRITE)
   async create(@Body() dto: CreateApplicationDto) {
     return this.applicationsService.create(dto);
   }
@@ -31,8 +34,8 @@ export class ApplicationsController {
   }
 
   @Patch(':id/status')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @UseGuards(AuthGuard, PermissionsGuard)
+  @Permissions(Permission.APPLICATIONS_WRITE)
   async updateStatus(
     @Param('id') id: string,
     @Body('status') status: ApplicationStatus,

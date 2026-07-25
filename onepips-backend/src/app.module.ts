@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { PermissionsModule } from './modules/permissions/permissions.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { LeadsModule } from './modules/leads/leads.module.js';
 import { ApplicationsModule } from './modules/applications/applications.module.js';
@@ -46,6 +47,7 @@ import { auth } from "./modules/auth/auth.js";
       limit: 20,
     }]),
     AuthModule,
+    PermissionsModule,
     UsersModule,
     LeadsModule,
     ApplicationsModule,

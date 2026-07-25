@@ -13,6 +13,7 @@ const navItems = [
     { name: "Analytics", href: "/admin/analytics", icon: "leaderboard" },
     { name: "Community", href: "/admin/community", icon: "group" },
     { name: "Settings", href: "/admin/settings", icon: "settings" },
+    { name: "Users", href: "/admin/users", icon: "manage_accounts" },
 ];
 
 export default function Sidebar() {
