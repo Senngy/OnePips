@@ -44,5 +44,5 @@ export class SecurityService implements OnModuleInit {
       process.exit(1);
     }
   }
-}}
+}
 

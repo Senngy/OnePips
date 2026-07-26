@@ -1,48 +1,63 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { 
+  Injectable, 
+  CanActivate, 
+  ExecutionContext, 
+  UnauthorizedException
+ } from '@nestjs/common';
+import { fromNodeHeaders } from 'better-auth/node';
+import { auth } from '../auth.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private prisma: PrismaService) {}
-
+ constructor(private readonly prisma: PrismaService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const ctx = context.switchToHttp();
-    const req = ctx.getRequest();
+    const req = context.switchToHttp().getRequest();
+    console.log(
+      '🔑 AuthGuard: Checking authentication for request:',
+      req.method,
+      req.originalUrl,
+    );
 
-    const cookieHeader: string | undefined = req.headers?.cookie;
-    if (!cookieHeader) {
-      throw new UnauthorizedException();
-    }
 
-    const cookies = Object.fromEntries(cookieHeader.split(';').map((c: string) => {
-      const [k, ...v] = c.split('=');
-      return [k.trim(), decodeURIComponent(v.join('='))];
-    }));
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
 
-    const token = cookies['better-auth.session_token'] || cookies['better-auth.sessionToken'] || cookies['session_token'] || cookies['sessionToken'];
-
-    if (!token) {
-      throw new UnauthorizedException();
-    }
-
-    const session = await this.prisma.session.findUnique({ where: { token }, include: { user: true } });
     if (!session) {
+      console.log('❌ AuthGuard: No valid Better Auth session');
+      throw new UnauthorizedException();
+    }
+
+     const user = await this.prisma.user.findUnique({
+      where: {
+        id: session.user.id,
+      },
+    });
+
+    if (!user) {
       throw new UnauthorizedException();
     }
 
     const now = new Date();
-    if (session.expiresAt && session.expiresAt < now) {
-      throw new UnauthorizedException();
-    }
 
     // 🔐 Mettre à jour lastLoginAt pour tracker l'activité
-    await this.prisma.user    .update({
-      where: { id: session.userId },
+    await this.prisma.session.update({
+      where: { id: session.session.id },
       data: { lastLoginAt: now },
     });
 
-    req.user = session.user;
-    req.session = session;
+    req.user = user;
+    req.session = session.session;
+    
+    console.log('✅ AuthGuard: Authenticated user:', {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      sessionId: session.session.id,
+      sessionExpiresAt: session.session.expiresAt,
+    });
+
     return true;
   }
 }
