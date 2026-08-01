@@ -4,7 +4,9 @@ import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
 import MobileNav from "@/components/admin/layout/mobile-nav";
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 const ALL_ROLES = ["SUPER_ADMIN", "ADMIN", "MANAGER", "EDITOR", "VIEWER", "CUSTOMER"];
 const ALL_PERMISSIONS = [
@@ -37,6 +39,8 @@ type PermissionOverride = {
 };
 
 export default function AdminUsersPage() {
+  const { user: currentUser } = useAuth();
+  const router = useRouter();
   const [users, setUsers] = useState<UserWithPerms[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,8 +59,13 @@ export default function AdminUsersPage() {
   }, []);
 
   useEffect(() => {
+    if (!currentUser) return;
+    if (currentUser.role !== "SUPER_ADMIN") {
+      router.replace("/admin/dashboard");
+      return;
+    }
     fetchUsers();
-  }, [fetchUsers]);
+  }, [fetchUsers, currentUser, router]);
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
@@ -172,37 +181,58 @@ export default function AdminUsersPage() {
                       <p className="text-sm text-outline">{user.email}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <select
-                        value={user.role}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                        className="bg-surface-container-lowest border border-outline-variant/20 rounded-md px-3 py-1.5 text-sm font-medium text-on-surface focus:border-primary focus:ring-1 focus:ring-primary"
-                      >
-                        {ALL_ROLES.map((role) => (
-                          <option key={role} value={role}>
-                            {role}
-                          </option>
-                        ))}
-                      </select>
+                      {user.role === "SUPER_ADMIN" ? (
+                        <span className="px-3 py-1.5 text-sm font-bold text-amber-400 bg-amber-400/10 rounded-md border border-amber-400/20">
+                          SUPER_ADMIN
+                        </span>
+                      ) : (
+                        <select
+                          value={user.role}
+                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          className="bg-surface-container-lowest border border-outline-variant/20 rounded-md px-3 py-1.5 text-sm font-medium text-on-surface focus:border-primary focus:ring-1 focus:ring-primary"
+                        >
+                          {ALL_ROLES.map((role) => (
+                            <option key={role} value={role}>
+                              {role}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                       <button
                         onClick={() =>
-                          setExpandedUser(expandedUser === user.id ? null : user.id)
+                          setExpandedUser(expandedUser === user.id ? null : user.role !== "SUPER_ADMIN" ? user.id : null)
                         }
-                        className="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                        className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                          user.role === "SUPER_ADMIN"
+                            ? "text-outline/40 cursor-not-allowed"
+                            : "text-primary hover:bg-primary/10"
+                        }`}
                         type="button"
+                        disabled={user.role === "SUPER_ADMIN"}
                       >
                         {expandedUser === user.id ? "Fermer" : "Permissions"}
                       </button>
-                      <button
-                        onClick={() => handleResetPermissions(user.id)}
-                        className="px-3 py-1.5 text-sm font-medium text-error/70 hover:text-error hover:bg-error/10 rounded-lg transition-colors"
-                        type="button"
-                      >
-                        Réinitialiser
-                      </button>
+                      {user.role !== "SUPER_ADMIN" && (
+                        <button
+                          onClick={() => handleResetPermissions(user.id)}
+                          className="px-3 py-1.5 text-sm font-medium text-error/70 hover:text-error hover:bg-error/10 rounded-lg transition-colors"
+                          type="button"
+                        >
+                          Réinitialiser
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  {expandedUser === user.id && (
+                  {expandedUser === user.id && user.role === "SUPER_ADMIN" && (
+                    <div className="border-t border-outline-variant/10 p-6 bg-surface-container-low">
+                      <p className="text-sm text-amber-400 font-medium">
+                        Le SUPER_ADMIN possède toutes les permissions par défaut. Aucune configuration individuelle n'est nécessaire.
+                      </p>
+                    </div>
+                  )}
+
+                  {expandedUser === user.id && user.role !== "SUPER_ADMIN" && (
                     <div className="border-t border-outline-variant/10 p-6 bg-surface-container-low">
                       <p className="text-sm font-medium text-outline mb-1">
                         Rôle actuel : <span className="text-on-surface font-bold">{user.role}</span>
