@@ -379,7 +379,7 @@ Leads        —       Uses(global) Uses guard  —     —     —        —  
 
 | # | Tâche | Catégorie | Statut |
 |---|-------|-----------|--------|
-| 1 | Appliquer la migration DB `rbac_v3` | Prisma | ⬜ |
+| 1 | ~~Appliquer la migration DB `rbac_v3`~~ ✅ **Fait** — 17/17 migrations appliquées, colonne `granted` présente sur `UserPermission`, enum `Permission` = 20 valeurs (dont `USERS_READ`, `ADMINS_MANAGE`, `ROLES_MANAGE`, `FILES_UPLOAD`). Vérifié en base le 30/07 | Prisma | ✅ |
 | 2 | Installer Helmet + configurer **toute la suite** : CSP, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy, nosniff | Sécurité | ⬜ |
 | 3 | CSRF : vérifier ce que Better Auth fournit, sinon implémenter | Sécurité | ⬜ |
 | 4 | **Audit log admin** (modèle `AdminAuditLog` + écriture sur role/permissions change) | Observabilité | ⬜ |
