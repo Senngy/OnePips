@@ -1,36 +1,28 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator.js';
 import { Role } from '../../../../generated/prisma/client.js';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
 
-  constructor(
-    private reflector: Reflector,
-  ) { }
-
-
-  canActivate(
-    context: ExecutionContext,
-  ): boolean {
-
-
+  canActivate(context: ExecutionContext): boolean {
     /*
     |--------------------------------------------------------------------------
     | 1. Récupération des rôles requis par la route
     |--------------------------------------------------------------------------
     */
 
-    const requiredRoles =
-      this.reflector.getAllAndOverride<Role[]>(
-        ROLES_KEY,
-        [
-          context.getHandler(),
-          context.getClass(),
-        ],
-      );
-
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     /*
     |--------------------------------------------------------------------------
@@ -45,15 +37,9 @@ export class RolesGuard implements CanActivate {
     |
     */
 
-    if (
-      !requiredRoles ||
-      requiredRoles.length === 0
-    ) {
-
+    if (!requiredRoles || requiredRoles.length === 0) {
       return true;
-
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -64,23 +50,13 @@ export class RolesGuard implements CanActivate {
     |
     */
 
-    const request =
-      context
-        .switchToHttp()
-        .getRequest();
+    const request = context.switchToHttp().getRequest();
 
-    const user =
-      request.user;
-
+    const user = request.user;
 
     if (!user) {
-
-      throw new ForbiddenException(
-        'Utilisateur non authentifié',
-      );
-
+      throw new ForbiddenException('Utilisateur non authentifié');
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -88,14 +64,9 @@ export class RolesGuard implements CanActivate {
     |--------------------------------------------------------------------------
     */
 
-    if (
-      user.role === Role.SUPER_ADMIN
-    ) {
-
+    if (user.role === Role.SUPER_ADMIN) {
       return true;
-
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -103,21 +74,12 @@ export class RolesGuard implements CanActivate {
     |--------------------------------------------------------------------------
     */
 
-    const hasRequiredRole =
-      requiredRoles.includes(user.role);
-
+    const hasRequiredRole = requiredRoles.includes(user.role);
 
     if (!hasRequiredRole) {
-
-      throw new ForbiddenException(
-        'Permissions insuffisantes',
-      );
-
+      throw new ForbiddenException('Permissions insuffisantes');
     }
 
-
     return true;
-
   }
-
 }

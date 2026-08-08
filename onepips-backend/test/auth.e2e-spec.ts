@@ -11,8 +11,10 @@ describe('Auth guards (e2e)', () => {
 
   beforeEach(async () => {
     // Ensure required env vars for ConfigModule validation
-    process.env.BETTER_AUTH_SECRET = process.env.BETTER_AUTH_SECRET || 'test-secret';
-    process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://localhost/test';
+    process.env.BETTER_AUTH_SECRET =
+      process.env.BETTER_AUTH_SECRET || 'test-secret';
+    process.env.DATABASE_URL =
+      process.env.DATABASE_URL || 'postgresql://localhost/test';
     process.env.JWT_SECRET = process.env.JWT_SECRET || 'jwt-test-secret';
 
     prismaMock = {

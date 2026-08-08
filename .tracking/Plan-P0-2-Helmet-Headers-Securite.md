@@ -1,6 +1,6 @@
 # P0-2 — Helmet + Headers Sécurité (Plan d'implémentation détaillé)
 
-> Date : 30/07/2026 · Version : v8 (ajout §12 environnements dev/staging/prod + CI/CD + flux Git + étapes préparatoires + répartition des tâches ; §13 découpage en commits ; §14 analyse de risques d'implémentation — préparation terrain, **aucun code écrit, aucune branche/fichier créé**) · Statut : 📝 Plan (aucune modification appliquée)
+> Date : 30/07/2026 · Version : v9 (**correction majeure** — le plan mélangeait décisions de production avec le développement local ; D1/D2/D7 ne sont plus « bloquantes avant C1 », elles sont réparties par étape réelle de déploiement ; ajout du chemin de travail concret §13.5 et du résumé « Maintenant ? » §13.0 ; SOUS-ÉTAPE 0 et checklist réécrites en conséquence) · Statut : 📝 Plan (aucune modification appliquée)
 > Source : `.tracking/RBAC-v3-audit.md` §5.1, P0 #2
 > Périmètre : Backend NestJS **+** Frontend Next.js (les deux doivent être durcis)
 > Règle : **document de plan uniquement — aucune modification du projet tant que non validée.**
@@ -72,16 +72,20 @@ Protéger les réponses HTTP du backend **et** les pages du frontend avec l'ense
 
 ## 3. SOUS-ÉTAPES DÉTAILLÉES
 
-## SOUS-ÉTAPE 0 — Préparation & inventaire (avant tout code)
+## SOUS-ÉTAPE 0 — Préparation & inventaire (échelonnée — tout n'est **pas** requis avant de coder)
 
-| # | Action | Détail | Livrable |
-|---|--------|--------|----------|
-| 0.1 | Confirmer le domaine(s) de production | Front (ex: `app.onepips.fr`) + API (même domaine derrière reverse-proxy ? ou `api.onepips.fr` ?) | Détermine CORS + `frame-ancestors` + HSTS |
-| 0.2 | Confirmer HTTPS de bout en bout | Reverse proxy (Nginx/Caddy) qui termine TLS **avant** Nest ? | HSTS ne sert que derrière HTTPS |
-| 0.3 | Lister les domaines externes utilisés | Table §2 + vérifier au dernier moment (un nouvel embed = CSP à revoir) | Liste `allowlist` CSP |
-| 0.4 | Décider du mode dev | CSP **désactivée** en dev (HMR/react-refresh casse sinon) | Stratégie dev/prod |
-| 0.5 | Choisir un outil de vérification | `curl -I`, DevTools Network, ou `securityheaders.com` | Bench avant/après |
-| 0.6 | **Décider la destination des rapports CSP** | **`Reporting-Endpoints` + `report-to`** (recommandé) ; `report-uri` seulement si la stack de collecte ne supporte pas encore `report-to` | Endpoint de collecte |
+> ⚠️ **Correction v9** : cette étape ne bloque **pas** le commit C1. Helmet + CSP se développent et se testent **100% en local** (`http://localhost:3000` / `http://localhost:3001`), sans domaine ni HTTPS ni staging. Le tableau ci-dessous précise **quand** chaque action devient nécessaire (voir aussi §13.0 pour le détail par commit).
+
+| # | Action | Détail | Quand ? |
+|---|--------|--------|---------|
+| 0.1 | Utiliser des **placeholders** pour les origines | Local : `FRONT_URL=http://localhost:3000`, `API_URL=http://localhost:3001` — le code lit `process.env.FRONT_URL`/`API_URL`, **jamais** de domaine écrit en dur | ✅ **Maintenant** |
+| 0.2 | Décider D9 (Helmet seul vs + compression) | Helmet seul recommandé au lancement | ✅ **Maintenant, avant C1** |
+| 0.3 | Décider du mode dev | CSP **désactivée** en dev (HMR/react-refresh casse sinon) | ✅ **Maintenant, avant C3** |
+| 0.4 | Lister les domaines externes **réellement utilisés dans le code** (table §2) | Base de l'allowlist CSP **initiale** — pas besoin d'être finale/parfaite (Report-Only corrige par itération) | ✅ **Maintenant, avant C6/C7** |
+| 0.5 | Choisir un outil de vérification | `curl -I` / DevTools **maintenant** ; `securityheaders.com` seulement utile une fois en ligne | ✅ Maintenant (curl/DevTools) — plus tard (securityheaders.com) |
+| 0.6 | Domaine + HTTPS de **staging** (D1/D2 partiels, D10) | `staging.<domaine choisi>` + certificat | ❌ **Pas maintenant** — avant le déploiement staging |
+| 0.7 | Destination des rapports CSP (D7) | **Console** suffit en local/dev | ✅ Console maintenant — ❌ `Reporting-Endpoints`/`report-to` réel seulement avant staging |
+| 0.8 | Domaine + HTTPS de **production** définitifs (D1/D2 finaux) | `app.<domaine>` / `api.<domaine>` (ou mono-domaine) | ❌ **Pas maintenant** — avant le déploiement production |
 
 ---
 
@@ -418,40 +422,48 @@ Pour ne **jamais** casser la prod en déployant une CSP trop stricte :
 
 ## 7. CHECKLIST P0-2 (à cocher pendant l'implémentation)
 
-| # | Tâche | Où | Statut |
-|---|-------|-----|--------|
-| 1 | Décider domaines prod + HTTPS (0.1/0.2) | Décision | ⬜ |
-| 2 | Confirmer l'allowlist CSP finale (0.3) | Frontend | ⬜ |
-| 3 | Décider destination des rapports CSP : `Reporting-Endpoints`/`report-to` (0.6) | Décision | ⬜ |
-| 4 | **Décider Helmet seul vs Helmet + Compression (D9)** — au lancement : Helmet seul (reverse-proxy compresse déjà) | Décision | ⬜ |
-| 5 | Installer `helmet` (v8.3.0 — options v8 confirmées) | `onepips-backend` | ⬜ |
-| 6 | Créer `src/common/helmet.config.ts` | Backend | ⬜ |
-| 7 | Brancher Helmet dans `main.ts` | Backend | ⬜ |
-| 8 | **Phase A** : HSTS max-age=86400 (backend) + CSP Report-Only (frontend) + vérifier headers (`curl`) | Les 2 | ⬜ |
-| 9 | Configurer headers Next 16 (`headers()` dans `next.config.ts` — mécanisme validé §2) | Frontend | ⬜ |
-| 10 | CSP publique (YouTube, fonts, Turnstile, lh3, API) | Frontend | ⬜ |
-| 11 | CSP `/admin/*` stricte (frame-src none, pas de Turnstile) | Frontend | ⬜ |
-| 12 | **Phase B** : enforce + matrice de tests §3.3 (dev + prod) | Les 2 | ⬜ |
-| 13 | **Phase C** : retirer unsafe-inline/unsafe-eval (nonce/hashs) | Frontend | ⬜ |
-| 14 | Score `securityheaders.com` ≥ A ou A+ (prod) | Prod | ⬜ |
-| 15 | Mettre à jour l'audit (section 5.1 → ✅, P0 #2 → ✅) | Audit | ⬜ |
+> ✅ **v9** : réordonnée pour que les tâches « Maintenant / local » soient clairement séparées des tâches « avant staging » et « avant production » (cf. §13.0).
+
+| # | Tâche | Où | Quand | Statut |
+|---|-------|-----|-------|--------|
+| 1 | Décider **D9** (Helmet seul, pas de compression) | Décision | ✅ Maintenant | ⬜ |
+| 2 | Poser les placeholders d'environnement (`FRONT_URL`/`API_URL` en local) | Backend/Frontend | ✅ Maintenant | ⬜ |
+| 3 | Installer `helmet` (v8.3.0 — options v8 confirmées) | `onepips-backend` | ✅ Maintenant (C1) | ⬜ |
+| 4 | Créer `src/common/helmet.config.ts` | Backend | ✅ Maintenant (C2) | ⬜ |
+| 5 | Brancher Helmet dans `main.ts` (CSP off, HSTS off en dev) | Backend | ✅ Maintenant (C3) | ⬜ |
+| 6 | Retester Better Auth (signup/login/logout) + uploads + API en local | Backend | ✅ Immédiatement après C3 | ⬜ |
+| 7 | Automatiser les tests headers (`curl`/script — §14 `security-check.sh`) | Backend | ✅ Maintenant (C4) | ⬜ |
+| 8 | Headers Next.js non-CSP (X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy) | Frontend | ✅ Maintenant (C5) | ⬜ |
+| 9 | Établir une **première allowlist CSP** à partir des dépendances réelles du code (pas besoin d'être finale) | Frontend | ✅ Maintenant (avant C6/C7) | ⬜ |
+| 10 | CSP Report-Only bloc public, rapports en **console** (localhost) | Frontend | ✅ Maintenant (C6) | ⬜ |
+| 11 | CSP Report-Only bloc `/admin/*` | Frontend | ✅ Maintenant (C7) | ⬜ |
+| 12 | Tester/corriger les violations CSP en local, en boucle | Frontend | ✅ Itératif, en local | ⬜ |
+| 13 | **Avant staging** : trancher D1 (domaine staging) + D2 (HTTPS/reverse-proxy staging) + D7 (reporting CSP réel) | Décision/Infra | ❌ Pas avant | ⬜ |
+| 14 | Déployer sur staging, observer 3-7 jours (vraie Phase A, §4) | Staging | ❌ Après C6/C7 validés en local | ⬜ |
+| 15 | **Phase B** : basculer Enforce (staging puis prod) + matrice §3.3 | Les 2 | ❌ Après validation staging | ⬜ |
+| 16 | **Phase C** : durcir `script-src` (nonce/SRI), HSTS phase-c | Frontend/Backend | ❌ Après Phase B | ⬜ |
+| 17 | **Avant production** : trancher D1/D2 définitifs (domaines + HTTPS prod) | Décision/Infra | ❌ Pas avant | ⬜ |
+| 18 | Score `securityheaders.com` ≥ A ou A+ (prod) | Prod | ❌ Après mise en prod | ⬜ |
+| 19 | Mettre à jour l'audit (section 5.1 → ✅, P0 #2 → ✅) | Audit | Fin | ⬜ |
 
 ---
 
-## 8. DÉCISIONS À TRANCHER (avant implémentation)
+## 8. DÉCISIONS À TRANCHER (réparties par étape — **pas toutes avant implémentation**)
 
-| # | Décision | Options | Impact |
-|---|----------|---------|--------|
-| D1 | Domaine(s) de production | `app.onepips.fr` + `api.onepips.fr` / mono-domaine derrière reverse-proxy | CORS, CSP `connect-src`/`img-src`, HSTS `includeSubDomains` |
-| D2 | Terminaison HTTPS | Caddy / Nginx (recommandé) devant Nest | HSTS, score securityheaders |
-| D3 | COEP | **Off** (recommandé) / On | Compatibilité Google Fonts, YouTube, Cloudflare |
-| D4 | CORP sur uploads | **`same-origin`** (recommandé — anti-hotlink strict) / `same-site` (si front et API sur origines différentes) / `cross-origin` | Affichage des images : même-origin bloquera un front sur `app.…` si l'API est sur `api.…` |
-| D5 | `script-src` en prod | **nonce ou hashs** (durci) / `unsafe-inline` (exception dev uniquement) | Niveau de protection XSS |
-| D6 | HSTS `preload` | Non (recommandé — seulement après Phase C) / Oui | Engagement 2 ans non révocable |
-| D7 | Collecte des violations CSP | **`Reporting-Endpoints` + `report-to`** (recommandé) / `report-uri` (fallback stack ancienne) / console only | Qualité de la phase Report-Only |
-| D8 | Cache-Control des uploads | Immutable (nom de fichier hashé) | Perf + sécurité |
-| D9 | Compression backend | **Helmet seul** (recommandé au lancement — le reverse-proxy Caddy/Nginx peut déjà compresser) / **Helmet + `compression`** (Nest) | Perf réseau ; `compression` ajoute une dépendance + risque BREACH sur réponses sensibles (à éviter avec CSP `no-referrer` ?) |
-| D10 | Domaine + certificat de staging | `staging.onepips.fr` (pressenti) + HTTPS dédié | Nécessaire pour tester HSTS/CSP en conditions réelles avant prod (§12.1/§12.2) |
+> ✅ **Correction v9** : seule **D9** doit être tranchée avant de coder. D1/D2/D7/D10 (tout ce qui touche à un domaine réel) se tranchent **au moment du déploiement concerné** (staging, puis production), pas avant. Voir aussi le résumé §13.0.
+
+| # | Décision | Options | Impact | Quand trancher ? |
+|---|----------|---------|--------|-------------------|
+| D1 | Domaine(s) de production | **`TBD`** maintenant (placeholder) → `app.<domaine>` + `api.<domaine>` / mono-domaine derrière reverse-proxy | CORS, CSP `connect-src`/`img-src`, HSTS `includeSubDomains` | ❌ Pas maintenant — partiel avant staging (D10), définitif avant production |
+| D2 | Terminaison HTTPS | **`TBD`** en local (HTTP) → Caddy/Nginx (recommandé) devant Nest | HSTS, score securityheaders | ❌ Pas maintenant — pertinent seulement dès staging |
+| D3 | COEP | **Off** (recommandé) / On | Compatibilité Google Fonts, YouTube, Cloudflare | ✅ Déjà tranché (off) |
+| D4 | CORP sur uploads | **`same-origin`** (recommandé — anti-hotlink strict) / `same-site` (si front et API sur origines différentes) / `cross-origin` | Affichage des images : même-origin bloquera un front sur `app.…` si l'API est sur `api.…` | 🟡 Peut être tranché maintenant (indépendant du domaine réel, dépend de l'architecture) |
+| D5 | `script-src` en prod | **nonce ou hashs** (durci) / `unsafe-inline` (exception dev uniquement) | Niveau de protection XSS | ❌ Phase C uniquement |
+| D6 | HSTS `preload` | Non (recommandé — seulement après Phase C) / Oui | Engagement 2 ans non révocable | ❌ Après Phase C, jamais avant |
+| D7 | Collecte des violations CSP | **Console** (local/dev, suffisant pour démarrer) → `Reporting-Endpoints` + `report-to` (recommandé en staging/prod) / `report-uri` (fallback) | Qualité de la phase Report-Only | ✅ Console maintenant — ❌ réel pas avant staging |
+| D8 | Cache-Control des uploads | Immutable (nom de fichier hashé) | Perf + sécurité | 🟡 Peut être tranché maintenant |
+| D9 | Compression backend | **Helmet seul** (recommandé au lancement — le reverse-proxy Caddy/Nginx peut déjà compresser) / **Helmet + `compression`** (Nest) | Perf réseau ; `compression` ajoute une dépendance + risque BREACH sur réponses sensibles | ✅ **Maintenant** — indépendant du domaine, décision immédiate |
+| D10 | Domaine + certificat de staging | **`TBD`** maintenant → `staging.<domaine>` + HTTPS dédié | Nécessaire pour tester HSTS/CSP en conditions réelles (§12.1/§12.2) | ❌ Pas maintenant — avant le déploiement staging |
 
 ---
 
@@ -507,7 +519,8 @@ Pour ne **jamais** casser la prod en déployant une CSP trop stricte :
 | **production** | Report-Only → Enforce → Harden (Phases A/B/C, §4) | Progressif `phase-a → b → c` (§4) | Utilisateurs réels |
 
 > Conséquence sur `helmet.config.ts` et `next.config.ts` (§3, SOUS-ÉTAPE 1/2) : la factory doit accepter **3 valeurs** (`development` / `staging` / `production`), pas un simple booléen `isProd`. Impact sur le code déjà esquissé en référence : `const isProd = env === 'production'` devra devenir une vraie branche à 3 voies le jour de l'implémentation (non appliqué ici).
-> Ajout **D10** (voir §8, à reporter dans la table des décisions) : Domaine de staging (`staging.onepips.fr` pressenti) + certificat HTTPS dédié — nécessaire avant de tester HSTS/CSP en conditions réelles.
+> Ajout **D10** (voir §8) : Domaine de staging (`staging.onepips.fr` pressenti) + certificat HTTPS dédié — nécessaire avant de tester HSTS/CSP en conditions réelles.
+> ✅ **Précision v9** : ce tableau décrit le modèle **cible**. Les commits C1 à C7 (§13.1) ne nécessitent **aucun** de ces éléments — ils se développent et se testent entièrement en `development` local (`localhost`). D10/staging n'entre en jeu qu'au moment du déploiement staging (§13.0).
 
 ### 12.2 Architecture CI/CD proposée (documentaire — à mettre en place, pas par l'agent)
 
@@ -546,19 +559,20 @@ production
 - Rejoint le découpage en commits (§13) : les commits C1-C8 (Phase A) doivent atterrir sur `staging` **avant** `main`. Les Phases B/C (C9-C13) ne partent vers `production` qu'après validation staging explicite.
 - Nom de branche à utiliser (§12.4, Étape 1) : `security/p0-helmet`.
 
-### 12.4 Étapes préparatoires avant tout code (statut de prise en charge)
+### 12.4 Étapes préparatoires (statut de prise en charge — aucune ne requiert domaine/staging/HTTPS)
 
-> Rappel : rien de ce qui suit n'a été exécuté par l'agent — **documentation de tâches à faire**, conformément à la règle « aucune modification du projet ».
+> Rappel : rien de ce qui suit n'a été exécuté par l'agent — **documentation de tâches à faire**, conformément à la règle « aucune modification du projet ». ✅ **Précision v9** : ces 4 étapes sont des tâches légères de local uniquement (branche, doc, placeholders `.env.*`, squelettes de config) — aucune ne dépend de D1/D2/D7/D10.
 
-| Étape | Action | Qui | Statut |
-|-------|--------|-----|--------|
-| 1 | `git checkout -b security/p0-helmet` | À faire (agent ou utilisateur, au choix — non exécuté ici) | ⬜ En attente |
-| 2 | Créer `docs/security/P0-2-Helmet.md` (reprise de ce plan) | **Pris en charge personnellement par l'utilisateur** | ⬜ En attente de transmission |
-| 3 | Créer les variables d'environnement : Backend `.env.development` (`NODE_ENV=development`, `FRONT_URL=http://localhost:3000`) + `.env.staging` (à définir avec D1/D10) ; Frontend `.env.local` (`NEXT_PUBLIC_API_URL=http://localhost:3001`) | À faire (non exécuté ici) | ⬜ En attente |
-| 4 | Créer une config par environnement : `config/helmet.dev.ts`, `config/helmet.staging.ts`, `config/helmet.prod.ts` (même si `staging` n'existe pas encore en infra) | **Pris en charge personnellement par l'utilisateur** | ⬜ En attente de transmission |
+| Étape | Action | Qui | Quand | Statut |
+|-------|--------|-----|-------|--------|
+| 1 | `git checkout -b security/p0-helmet` | À faire (agent ou utilisateur, au choix — non exécuté ici) | Avant C1 | ⬜ En attente |
+| 2 | Créer `docs/security/P0-2-Helmet.md` (reprise de ce plan) | **Pris en charge personnellement par l'utilisateur** | Avant C1 | ⬜ En attente de transmission |
+| 3 | Créer les variables d'environnement **locales** : Backend `.env.development` (`NODE_ENV=development`, `FRONT_URL=http://localhost:3000`) ; Frontend `.env.local` (`NEXT_PUBLIC_API_URL=http://localhost:3001`) — **placeholders uniquement, pas de domaine réel** | À faire (non exécuté ici) | Avant C1 | ⬜ En attente |
+| 3bis | `.env.staging` (valeurs réelles D1/D10) | À faire | ❌ Pas avant le déploiement staging (§13.0) | ⬜ Différé |
+| 4 | Créer une config par environnement : `config/helmet.dev.ts`, `config/helmet.staging.ts`, `config/helmet.prod.ts` (squelettes — même si `staging` n'existe pas encore en infra) | **Pris en charge personnellement par l'utilisateur** | Avant C1 (squelettes) | ⬜ En attente de transmission |
 
 > Étapes 2 et 4 : à cocher dès réception de la transmission utilisateur — ne pas les régénérer/écraser une fois reçues.
-> Étapes 1 et 3 : restent des tâches ouvertes du plan, à exécuter avant le commit C1 (§13.0 prérequis).
+> Étapes 1 et 3 : restent des tâches ouvertes du plan, à exécuter avant le commit C1 — mais **sans attendre aucune décision de domaine** (§13.0).
 
 ### 12.5 Répartition des tâches d'implémentation (qui code quoi)
 
@@ -578,13 +592,34 @@ production
 
 > Objectif : chaque commit doit être **atomique**, **testable isolément**, et **revenable** (rollback = `git revert`). Aucun commit ne doit mélanger backend et frontend. Les commits « sans comportement » (fichier créé mais non branché) précèdent toujours le commit qui l'active.
 
-### 13.0 Prérequis bloquants (à trancher AVANT le commit 1)
+### 13.0 Décisions réparties par étape (correction v9 — plus de « bloquantes avant C1 »)
 
-| Décision | Pourquoi bloquant |
-|----------|--------------------|
-| D1 (domaine prod) + D2 (HTTPS/reverse-proxy) | Sans ça, `<API_ORIGIN>` reste un placeholder jamais remplacé → CSP inutilisable en prod |
-| D7 (destination des rapports CSP) | Le commit CSP Report-Only (C6) a besoin d'un endpoit réel ou d'un fallback « console only » assumé |
-| D9 (Helmet seul / + compression) | Évite d'installer un paquet qui sera retiré au commit suivant |
+> ⚠️ **Erreur corrigée** : la version précédente laissait croire que D1 (domaine prod), D2 (HTTPS) et D7 (reporting CSP) devaient être tranchées avant le commit C1. **C'est faux.** Le développement de Helmet + CSP se fait à 100% en local (`localhost:3000`/`localhost:3001`), sans domaine, sans HTTPS, sans staging. Répartition correcte :
+
+| Avant... | Décisions à trancher | Pourquoi |
+|----------|------------------------|----------|
+| **C1** (installer Helmet) | **D9 uniquement** (Helmet seul) | Évite d'installer un paquet retiré au commit suivant — tout le reste peut attendre |
+| **C3** (brancher Helmet) | Comportement par environnement (dev/staging/prod, §12.1) — avec des **placeholders** (`localhost`), jamais de vraies valeurs de domaine | Le code doit lire `process.env.NODE_ENV`/`FRONT_URL`/`API_URL`, pas des domaines en dur |
+| **C6/C7** (CSP Report-Only) | Allowlist CSP **initiale** (pas finale) basée sur les dépendances réelles du code (table §2) | Report-Only ne bloque rien : les oublis d'allowlist se corrigent par itération (console → violation → correction → retest), voir §13.1 |
+| **Déploiement staging** | **D1** (domaine staging) + **D2** (HTTPS/reverse-proxy staging) + **D7** (reporting CSP réel) + **D10** | C'est seulement à ce moment que ces éléments deviennent nécessaires |
+| **Déploiement production** | **D1**/**D2** définitifs (domaines + HTTPS prod) | Décidés au moment du déploiement, pas avant |
+
+> **Le point clé** : rien n'empêche de committer C1 → C7 **aujourd'hui**, en local, sans connaître le domaine de production ni même savoir s'il est disponible.
+
+**Résumé — qu'est-ce qui doit être décidé *maintenant* ?**
+
+| Décision | Maintenant ? | Pourquoi |
+|----------|--------------|----------|
+| Domaine prod (D1) | ❌ Non | Pas nécessaire en local |
+| HTTPS prod (D2) | ❌ Non | Nécessaire seulement au déploiement |
+| Domaine staging (D10) | ❌ Pas encore | Nécessaire quand le staging est créé |
+| Installer Helmet | ✅ Oui | Fonctionne parfaitement en local (`localhost`) |
+| Compression (D9) | ✅ Oui — mais réponse = **non, Helmet seul** | Décision immédiate, indépendante du domaine ; hors besoin immédiat de P0-2 |
+| Allowlist CSP | 🟡 Initiale seulement | À construire avec les dépendances réelles du code, pas besoin d'être parfaite |
+| CSP Report-Only | ✅ Oui | Très bien pour le local (aucune ressource bloquée) |
+| Reporting CSP réel (D7) | ❌ Pas encore | Console suffisante au début |
+| HSTS | ❌ Non (en local HTTP) | À activer progressivement seulement en staging/prod |
+| CSP Enforce | ❌ Pas au début | Seulement après une observation Report-Only satisfaisante |
 
 ### 13.1 PHASE A — Report-Only
 
@@ -597,9 +632,11 @@ production
 | C5 | `chore(frontend): add non-CSP security headers` | `next.config.ts` | **Changement réel** — toutes les pages reçoivent ces headers | DevTools Network sur 2-3 pages + `/admin/login` | Retirer le bloc `headers()` |
 | C6 | `feat(frontend): add CSP Report-Only (bloc public)` | `next.config.ts` | Aucune page bloquée (Report-Only) | Naviguer `/methode`, formulaires publics, vérifier console + rapports | Retirer le header CSP |
 | C7 | `feat(frontend): add CSP Report-Only (bloc /admin/*)` | `next.config.ts` | Aucune page bloquée | Naviguer tout `/admin/*` | Retirer le bloc |
-| C8 | `docs: update tracking (checklist 1-11, audit partiel)` | `.tracking/*.md` | Aucun | — | — |
+| C8 | `docs: update tracking (checklist 1-12, audit partiel)` | `.tracking/*.md` | Aucun | — | — |
 
-**GATE Phase A** (§4) : 3-7 jours d'observation, critère de sortie = plus de violation critique dans les rapports/console.
+**GATE Phase A** (§4) — se déroule en **2 temps** (correction v9) :
+1. **En local (maintenant)** : boucle itérative Report-Only → tester l'app (`/methode`, formulaires, `/admin/*`) → lire les violations en **console** → corriger l'allowlist §2 → retester, jusqu'à zéro violation critique en local. Aucun domaine/staging requis.
+2. **En staging** (une fois D1/D2/D7/D10 tranchés, §13.0) : 3-7 jours d'observation avec reporting réel (`Reporting-Endpoints`/`report-to`), critère de sortie = plus de violation critique dans les rapports.
 
 ### 13.2 PHASE B — Enforce
 
@@ -625,7 +662,76 @@ production
 
 | # | Commit | Fichiers |
 |---|--------|----------|
-| C14 | `docs: mark P0-2 complete (audit ✅, checklist 12-15, score securityheaders.com)` | `.tracking/*.md` |
+| C14 | `docs: mark P0-2 complete (audit ✅, checklist 13-19, score securityheaders.com)` | `.tracking/*.md` |
+
+### 13.5 Chemin de travail concret (à partir de maintenant — correction v9)
+
+> Vue d'ensemble qui remplace la lecture linéaire « C1 → C14 » par le vrai enchaînement, avec les points de bascule staging/production explicites.
+
+```
+                 MAINTENANT
+                     │
+                     ▼
+              Développement local
+                     │
+              C1 — Installer Helmet
+                     │
+              C2 — Config Helmet
+                     │
+              C3 — Brancher Helmet
+                     │
+           Tests localhost:3001
+        (Better Auth, uploads, API)
+                     │
+              C4 — Tests headers
+                     │
+           C5 — Headers Next.js
+                     │
+       C6/C7 — CSP Report-Only
+          (localhost:3000, console)
+                     │
+          Tests + corrections CSP
+             (boucle locale, §13.1)
+                     │
+              ┌──────┴──────┐
+              │             │
+              ▼             ▼
+           STAGING      (rester en local
+              │          tant que pas prêt)
+     domaine + HTTPS réels (D1/D2/D10)
+              │
+       Reporting CSP réel (D7)
+              │
+      Observation 3-7 jours
+              │
+          C9 — Enforce
+              │
+       Observation 1-2 semaines
+              │
+       Phase C — Harden
+              │
+          PRODUCTION
+   (D1/D2 définitifs à ce stade)
+```
+
+**Chemin minimal pour démarrer aujourd'hui** (aucune étape ci-dessous ne nécessite domaine, certificat, reverse-proxy ou staging) :
+
+1. Tag/commit de sauvegarde avant de commencer
+2. C1 — installer Helmet
+3. C2 — créer `helmet.config.ts`
+4. C3 — brancher Helmet
+5. Tester Better Auth + API + uploads (`localhost:3001`)
+6. C4 — automatiser les tests headers
+7. C5 — headers Next.js
+8. C6/C7 — CSP Report-Only (`localhost:3000`)
+9. Tester/corriger l'allowlist (boucle)
+10. Seulement ensuite : préparer staging
+11. Puis HTTPS + domaine de staging (D1/D2/D10)
+12. Puis Phase B (Enforce)
+13. Puis Phase C (Harden)
+14. Puis production (D1/D2 définitifs)
+
+> Les étapes 1 à 9 sont réalisables **dès maintenant**, sans attendre aucune décision de domaine/infra.
 
 ---
 
@@ -641,7 +747,7 @@ production
 | R4 | Le passage **nonce** (Phase C) force le rendu dynamique → perte statique/ISR/PPR/CDN sur des pages publiques normalement statiques | Élevée si nonce choisi | Élevé (perf) | C11 | Préférer **SRI** (expérimental) pour garder le statique ; ne pas choisir nonce « par réflexe » |
 | R5 | `preload: true` activé trop tôt (erreur de commit/copier-coller) → engagement quasi irréversible (~2 ans, listes navigateurs) | Faible (documenté `false`) | 🔴 Critique si ça arrive | C12 | Revue de code obligatoire sur ce champ ; ne jamais committer `preload:true` avant fin Phase C |
 | R6 | Un domaine externe manquant dans l'allowlist casse une intégration **silencieusement** (pas d'erreur visible hors console) | Moyenne | Moyen | C6/C7/C9 | Vérifier la console + matrice §3.3 à **chaque** phase, pas seulement à la fin |
-| R7 | D1/D2/D7 non tranchées avant C6 → CSP écrite avec des placeholders (`<API_ORIGIN>`) jamais remplacés en prod | Moyenne | Élevé | C6 | Bloquer C6 tant que D1/D2/D7 ne sont pas actées (gate explicite en 13.0) |
+| R7 | *(reformulé v9 — D1/D2/D7 ne bloquent plus C6)* : coder un domaine **en dur** pendant le dev local au lieu de lire `process.env.FRONT_URL`/`API_URL` → oubli de rendre l'origine configurable, D1/D2 remplacés trop tard/mal | Faible si `process.env` respecté dès C3 | Élevé si oublié | C3/C6 | Toujours lire l'origine via variable d'environnement dès C3 (jamais de domaine en dur) — voir §13.0 |
 | R8 | La version Helmet réellement installée diffère de la v8.3.0 vérifiée (nouvelle release entre-temps) | Faible | Moyen | C1/C2 | Toujours refaire `npm ls helmet` + relire la doc de LA version installée avant d'écrire `helmet.config.ts` |
 | R9 | `compression` (si D9 retenu) compresse des réponses sensibles (session/tokens) → vecteur BREACH | Faible (D9 recommandé = Helmet seul) | Moyen | C1 | Ne compresser que les réponses non sensibles si D9 évolue vers « + compression » |
 | R10 | Cache navigateur du HSTS empêchant un rollback rapide en cas de souci | Faible | Moyen-Élevé | C10/C12 | Montée progressive du `max-age` déjà prévue (phase-a→b→c), jamais de saut direct à 1 an |

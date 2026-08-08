@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { TestimonialDto } from './DTO/testimonial.DTO.js';
-import { ResultDto } from './DTO/result.DTO.js'; 
+import { ResultDto } from './DTO/result.DTO.js';
 
 @Injectable()
 export class CommunityService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async getTestimonials() {
     return this.prisma.testimonial.findMany({
@@ -64,7 +64,7 @@ export class CommunityService {
     return this.prisma.testimonial.create({
       data: {
         name: data.name,
-        role: data.role ,
+        role: data.role,
         rating: data.rating ?? 0,
         content: data.content ?? '',
         isVisible: data.isVisible,

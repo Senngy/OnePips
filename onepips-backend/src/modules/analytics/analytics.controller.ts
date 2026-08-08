@@ -11,7 +11,11 @@ export class AnalyticsController {
 
   @Get('overview')
   @UseGuards(AuthGuard, PermissionsGuard)
-  @Permissions(Permission.LEADS_READ, Permission.APPLICATIONS_READ, Permission.PAYMENTS_READ)
+  @Permissions(
+    Permission.LEADS_READ,
+    Permission.APPLICATIONS_READ,
+    Permission.PAYMENTS_READ,
+  )
   async getOverview() {
     return this.analyticsService.getOverview();
   }

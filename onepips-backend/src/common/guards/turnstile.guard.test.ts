@@ -30,7 +30,10 @@ test('sends the runtime Turnstile secret to Cloudflare when a token is provided'
   process.env.TURNSTILE_BYPASS_TOKEN = 'DEV_BYPASS';
 
   global.fetch = async (url: string | URL | Request, options?: RequestInit) => {
-    calls.push({ url: typeof url === 'string' ? url : url.toString(), options: { body: options?.body?.toString() } });
+    calls.push({
+      url: typeof url === 'string' ? url : url.toString(),
+      options: { body: options?.body?.toString() },
+    });
     return {
       json: async () => ({ success: true }),
     } as Response;
@@ -48,7 +51,10 @@ test('sends the runtime Turnstile secret to Cloudflare when a token is provided'
 
     assert.equal(result, true);
     assert.equal(calls.length, 1);
-    assert.equal(calls[0].url, 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
+    assert.equal(
+      calls[0].url,
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+    );
     assert.match(calls[0].options?.body ?? '', /secret=runtime-secret/);
     assert.match(calls[0].options?.body ?? '', /response=token-value/);
   } finally {

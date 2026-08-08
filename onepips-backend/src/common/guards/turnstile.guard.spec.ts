@@ -27,7 +27,7 @@ describe('TurnstileGuard', () => {
       json: async () => ({ success: true }),
     });
 
-    global.fetch = fetchSpy as unknown as typeof fetch;
+    global.fetch = fetchSpy;
 
     const { TurnstileGuard } = await import('./turnstile.guard');
     const guard = new TurnstileGuard(new Reflector());

@@ -10,5 +10,4 @@ export class EventUpdateDto {
 
   @IsDateString()
   startsAt?: string;
-
 }

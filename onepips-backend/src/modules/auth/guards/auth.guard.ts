@@ -1,16 +1,16 @@
-import { 
-  Injectable, 
-  CanActivate, 
-  ExecutionContext, 
-  UnauthorizedException
- } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../auth.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
- constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
     console.log(
@@ -18,7 +18,6 @@ export class AuthGuard implements CanActivate {
       req.method,
       req.originalUrl,
     );
-
 
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
@@ -29,7 +28,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-     const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         id: session.user.id,
       },
@@ -49,7 +48,7 @@ export class AuthGuard implements CanActivate {
 
     req.user = user;
     req.session = session.session;
-    
+
     console.log('✅ AuthGuard: Authenticated user:', {
       id: user.id,
       email: user.email,

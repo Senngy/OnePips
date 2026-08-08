@@ -6,9 +6,17 @@ import { calculateScore, getLeadStatus } from '../../common/utils/scoring.js';
 
 @Injectable()
 export class LeadsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-  async findAll(query?: { page?: number; limit?: number; status?: string; score?: number; search?: string, minScore?: number; maxScore?: number }) {
+  async findAll(query?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    score?: number;
+    search?: string;
+    minScore?: number;
+    maxScore?: number;
+  }) {
     const where: any = {};
     console.log('[API] Query received in service:', query);
 
@@ -33,7 +41,7 @@ export class LeadsService {
           where,
           skip: ((query?.page || 1) - 1) * (query?.limit || 10),
           take: query?.limit || 10,
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: 'desc' },
         }),
         this.prisma.lead.count({ where }),
       ]);
@@ -56,7 +64,7 @@ export class LeadsService {
         where,
         skip: ((query?.page || 1) - 1) * (query?.limit || 10),
         take: query?.limit || 10,
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
       }),
       this.prisma.lead.count({ where }),
     ]);
@@ -69,14 +77,13 @@ export class LeadsService {
         lastPage: Math.ceil(total / (query?.limit || 10)),
       },
     };
-  };
-
+  }
 
   async create(dto: CreateLeadDto) {
-    console.log('[API lead service] create : called')
+    console.log('[API lead service] create : called');
     const score = calculateScore(dto);
     const status = getLeadStatus(score);
-    console.log('[API lead service] create', dto)
+    console.log('[API lead service] create', dto);
 
     // Exclude cfTurnstileToken from persistence (it's only for validation)
     const { cfTurnstileToken, ...safeDto } = dto;
@@ -117,7 +124,8 @@ export class LeadsService {
       interests: dto.interests ?? existing.interests ?? undefined,
       markets: dto.markets ?? existing.markets ?? undefined,
       accountType: dto.accountType ?? existing.accountType ?? undefined,
-      budgetFormation: dto.budgetFormation ?? existing.budgetFormation ?? undefined,
+      budgetFormation:
+        dto.budgetFormation ?? existing.budgetFormation ?? undefined,
       budgetTrading: dto.budgetTrading ?? existing.budgetTrading ?? undefined,
     };
 

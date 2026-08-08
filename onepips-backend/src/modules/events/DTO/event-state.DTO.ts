@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsArray, IsObject, IsInt, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsObject,
+  IsInt,
+  IsBoolean,
+} from 'class-validator';
 
 export class EventStateDto {
   @IsBoolean()

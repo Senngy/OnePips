@@ -6,5 +6,5 @@ import { CommunityController } from './community.controller.js';
   controllers: [CommunityController],
   providers: [CommunityService],
   exports: [CommunityService],
-})    
+})
 export class CommunityModule {}

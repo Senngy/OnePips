@@ -1,11 +1,19 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { CommunityService } from './community.service.js';
 import { ResultDto } from './DTO/result.DTO.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import { PermissionsGuard } from '../permissions/guards/permissions.guard.js';
 import { Permissions } from '../permissions/decorators/permissions.decorator.js';
 import { Permission } from '../../../generated/prisma/client.js';
-
 
 @Controller('community')
 export class CommunityController {
@@ -57,7 +65,10 @@ export class CommunityController {
   @Patch('results/:id')
   @UseGuards(AuthGuard, PermissionsGuard)
   @Permissions(Permission.COMMUNITY_WRITE)
-  async updateResult(@Param('id') id: string, @Body() body: Partial<ResultDto>) {
+  async updateResult(
+    @Param('id') id: string,
+    @Body() body: Partial<ResultDto>,
+  ) {
     return this.communityService.updateResult(id, body);
   }
 

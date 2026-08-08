@@ -1,12 +1,12 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Param, 
-  Patch, 
-  UseGuards
- } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { EventsService } from './events.service.js';
 import { EventStateDto } from './DTO/event-state.DTO.js';
 import { EventCreateDto } from './DTO/create-event.DTO.js';
@@ -33,7 +33,7 @@ export class EventsController {
   }
 
   @Get('state')
-  async getEventState(): Promise<EventStateDto>  {
+  async getEventState(): Promise<EventStateDto> {
     return this.eventsService.getEventState();
   }
 

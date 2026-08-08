@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { CreateApplicationDto } from './dto/create-application.dto.js';
 import { CreateDirectApplicationDto } from './dto/create-direct-application.dto.js';
@@ -6,7 +10,7 @@ import { calculateScore, getLeadStatus } from '../../common/utils/scoring.js';
 
 @Injectable()
 export class ApplicationsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll() {
     return this.prisma.application.findMany({ include: { lead: true } });
@@ -28,7 +32,9 @@ export class ApplicationsService {
     });
 
     if (existing) {
-      throw new ConflictException('Cette candidature a déjà été soumise. Vous allez être recontacté par notre équipe.');
+      throw new ConflictException(
+        'Cette candidature a déjà été soumise. Vous allez être recontacté par notre équipe.',
+      );
     }
 
     // 2. Compute score for the application
@@ -86,7 +92,7 @@ export class ApplicationsService {
   async createDirect(dto: CreateDirectApplicationDto) {
     // Exclude cfTurnstileToken from persistence (it's only for validation)
     const { cfTurnstileToken, ...safeDto } = dto;
-    
+
     const score = calculateScore(safeDto);
     const status = getLeadStatus(score);
 

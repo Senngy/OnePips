@@ -7,17 +7,17 @@ import { EventUpdateDto } from './DTO/update-event.DTO.js';
 
 @Injectable()
 export class EventsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
   async findAll() {
     return this.prisma.event.findMany({
       orderBy: {
-        startsAt: 'asc'
+        startsAt: 'asc',
       },
-      include : {
+      include: {
         _count: {
-          select: { participants: true }
-        } 
-      }
+          select: { participants: true },
+        },
+      },
     });
   }
 
@@ -25,16 +25,16 @@ export class EventsService {
     return this.prisma.event.findMany({
       where: {
         startsAt: {
-          gte: new Date()
+          gte: new Date(),
         },
       },
       orderBy: {
-        startsAt: 'asc'
+        startsAt: 'asc',
       },
-      include : {
+      include: {
         _count: {
-          select: { participants: true }
-        }, 
+          select: { participants: true },
+        },
       },
     });
   }
@@ -47,7 +47,7 @@ export class EventsService {
         startsAt: dto.startsAt,
         isPublished: dto.isPublished ?? false,
         isCanceled: dto.isCanceled ?? false,
-      }
+      },
     });
   }
 
@@ -58,7 +58,7 @@ export class EventsService {
         title: dto.title,
         description: dto.description,
         startsAt: dto.startsAt,
-      }
+      },
     });
   }
 
@@ -68,13 +68,13 @@ export class EventsService {
         isPublished: true,
         isCanceled: false,
         startsAt: {
-          gte: now
-        }
+          gte: now,
+        },
       },
       orderBy: {
-        startsAt: 'asc'
-      }
-    })
+        startsAt: 'asc',
+      },
+    });
   }
 
   async getEventState(): Promise<EventStateDto> {
@@ -84,20 +84,20 @@ export class EventsService {
       nextEvent, // details of the next event or null if none
     };
   }
-  async register( dto: CreateLeadDto, eventId?: string,) {
+  async register(dto: CreateLeadDto, eventId?: string) {
     // Exclude cfTurnstileToken from persistence (it's only for validation)
     const { cfTurnstileToken, ...safeDto } = dto;
-    
+
     const lead = await this.prisma.lead.upsert({
       where: { email: safeDto.email },
       create: {
         ...safeDto,
-        source: "live",
+        source: 'live',
       },
       update: safeDto,
     });
-    
-    if(!eventId) {
+
+    if (!eventId) {
       const nextEvent = await this.getNextEvent();
       if (!nextEvent) {
         throw new Error('No upcoming event found for registration');
@@ -118,7 +118,7 @@ export class EventsService {
   async cancelEvent(eventId: string) {
     return this.prisma.event.update({
       where: { id: eventId },
-      data: { 
+      data: {
         isCanceled: true,
         isPublished: false, // Optionally unpublish the event when canceled
       },
@@ -128,25 +128,29 @@ export class EventsService {
   async publishEvent(eventId: string) {
     return this.prisma.event.update({
       where: { id: eventId },
-      data: { 
+      data: {
         isPublished: true,
         isCanceled: false, // Ensure the event is not marked as canceled when published
       },
     });
   }
 
-  async getEventParticipants(eventId: string, page: number = 1, limit: number = 10) {
+  async getEventParticipants(
+    eventId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
     const eventParticipants = await this.prisma.eventParticipant.findMany({
       where: { eventId },
       include: {
         lead: true, // Include lead details for each participant
       },
-      orderBy: { joinedAt: 'asc' }, 
+      orderBy: { joinedAt: 'asc' },
     });
     return this.prisma.lead.findMany({
       where: {
         id: {
-          in: eventParticipants.map(ep => ep.leadId),
+          in: eventParticipants.map((ep) => ep.leadId),
         },
       },
     });
@@ -156,16 +160,16 @@ export class EventsService {
     return this.prisma.event.findMany({
       where: {
         startsAt: {
-          lt: new Date()
+          lt: new Date(),
         },
       },
       orderBy: {
-        startsAt: 'desc'
+        startsAt: 'desc',
       },
-      include : {
+      include: {
         _count: {
-          select: { participants: true }
-        }, 
+          select: { participants: true },
+        },
       },
     });
   }

@@ -1,7 +1,6 @@
 import { IsString, IsNumber, IsOptional, IsDateString } from 'class-validator';
 
 export class ResultDto {
-
   @IsString()
   title: string = '';
 

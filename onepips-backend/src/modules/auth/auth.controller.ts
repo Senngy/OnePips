@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';
 import { auth } from './auth.js';
 
-const betterAuthHandler = toNodeHandler(auth as any);
+const betterAuthHandler = toNodeHandler(auth);
 
 @Controller('auth')
 export class AuthController {

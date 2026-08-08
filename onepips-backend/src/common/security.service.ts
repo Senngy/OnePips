@@ -13,7 +13,7 @@ export class SecurityService implements OnModuleInit {
 
   /**
    * Vérifie qu'il existe exactement 1 SUPER_ADMIN
-   * 
+   *
    * Si 0 ou >1, le serveur refuse de démarrer
    * Cela garantit l'intégrité du modèle de sécurité
    */
@@ -45,4 +45,3 @@ export class SecurityService implements OnModuleInit {
     }
   }
 }
-

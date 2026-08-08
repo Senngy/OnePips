@@ -1,4 +1,9 @@
-import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import type { User, Role } from '../../../generated/prisma/client.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
@@ -44,7 +49,8 @@ export class UsersService {
     return Promise.all(
       users.map(async (user) => ({
         ...user,
-        effectivePermissions: await this.permissionsService.getEffectivePermissions(user.id),
+        effectivePermissions:
+          await this.permissionsService.getEffectivePermissions(user.id),
       })),
     );
   }

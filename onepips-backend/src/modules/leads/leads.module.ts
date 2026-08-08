@@ -7,4 +7,4 @@ import { LeadsController } from './leads.controller.js';
   providers: [LeadsService],
   exports: [LeadsService],
 })
-export class LeadsModule { }
+export class LeadsModule {}

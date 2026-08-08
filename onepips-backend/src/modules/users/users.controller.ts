@@ -1,4 +1,12 @@
-import { Controller, Get, Body, Param, UseGuards, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Body,
+  Param,
+  UseGuards,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
@@ -42,11 +50,7 @@ export class UsersController {
     @Body('role') newRole: string,
     @CurrentUser() currentUser: User,
   ) {
-    return this.usersService.updateRole(
-      userId,
-      newRole as any,
-      currentUser,
-    );
+    return this.usersService.updateRole(userId, newRole as any, currentUser);
   }
 
   @Patch(':id/permissions')
@@ -54,7 +58,8 @@ export class UsersController {
   @Roles(Role.SUPER_ADMIN)
   async updatePermissions(
     @Param('id') userId: string,
-    @Body('permissions') permissions: { permission: string; granted: boolean }[],
+    @Body('permissions')
+    permissions: { permission: string; granted: boolean }[],
   ) {
     return this.usersService.updatePermissions(userId, permissions);
   }

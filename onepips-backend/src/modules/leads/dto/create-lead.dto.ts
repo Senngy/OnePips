@@ -1,45 +1,47 @@
 import { IsEmail, IsOptional, IsString, IsArray, IsInt } from 'class-validator';
 
 export class CreateLeadDto {
-    @IsOptional()
-    @IsString()
-    cfTurnstileToken?: string;
+  @IsOptional()
+  @IsString()
+  cfTurnstileToken?: string;
 
-    @IsString()
-    name: string;
+  @IsString()
+  name: string;
 
-    @IsEmail()
-    email: string;
+  @IsEmail()
+  email: string;
 
-    @IsOptional()
-    @IsString()
-    phone?: string;
+  @IsOptional()
+  @IsString()
+  phone?: string;
 
-    @IsOptional()
-    @IsString()
-    source?: string;
+  @IsOptional()
+  @IsString()
+  source?: string;
 
-    @IsOptional()
-    @IsArray()
-    interests?: ('PRIVATE_COACHING' | 'SIGNALS' | 'LIVES_SUBSCRIPTION' | 'ONE_TO_ONE')[];
+  @IsOptional()
+  @IsArray()
+  interests?: (
+    'PRIVATE_COACHING' | 'SIGNALS' | 'LIVES_SUBSCRIPTION' | 'ONE_TO_ONE'
+  )[];
 
-    @IsOptional()
-    @IsInt()
-    tradingYears?: number;
+  @IsOptional()
+  @IsInt()
+  tradingYears?: number;
 
-    @IsOptional()
-    @IsInt()
-    budgetFormation?: number;
+  @IsOptional()
+  @IsInt()
+  budgetFormation?: number;
 
-    @IsOptional()
-    @IsInt()
-    budgetTrading?: number;
+  @IsOptional()
+  @IsInt()
+  budgetTrading?: number;
 
-    @IsOptional()
-    @IsArray()
-    markets?: ('CFD' | 'CRYPTO' | 'FUTURES')[];
+  @IsOptional()
+  @IsArray()
+  markets?: ('CFD' | 'CRYPTO' | 'FUTURES')[];
 
-    @IsOptional()
-    @IsArray()
-    accountType?: ('PERSONAL' | 'DEMO' | 'PROPFIRM')[];
+  @IsOptional()
+  @IsArray()
+  accountType?: ('PERSONAL' | 'DEMO' | 'PROPFIRM')[];
 }

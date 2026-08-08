@@ -4,13 +4,7 @@ import { PermissionsGuard } from './guards/permissions.guard.js';
 
 @Global()
 @Module({
-  providers: [
-    PermissionsService,
-    PermissionsGuard,
-  ],
-  exports: [
-    PermissionsService,
-    PermissionsGuard,
-  ],
+  providers: [PermissionsService, PermissionsGuard],
+  exports: [PermissionsService, PermissionsGuard],
 })
 export class PermissionsModule {}

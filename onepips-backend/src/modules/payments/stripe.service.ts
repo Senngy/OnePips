@@ -12,7 +12,9 @@ export class StripeService {
         apiVersion: '2025-01-27' as any,
       });
     } else {
-      console.warn('Stripe API key is not configured. Stripe features will be disabled.');
+      console.warn(
+        'Stripe API key is not configured. Stripe features will be disabled.',
+      );
     }
   }
 

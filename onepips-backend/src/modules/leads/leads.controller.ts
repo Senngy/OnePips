@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Query, Patch, Param, Delete, BadRequestException, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  Patch,
+  Param,
+  Delete,
+  BadRequestException,
+  UseGuards,
+} from '@nestjs/common';
 import { LeadsService } from './leads.service.js';
 import { CreateLeadDto } from './dto/create-lead.dto.js';
 import { UpdateLeadDto } from './dto/update-lead.dto.js';
@@ -11,14 +22,14 @@ import { Permission } from '../../../generated/prisma/client.js';
 
 @Controller('leads')
 export class LeadsController {
-  constructor(private readonly leadsService: LeadsService) { }
+  constructor(private readonly leadsService: LeadsService) {}
 
   @Get()
   @UseGuards(AuthGuard, PermissionsGuard)
   @Permissions(Permission.LEADS_READ)
   async findAll(
-    @Query("page") page: number = 1,
-    @Query("limit") limit: number = 10,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
     @Query('status') status?: string,
     @Query('score') score?: number,
     @Query('search') search?: string,
@@ -55,10 +66,7 @@ export class LeadsController {
   @Patch(':id')
   @UseGuards(AuthGuard, PermissionsGuard)
   @Permissions(Permission.LEADS_WRITE)
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdateLeadDto,
-  ) {
+  async update(@Param('id') id: string, @Body() dto: UpdateLeadDto) {
     return this.leadsService.update(id, dto);
   }
 

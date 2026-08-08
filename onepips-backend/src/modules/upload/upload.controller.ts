@@ -1,4 +1,14 @@
-import { BadRequestException, Controller, Get, Post, Req, Res, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+  UseGuards,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { randomBytes } from 'node:crypto';
@@ -25,7 +35,8 @@ function ensureUploadDirectory() {
 }
 
 function createSafeFilename(originalName: string, mimeType: string) {
-  const extension = ALLOWED_MIME_TYPES[mimeType] ?? extname(originalName).toLowerCase();
+  const extension =
+    ALLOWED_MIME_TYPES[mimeType] ?? extname(originalName).toLowerCase();
   const basenameSanitized = basename(originalName, extname(originalName))
     .replace(/[^a-zA-Z0-9-_]/g, '-')
     .replace(/-+/g, '-')
@@ -66,7 +77,12 @@ export class UploadController {
       }),
       fileFilter: (_req, file, cb) => {
         if (!ALLOWED_MIME_TYPES[file.mimetype]) {
-          return cb(new BadRequestException('Format de fichier invalide. Seuls JPG, PNG, WebP et GIF sont acceptés.'), false);
+          return cb(
+            new BadRequestException(
+              'Format de fichier invalide. Seuls JPG, PNG, WebP et GIF sont acceptés.',
+            ),
+            false,
+          );
         }
         cb(null, true);
       },
@@ -77,7 +93,9 @@ export class UploadController {
   )
   uploadFile(@UploadedFile() file: any, @Req() req: Request) {
     if (!file) {
-      throw new BadRequestException('Aucun fichier reçu. Assurez-vous d’envoyer le champ `file`.');
+      throw new BadRequestException(
+        'Aucun fichier reçu. Assurez-vous d’envoyer le champ `file`.',
+      );
     }
 
     const protocol = req.protocol;

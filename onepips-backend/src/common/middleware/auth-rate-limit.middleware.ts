@@ -13,12 +13,18 @@ export class AuthRateLimitMiddleware implements NestMiddleware {
       // Only apply to auth routes (API prefix included)
       if (!path.startsWith('/api/auth')) return next();
 
-      const ip = (req.ip || req.headers['x-forwarded-for'] || (req.connection && (req.connection as any).remoteAddress) || '') as string;
+      const ip = (req.ip ||
+        req.headers['x-forwarded-for'] ||
+        (req.connection && (req.connection as any).remoteAddress) ||
+        '') as string;
       const now = Date.now();
       const windowMs = 60 * 1000; // 1 minute
 
       // Stricter limits for sign-in / sign-up / forgot-password
-      const isSensitive = /sign-in|sign-up|forgot-password|sign-in\/email|sign-up\/email/.test(path);
+      const isSensitive =
+        /sign-in|sign-up|forgot-password|sign-in\/email|sign-up\/email/.test(
+          path,
+        );
       const limit = isSensitive ? 5 : 100; // 5/min for auth sensitive endpoints
 
       const key = `${ip}:${path}`;

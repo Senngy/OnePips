@@ -4,7 +4,7 @@ import type { User } from '../../../generated/prisma/client.js';
 /**
  * Décorateur pour récupérer l'utilisateur courant
  * depuis la requête (attaché par AuthGuard)
- * 
+ *
  * Usage:
  * @Get()
  * @UseGuards(AuthGuard)
