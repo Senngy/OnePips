@@ -1,4 +1,5 @@
 import { api } from "../api-client";
+import type { Lead } from "./leads.service";
 
 export type DirectApplicationPayload = {
     name: string;
@@ -44,21 +45,21 @@ export type ApplicationDto = {
 };
 
 export const createApplication = (data: ApplicationDto) =>
-    api("/applications", {
+    api<ApplicationDto>("/applications", {
         method: "POST",
         body: JSON.stringify(data),
     });
 
-export const getApplications = () => api("/applications");
+export const getApplications = () => api<ApplicationDto[]>("/applications");
 
 export const updateApplicationStatus = (id: string, status: string) =>
-    api(`/applications/${id}/status`, {
+    api<ApplicationDto>(`/applications/${id}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
     });
 
 export const createDirectApplication = (data: DirectApplicationPayload) =>
-    api("/applications/direct", {
+    api<{ lead: Lead; application: ApplicationDto }>("/applications/direct", {
         method: "POST",
         body: JSON.stringify(data),
     });

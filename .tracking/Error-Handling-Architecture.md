@@ -1,7 +1,8 @@
 # Error Handling Architecture — Audit & Plan
 
-> Créé : 17/08/2026 · Mis à jour : 24/08/2026 · Version : v6 (Phase 3 implémentée et validée — `api<T>()` + `ApiError` refactorée)
-> Statut global : ✅ Phase 0 complétée · ✅ Phase 1 validée (contrat figé) · ✅ Phase 2 implémentée et validée · ✅ Phase 3 implémentée et validée · ⬜ Phase 4 en attente d'autorisation
+> Créé : 17/08/2026 · Mis à jour : 24/08/2026 · Version : v9 (Phase 5 validée — typage `api<T>()` + décision `UNKNOWN_ERROR` frontend-only)
+> Statut global : ✅ Phase 0 complétée · ✅ Phase 1 validée · ✅ Phase 2 validée · ✅ Phase 3 validée · ✅ Phase 4 validée · ✅ Phase 5 validée · 📋 Phases 6-9 planifiées, en attente d'autorisation phase par phase
+> **Document distinct de `RBAC-v3-audit.md`.** Ce document est propriétaire du contrat d'erreur (`ApiErrorResponse`, codes, `requestId`, `api<T>()`) et de son intégration progressive dans les domaines métier. `RBAC-v3-audit.md` reste seul propriétaire d'`AuthGuard`, `RolesGuard`, `PermissionsGuard`, `User.status`, `Session.status`, `lastLoginAt`, permissions, révocation de session. Voir §8bis pour la répartition détaillée et §14 pour les checkpoints de synchronisation.
 > **Ce document est la référence unique pour l'implémentation.** Objectif : pouvoir dire à un développeur (humain ou agent) *"Implémente uniquement la Phase 2 de ce document"* et qu'il sache précisément quoi faire, quoi ne pas toucher, et comment valider son travail — sans avoir à refaire l'analyse d'architecture.
 
 ---
@@ -359,12 +360,24 @@ Avec un typage correct, ces trois lignes doivent produire une **erreur de compil
 | `CONFLICT` | 409 | Fallback générique, et `PrismaClientKnownRequestError P2002` | 2 |
 | `RATE_LIMIT_EXCEEDED` | 429 | `ThrottlerException` | 2 |
 | `INTERNAL_ERROR` | 500 | Toute erreur non catchée, `Error` natif, Prisma non mappée | 2 |
+| `UNKNOWN_ERROR` | — | **Frontend-only** — fallback de `api-client.ts` quand le corps d'erreur reçu n'est pas un `ApiErrorResponse` (proxy, gateway, réponse non conforme). Jamais émis par le backend | 5 |
 | `SECURITY_TURNSTILE_REQUIRED` | 400 | `TurnstileGuard` — token absent | 4 |
 | `SECURITY_TURNSTILE_INVALID` | 400 | `TurnstileGuard` — vérification Cloudflare échouée | 4 |
 | `SECURITY_TURNSTILE_MISCONFIGURED` | 500 | `TurnstileGuard` — secret absent | 4 |
+| `LEAD_NOT_FOUND` | 404 | `LeadsService.update` / `ApplicationsService.create` — lead inexistant | 6 |
+| `APPLICATION_ALREADY_EXISTS` | 409 | `ApplicationsService.create` — candidature déjà soumise pour ce lead | 6 |
 
-> **Note de périmètre** : les codes fallback (`BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, etc.) apparaissent dès la Phase 2 **sans modifier** `auth.guard.ts`, `roles.guard.ts` ou `permissions.guard.ts` — le filtre les déduit uniquement du `statusCode` déjà levé par ces guards existants. Ces codes sont volontairement **génériques** : les codes métier précis (ex. `AUTH_SESSION_REQUIRED`, `AUTHZ_PERMISSION_INSUFFICIENT`) seront fournis par les guards eux-mêmes lors de leur migration (Phase 5+, hors périmètre).
-> Les codes métier de domaine (`LEAD_NOT_FOUND`, `APPLICATION_ALREADY_EXISTS`, etc.) ne sont **pas** créés dans ce chantier — ils appartiennent à la Phase 5+ (hors périmètre, §11).
+**Distinction `INTERNAL_ERROR` vs `UNKNOWN_ERROR` (figée le 24/08) :**
+
+| Code | Origine | HTTP | Sens |
+|---|---|---|---|
+| `INTERNAL_ERROR` | **Backend** (`GlobalExceptionFilter`) | 500 | Le serveur a réellement rencontré une erreur interne |
+| `UNKNOWN_ERROR` | **Frontend** (`api-client.ts`) | — (fallback local) | Le client a reçu une réponse qu'il ne peut pas interpréter comme `ApiErrorResponse` — problème de contrat, proxy, gateway, réponse non conforme |
+
+> **Règle importante** : `UNKNOWN_ERROR` ne doit **jamais** être utilisé pour remplacer une erreur métier backend connue. C'est uniquement le fallback du `api-client` lorsque le corps reçu ne peut pas être interprété comme `ApiErrorResponse`. Il ne doit pas « mentir » en transformant « je ne comprends pas la réponse » en « le serveur a généré une erreur interne ».
+
+> **Note de périmètre** : les codes fallback (`BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, etc.) apparaissent dès la Phase 2 **sans modifier** `auth.guard.ts`, `roles.guard.ts` ou `permissions.guard.ts` — le filtre les déduit uniquement du `statusCode` déjà levé par ces guards existants. Ces codes sont volontairement **génériques** : les codes métier précis (ex. `AUTH_SESSION_REQUIRED`, `AUTHZ_PERMISSION_INSUFFICIENT`) seront fournis par les guards eux-mêmes lors de leur migration (Phase 9, coordonnée avec `RBAC-v3-audit.md`).
+> Les codes métier de domaine `LEAD_NOT_FOUND` et `APPLICATION_ALREADY_EXISTS` sont créés en Phase 6 (Leads + Applications). Les codes restants (Events, Payments, Booking, Auth/RBAC) seront créés dans leurs phases respectives, uniquement si le cas métier réel existe.
 
 ---
 
@@ -589,6 +602,51 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 
 ---
 
+## 8bis. COHÉRENCE CROISÉE AVEC `RBAC-v3-audit.md`
+
+> Deux documents distincts, deux propriétaires. Celui-ci ne recopie jamais le détail des décisions RBAC ; il les référence. Audit réalisé le 24/08 par lecture intégrale des deux documents (aucun code source consulté pour cet audit — uniquement les deux `.md`).
+
+### 8bis.1 Répartition de la propriété par sujet
+
+| Sujet | Propriétaire | L'autre document doit... |
+|---|---|---|
+| `ApiErrorResponse` (contrat, forme) | **Error Handling** (§4.1) | RBAC référence ce contrat quand les guards seront migrés (Phase 9), ne redéfinit jamais sa forme |
+| `requestId` (génération, flux) | **Error Handling** (§7) | RBAC référence — implémenté par `RequestIdMiddleware` (Phase 2), couvre déjà le besoin RBAC P0 #9 |
+| Codes génériques (`BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `CONFLICT`, `RATE_LIMIT_EXCEEDED`, `INTERNAL_ERROR`) | **Error Handling** (§5) | RBAC ne les redéfinit pas ; ils s'appliquent déjà par défaut aux guards RBAC non migrés |
+| Codes métier RBAC (`AUTH_SESSION_REQUIRED`, `AUTH_ACCOUNT_INACTIVE`, `AUTHZ_ROLE_INSUFFICIENT`, `AUTHZ_PERMISSION_INSUFFICIENT`) | **RBAC** décide *quand* et avec quelle sémantique ; **Error Handling** définit *le format* d'émission | Les deux documents doivent citer le même nom une fois le code choisi (Phase 9 ↔ RBAC P0 #38) |
+| `AuthGuard` / `RolesGuard` / `PermissionsGuard` (comportement, ordre, bypass) | **RBAC** (§3, §3.2bis) | Error Handling ne décrit jamais leur logique interne, seulement leur *sortie* (`ApiErrorResponse`) |
+| `User.status` / `Session.status` | **RBAC** (§2.1) | Error Handling n'y touche pas ; référence uniquement pour le futur code `AUTH_ACCOUNT_INACTIVE` |
+| `lastLoginAt` | **RBAC** (§7.2, §12) | Aucune dépendance directe avec Error Handling |
+| Better Auth (config, architecture) | **RBAC** (§1, §4) | Error Handling référence uniquement le comportement du filtre *autour* des réponses Better Auth (`res.headersSent`, D5) |
+| Validation / exceptions HTTP (`ValidationPipe`, `GlobalExceptionFilter`, sémantique des codes HTTP) | **Error Handling** (§3, §5, §9) | RBAC n'a pas de plan de validation propre ; les guards en hériteront lors de leur migration |
+| Exposition d'informations sensibles (`details`, logs) | **Error Handling** (§8) pour la règle générale de non-exposition ; **RBAC** (§8.1-8.3) pour l'audit log métier (qui a fait quoi) | Sujets liés mais distincts — RBAC référence §8 pour la règle générale, garde son propre `AdminAuditLog` (traçabilité métier, pas gestion d'erreur) |
+
+### 8bis.2 Dépendances entre les deux chantiers
+
+- **Phase 9 (Error Handling) dépend de RBAC P0 #38** : la migration d'`AuthGuard` vers des exceptions structurées ne peut avoir de sens métier qu'après (ou avec) l'implémentation du contrôle `User.status`. Sans P0 #38, `AuthGuard` continue de lever des `UnauthorizedException` génériques déjà couvertes par le fallback `UNAUTHORIZED` (§5) — rien ne casse, mais aucun code métier n'est disponible.
+- **RBAC P0 #38/#39 hérite implicitement du contrat Error Handling** : toute distinction future entre "session absente" et "compte désactivé" devra passer par des exceptions structurées `{ code, message, details }` (§6 Exemple E), pas par un format ad hoc.
+- **RBAC P0 #9 (Request ID) est déjà satisfait** par Error Handling Phase 2 — aucune action RBAC requise (mise à jour de statut faite dans ce chantier, voir résumé de sortie).
+
+### 8bis.3 Doublons identifiés et traités
+
+| Doublon | Traitement |
+|---|---|
+| RBAC P0 #9 « Ajouter Request ID » vs Error Handling §7 (implémenté) | RBAC P0 #9 marqué **fait**, référence ajoutée vers ce document §7 |
+| RBAC §8.2 « logs non structurés » vs Error Handling §8.3 (règles de logging) | Pas de doublon de contenu — RBAC référence ce document §8 pour la règle générale ; RBAC garde la responsabilité de l'implémentation dans `AuthGuard`/logs RBAC (P0 #20, non fait) |
+
+### 8bis.4 Incohérence potentielle détectée — décision humaine requise
+
+**Anti-énumération au niveau du `code`, pas seulement du `statusCode`.**
+RBAC (§3.2bis) a délibérément choisi `401` pour *session absente* **et** pour *compte `DISABLED`/`SUSPENDED`*, précisément pour ne pas révéler l'état d'un compte à qui possède un cookie volé. Mais si `AuthGuard` (Phase 9 / RBAC P0 #38) émet un `code` différent pour ces deux cas (ex. `AUTH_SESSION_REQUIRED` vs `AUTH_ACCOUNT_INACTIVE`), l'anti-énumération reste vraie au niveau HTTP (`401` dans les deux cas) mais **serait cassée au niveau applicatif** (le corps JSON permettrait de distinguer les deux cas).
+
+→ **Décision à prendre dans `RBAC-v3-audit.md`** (propriétaire du sujet) : soit un `code` unique pour tous les cas d'authentification 401 (ex. `AUTH_SESSION_REQUIRED` sans distinction), soit accepter une distinction visible au niveau `code` (à justifier explicitement si retenu). **Non tranché à ce jour** — noté également dans `RBAC-v3-audit.md` §3.2bis.
+
+### 8bis.5 Règle de non-régression
+
+Aucune modification future de l'un des deux documents ne doit changer un contrat commun (`ApiErrorResponse`, `requestId`, noms de codes déjà utilisés) sans mettre à jour la référence correspondante dans l'autre document. Voir §14 « Checkpoints inter-documents ».
+
+---
+
 ## 9. PLAN D'IMPLÉMENTATION
 
 > Périmètre strict : **Phases 1 → 4 uniquement**. STOP après Phase 4. Aucune migration Events / Stripe / Auth / RBAC / Users / Permissions / `lastLoginAt` / Session / `User.status` / Prisma schema / Better Auth. Si une modification hors périmètre semble nécessaire pour faire fonctionner une phase : **arrêter, documenter le blocage ici, ne pas modifier le fichier hors périmètre.**
@@ -696,7 +754,7 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 - `npm run build` : exit code 0, aucune erreur.
 - **Corrections intégrées pendant la validation** :
   1. `LoggerMiddleware` : `>= 500` → `error`, `>= 400` → `warn`, sinon → `log` (conforme D2).
-  2. `GENERIC_CODE_BY_STATUS` : mapping volontairement **générique** — `401 → UNAUTHORIZED`, `403 → FORBIDDEN` (au lieu de `AUTH_SESSION_REQUIRED` / `AUTHZ_PERMISSION_INSUFFICIENT`, jugés trop spécifiques pour un fallback). Les codes métier précis seront posés par les guards eux-mêmes lors de leur migration (Phase 5+, hors périmètre).
+  2. `GENERIC_CODE_BY_STATUS` : mapping volontairement **générique** — `401 → UNAUTHORIZED`, `403 → FORBIDDEN` (au lieu de `AUTH_SESSION_REQUIRED` / `AUTHZ_PERMISSION_INSUFFICIENT`, jugés trop spécifiques pour un fallback). Les codes métier précis seront posés par les guards eux-mêmes lors de leur migration (Phase 9, coordonnée avec RBAC).
 
 **Point de validation humaine** : ✅ **Validé le 24/08** — diff limité aux fichiers listés, build OK, corrections D2 + mapping générique appliquées. En attente d'autorisation pour la Phase 3.
 
@@ -772,7 +830,7 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 
 ---
 
-### ⬜ PHASE 4 — Turnstile (premier cas réel)
+### ✅ PHASE 4 — Turnstile (implémentée et validée le 24/08)
 
 **Objectif** : valider le système end-to-end sur le cas concret ayant déclenché ce chantier, et clore la migration `status` → `statusCode` sur les deux seuls fichiers qui l'utilisaient.
 
@@ -782,7 +840,7 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 - `src/components/form/quick-apply-form.tsx`
 
 **Fichiers strictement interdits** :
-- `src/modules/applications/applications.service.ts` (introduire `APPLICATION_ALREADY_EXISTS` nécessiterait de le modifier — **hors périmètre**, reporté en Phase 5+)
+- `src/modules/applications/applications.service.ts` (introduire `APPLICATION_ALREADY_EXISTS` nécessiterait de le modifier — **hors périmètre**, reporté en Phase 6)
 - Tout autre fichier
 
 **Prérequis** : Phase 3 validée.
@@ -806,15 +864,24 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 - Compilation TypeScript : les erreurs sur `.status` identifiées en Phase 3 doivent maintenant disparaître
 
 **Critères d'acceptation** :
-- [ ] Les 3 codes Turnstile (`REQUIRED`, `INVALID`, `MISCONFIGURED`) produits avec les bons `statusCode`
-- [ ] Plus aucun `UnauthorizedException` dans `turnstile.guard.ts`
-- [ ] Plus aucune référence à `.status` sur `ApiError` dans tout le projet frontend
-- [ ] Le bug original (`POST /api/leads` → 401 "Turnstile token is required") est résolu : le comportement observé est maintenant `400 SECURITY_TURNSTILE_REQUIRED`
-- [ ] `applications.service.ts` non modifié
+- [x] Les 3 codes Turnstile (`REQUIRED`, `INVALID`, `MISCONFIGURED`) produits avec les bons `statusCode`
+- [x] Plus aucun `UnauthorizedException` dans `turnstile.guard.ts`
+- [x] Plus aucune référence à `.status` sur `ApiError` dans tout le projet frontend
+- [x] Le bug original (`POST /api/leads` → 401 "Turnstile token is required") est résolu : le comportement observé est maintenant `400 SECURITY_TURNSTILE_REQUIRED`
+- [x] `applications.service.ts` non modifié
 
 **Résultat attendu** : le système de gestion d'erreurs fonctionne end-to-end sur un cas réel, de la levée de l'exception jusqu'à l'affichage UI, avec des codes stables et des messages humains découplés.
 
-**Point de validation humaine** : test manuel complet du formulaire de lead (les 4 scénarios ci-dessus) en environnement de dev avant tout arrêt ou poursuite vers une Phase 5 (qui nécessiterait une nouvelle validation de périmètre, non couverte par ce document).
+**Résultat Phase 4 (implémentation) — validée le 24/08** :
+- Fichiers modifiés : `src/common/guards/turnstile.guard.ts`, `src/components/form/multi-step-form.tsx`, `src/components/form/quick-apply-form.tsx` (aucun créé).
+- `turnstile.guard.ts` : `UnauthorizedException` → `400 SECURITY_TURNSTILE_REQUIRED`, `400 SECURITY_TURNSTILE_INVALID`, `500 SECURITY_TURNSTILE_MISCONFIGURED` (via `InternalServerErrorException`). `try/catch` supprimé (le filtre gère déjà `Error` natif → `500 INTERNAL_ERROR` pour les échecs réseau/parse Cloudflare). `console.log` de debug supprimés (ils loggaient le token Turnstile — violation §8.2).
+- `multi-step-form.tsx` / `quick-apply-form.tsx` : `e.status === 409` → `e.statusCode === 409` ; branche dédiée `e.code === "SECURITY_TURNSTILE_REQUIRED" || "SECURITY_TURNSTILE_INVALID"` (message : *« La vérification de sécurité a échoué. Veuillez réessayer de valider le captcha. »*).
+- Backend `npm run build` : exit 0. Plus aucune référence `.status` sur `ApiError` dans le frontend.
+
+**Point de validation humaine** : ✅ **Validé le 24/08** — migration `statusCode` terminée, aucun `UnauthorizedException` restant, `applications.service.ts` intact. En attente d'une nouvelle validation de périmètre avant les Phases 5-9.
+
+**⚠️ Écart constaté pendant la phase (à traiter AVANT Phase 5) — `api-client.ts` a été modifié en dehors du plan** :
+Après la Phase 3, la signature de `api()` a été passée de `api<T = any>` à `api<T>` (sans défaut), avec ajout d'un garde `isApiErrorResponse()` et d'un fallback `code: "UNKNOWN_ERROR"` (au lieu de `INTERNAL_ERROR`). Conséquence : le typecheck frontend casse dans des fichiers **hors périmètre Phase 4** — `leads.service.ts` (`res` → `unknown`, lignes 90-93), `users/page.tsx` (57), `applications/page.tsx` (44), et dans `multi-step-form.tsx` les usages de `getLeadById`/`createLead` (`lead.name`, `lead.id`). Ces erreurs sont **déjà présentes indépendamment de la Phase 4** et n'ont pas été corrigées ici (périmètre). Ce typage est l'objet de la **Phase 5** (§9).
 
 **Instructions d'implémentation pour DeepSeek :**
 - Modifie uniquement les 3 fichiers listés. Ne touche pas à `applications.service.ts` même si cela semblerait "logique" pour un code `APPLICATION_ALREADY_EXISTS` — ce cas est hors périmètre, documente-le comme tel si tu le rencontres.
@@ -824,23 +891,237 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 
 ---
 
-### ⛔ PHASE 5+ — HORS PÉRIMÈTRE DE CE CHANTIER
+### 📋 PHASES 5 À 9 — MIGRATION PAR DOMAINE (planifiées, non autorisées)
 
-| Domaine | Raison |
-|---------|--------|
-| `events.service.ts` (`throw new Error()`) | Hors périmètre — après validation Phase 4 |
-| `stripe.service.ts` | Hors périmètre |
-| `auth.guard.ts`, `roles.guard.ts`, `permissions.guard.ts` | Hors périmètre — RBAC séparé (`RBAC-v3-audit.md`) |
-| `users.service.ts` | Hors périmètre |
-| `lastLoginAt` | Hors périmètre — chantier RBAC distinct |
-| `User.status`, `Session.status` | Hors périmètre — chantier RBAC distinct |
-| `LEAD_NOT_FOUND`, `APPLICATION_ALREADY_EXISTS` | Nécessitent `leads.service.ts` / `applications.service.ts` — hors périmètre |
-| Prisma schema | Aucune modification dans ce chantier |
-| Better Auth (architecture, plugins, config) | Aucune modification — seul le comportement du filtre **autour** de ses réponses est concerné (D5) |
-| Validation runtime (Zod) | Hors périmètre — décision D9 |
-| Toute librairie tierce nouvelle | Voir §10 |
+> **Séquence** : Phase 5 (typage API frontend) → Phase 6 (Leads+Applications) → Phase 7 (Events+Community+Upload) → Phase 8 (Payments+Booking, checkpoint) → Phase 9 (Auth/RBAC, inter-document avec `RBAC-v3-audit.md`).
+> **Règle d'exécution** : une phase n'est autorisée qu'après la validation complète de la précédente (voir §14 Checkpoint de validation). Aucun code source ne doit être touché sans autorisation phase par phase.
 
 ---
+
+### ✅ PHASE 5 — API typing / contrats frontend (implémentée et validée le 24/08)
+
+**Objectif** : terminer l'adoption de `api<T>()` ; supprimer les retours `unknown` chez les consommateurs identifiés ; typer les services et pages qui utilisent `api()` ; **ne pas restaurer `T = any`**.
+
+**Dépendances** : Phase 3 (contrat `api<T>()` figé). Aucune dépendance RBAC.
+
+**Fichiers concernés** (à confirmer lors de l'implémentation, périmètre indicatif issu de l'audit Phase 4) :
+- `src/lib/services/leads.service.ts` — typer `getLeads`, `getLeadById`, `createLead`, `updateLead`, `updateLeadStatus`, `deleteLead`, `deleteBulkLeads`
+- `src/app/admin/users/page.tsx` — `api<UserWithPerms[]>`
+- `src/app/admin/applications/page.tsx` — `api<ApplicationDto[]>`
+- `src/components/form/multi-step-form.tsx` — usages de `getLeadById`/`createLead`
+- `src/lib/api-client.ts`
+
+**Fichiers interdits** : tout contrôleur/service backend ; `auth.ts` ; `schema.prisma` ; les guards (AuthGuard/RolesGuard/PermissionsGuard/Turnstile) ; tout autre fichier non listé.
+
+**Prérequis** : Phase 4 validée. Types de retour backend connus (lire les DTO/selects réels des services — ne pas inventer).
+
+**Ce qui est déjà acquis** : `api<T>()` retourne `Promise<T>` ; `ApiError` typée ; `upload.service.ts` déjà migré (Phase 3).
+
+**Changements attendus** :
+1. Définir les types de retour réels des endpoints consommés (LeadDto, meta pagination, UserWithPerms, ApplicationDto).
+2. Remplacer les appels `api(...)` non typés par `api<Type>(...)`.
+3. Réconcilier le fallback `UNKNOWN_ERROR` de `api-client.ts` avec §5 : trancher entre `INTERNAL_ERROR` (conforme §5) et `UNKNOWN_ERROR` documenté frontend-only. **Décision à enregistrer ici.**
+4. Aucun changement de comportement runtime — uniquement du typage statique.
+
+**Exemples / patterns** :
+```ts
+// leads.service.ts
+const res = await api<{ data: LeadDto[]; meta: { total: number; page: number; lastPage: number } }>(`/leads${query}`);
+const lead = await api<LeadDto>(`/leads/${id}`);
+```
+
+**Tests** : `npx tsc --noEmit` frontend → plus d'erreur `unknown` sur les fichiers listés ; aucune erreur nouvelle ailleurs.
+
+**Critères d'acceptation** :
+- [x] Plus aucun retour `unknown` chez les consommateurs identifiés
+- [x] `T = any` non restauré
+- [x] Fallback `UNKNOWN_ERROR` vs `INTERNAL_ERROR` tranché et documenté en §5 (option b — `UNKNOWN_ERROR` conservé frontend-only)
+- [x] Aucun fichier hors périmètre modifié
+
+**Résultat Phase 5 (implémentation) — validée le 24/08** :
+- Fichiers modifiés : `src/lib/services/leads.service.ts`, `src/lib/services/applications.service.ts`, `src/app/admin/users/page.tsx` (aucun créé).
+- `leads.service.ts` : ajout du type `Lead` (champs requis `id`/`name`/`email`/`source`/`status`/`createdAt`/`updatedAt` + `score`/`tags`/`application` optionnels) ; typage de `getLeads` → `api<{ data: Lead[]; meta: { total; page; lastPage } }>`, `getLeadById`/`createLead`/`updateLead`/`updateLeadStatus` → `api<Lead>`, `deleteLead`/`deleteBulkLeads` → `api<{ message: string }>`.
+- `applications.service.ts` : `getApplications` → `api<ApplicationDto[]>`, `createApplication`/`updateApplicationStatus` → `api<ApplicationDto>`, `createDirectApplication` → `api<{ lead: Lead; application: ApplicationDto }>`.
+- `users/page.tsx` : `api<UserWithPerms[]>`.
+- Effet en cascade sans modification : `applications/page.tsx`, `multi-step-form.tsx`, `lead-tab.tsx` compilent désormais (leurs erreurs venaient des retours `unknown` de `api()`).
+- `npx tsc --noEmit` : plus aucune erreur `unknown`/`api<T>`. Restent 4 erreurs **préexistantes sans lien** (`new-result-modal.tsx`, `date-picker.tsx` ×2, `turnstile.tsx`) — inchangées avant/après.
+- Décision figée : `UNKNOWN_ERROR` = code frontend-only (fallback `api-client.ts`), distinct de `INTERNAL_ERROR` (backend 500). Voir §5. Aucune modification de `api-client.ts` nécessaire (il utilise déjà `UNKNOWN_ERROR`).
+
+**Checkpoint de validation** : voir §14 (bloc standard).
+
+**Instructions d'implémentation pour DeepSeek** : typer uniquement les fichiers listés ; lire les vrais retours backend avant de typer ; ne pas restaurer `any` ; ne pas toucher au backend ni aux guards ; appliquer le checkpoint §14 avant de considérer la phase terminée.
+
+---
+
+### ⬜ PHASE 6 — Leads + Applications
+
+**Objectif** : migrer les erreurs métier vers les codes structurés, en exploitant le contrat Error Handling en place. Codes attendus : `LEAD_NOT_FOUND`, `APPLICATION_ALREADY_EXISTS` (uniquement si le cas métier existe réellement).
+
+**Dépendances** : Phase 5 (typage fait). Aucune dépendance RBAC.
+
+**Fichiers concernés** :
+- `src/modules/leads/leads.service.ts` — `NotFoundException` → `{ code: 'LEAD_NOT_FOUND', ... }`
+- `src/modules/applications/applications.service.ts` — `ConflictException` → `{ code: 'APPLICATION_ALREADY_EXISTS', ... }`, `NotFoundException` → code adapté
+
+**Fichiers interdits** : tout guard ; `users.service.ts` ; `auth.ts` ; `schema.prisma` ; contrôleurs (sauf si le code actuel y lève déjà des exceptions à structurer — à confirmer).
+
+**Prérequis** : Phase 5 validée. Lecture réelle des `throw` existants dans ces deux services.
+
+**Ce qui est déjà acquis** : `GlobalExceptionFilter` (Phase 2) normalise déjà les `HttpException` structurées ; pattern §6 Exemple E ; le frontend lit déjà `e.code`.
+
+**Changements attendus** :
+1. Recenser les `throw` existants (NotFound/Conflict/Error natif) dans `leads.service.ts` et `applications.service.ts`.
+2. Structurer ceux qui correspondent à un cas métier réel : `{ code, message, details }`.
+3. Supprimer les `console.log` de debug de `leads.service.ts` (§8.3, P9).
+4. Enregistrer les nouveaux codes dans la table §5.
+
+**Exemples / patterns** : §6 Exemple E ; §8bis/Notes existantes.
+
+**Tests** :
+- `curl` : lead inexistant → `404 LEAD_NOT_FOUND` ; application déjà soumise → `409 APPLICATION_ALREADY_EXISTS`
+- Backend `npm run build` : exit 0
+- Aucune régression sur les routes existantes
+
+**Critères d'acceptation** :
+- [ ] `LEAD_NOT_FOUND` et `APPLICATION_ALREADY_EXISTS` produits avec les bons `statusCode`
+- [ ] Aucun nouveau code créé sans cas métier réel
+- [ ] `console.log` de debug retirés de `leads.service.ts`
+- [ ] §5 mis à jour avec les codes ajoutés
+- [ ] Aucun fichier hors périmètre modifié
+
+**Checkpoint de validation** : §14.
+
+**Instructions d'implémentation pour DeepSeek** : ne pas créer de codes « au cas où » ; ne structurer que les `throw` qui ont un cas réel ; utiliser §6 Exemple E ; ne pas toucher aux guards ni à `users.service.ts`.
+
+---
+
+### ⬜ PHASE 7 — Events + Community + Upload
+
+**Objectif** : migrer **uniquement ce qui reste réellement à migrer** côté Error Handling ; supprimer les `throw new Error()` métier/techniques lorsqu'ils doivent devenir structurés ;
+
+Backend :
+- utiliser HttpException structurée { code, message, details }
+- laisser le GlobalExceptionFilter produire ApiErrorResponse
+
+Frontend :
+- les appels api() reçoivent ApiError automatiquement
+
+**Dépendances** : Phase 6.
+
+**Fichiers concernés** :
+- `src/modules/events/events.service.ts` — remplacer `throw new Error(...)` par une `HttpException` structurée si cas métier réel (sinon laisser le filtre mapper en 500)
+- `src/modules/community/` — à auditer pour vérifier ce qui est déjà conforme
+- `src/lib/services/community.service.ts` / `events.service.ts` (frontend) — aligner si nécessaire
+
+**Fichiers interdits** : tout guard ; `users.service.ts` ; `payments` ; `booking`.
+
+**Prérequis** : Phase 6 validée. Audit réel des `throw` et des flux.
+
+**Ce qui est déjà acquis (ne pas refaire)** :
+- **Upload** : ✅ déjà fonctionnellement testé et migré — authentification ✅, permissions ✅, multipart ✅, upload ✅, réponse URL ✅ (`api<{ url: string }>()`, Phase 3). Rien à refaire côté Error Handling.
+- **Community** : à vérifier — si certains flux sont déjà conformes (GET publics, POST/PATCH/DELETE protégés), ne pas les re-migrer.
+
+**Changements attendus** :
+1. Auditer chaque `throw` réel ; ne structurer que les cas métier existants.
+2. `events.service.ts:103` `throw new Error('No upcoming event found for registration')` → cas métier (404) → structurer.
+3. Ne pas inventer de codes pour Community si aucun cas d'erreur métier précis n'existe.
+
+**Tests** : ciblés sur les flux modifiés ; build backend ; pas de régression.
+
+**Critères d'acceptation** :
+- [ ] `throw new Error()` métier restants → structurés là où un cas réel existe
+- [ ] Aucun flux déjà conforme re-migré (Upload notamment)
+- [ ] §5 mis à jour si nouveaux codes
+- [ ] Aucun fichier hors périmètre modifié
+
+**Checkpoint de validation** : §14.
+
+**Instructions d'implémentation pour DeepSeek** : auditer avant de migrer ; documenter explicitement ce qui est « déjà acquis » (Upload) et ne pas y retoucher ; ne structurer que les cas réels.
+
+---
+
+### ⬜ PHASE 8 — Payments + Booking : checkpoint DESIGN/REVIEW/VALIDATION
+
+**Objectif** : ces services ne sont **pas encore implémentés**. Ne pas forcer un design avant leur existence. Fonctionner comme un **checkpoint architectural** : vérifier l'architecture réelle une fois qu'elle existera, puis seulement préparer la migration Error Handling.
+
+**Dépendances** : aucune phase Error Handling ne dépend de Payments/Booking pour avancer ; cette phase est un gate amont.
+
+**Contenu du checkpoint (à exécuter quand Payments/Booking seront réels)** :
+1. Vérifier l'architecture réelle de Payments (Stripe) et Booking (Cal.com ou autre).
+2. Identifier les flux externes : Stripe, webhooks, appels asynchrones.
+3. Identifier : statuts métier, erreurs externes, idempotence, webhooks, erreurs réseau, validation, conflits.
+4. Vérifier comment ces flux s'intègrent au contrat `ApiErrorResponse`.
+5. Définir les codes d'erreur métier **seulement après** connaissance du domaine réel.
+
+**Important** : Cette phase devient active uniquement lorsque Payments et Booking existent réellement.
+Elle constitue un gate de conception et de validation, et non une phase d'implémentation immédiate.
+
+Elle ne bloque pas les autres chantiers tant que ses prérequis ne sont pas satisfaits.
+
+**Fichiers concernés** : aucun pour l'instant (documentation only).
+
+**Checkpoint de validation** : §14 (revue de conception, pas de build).
+
+---
+
+### ⬜ PHASE 9 — Auth / RBAC (inter-document avec `RBAC-v3-audit.md`)
+
+**Objectif** : aligner les guards RBAC sur le contrat `ApiErrorResponse` **sans recréer le plan RBAC**. Ce document définit uniquement *comment* les guards émettent leurs erreurs ; `RBAC-v3-audit.md` reste propriétaire de leur comportement. Error-Handling-Architecture.md est propriétaire du format et du transport des erreurs. RBAC-v3-audit.md est propriétaire de la sémantique et des conditions déclenchant les erreurs RBAC.
+
+Exemple :
+
+- `Error Handling
+AUTHZ_ROLE_INSUFFICIENT
+→ format = 403 + code + message + requestId`
+
+RBAC
+→ détermine quand ce code doit être émis
+
+Ainsi aucun des deux documents ne peut devenir accidentellement propriétaire du mauvais sujet.
+
+**Dépendances** : RBAC P0 #38 (contrôle `User.status` dans `AuthGuard`) et P0 #39 (révocation). Voir §8bis.2.
+
+**Ce document (Error Handling) définit** :
+- les codes attendus côté sortie des guards, une fois décidés dans `RBAC-v3-audit.md` : `AUTH_SESSION_REQUIRED`, `AUTH_ACCOUNT_INACTIVE`, `AUTHZ_ROLE_INSUFFICIENT`, `AUTHZ_PERMISSION_INSUFFICIENT`
+- le format d'émission : `{ code, message, details }` via §6 Exemple E
+- la règle §8.1 (pas d'info sensible dans `details`)
+
+**Ce document NE définit PAS** (propriété `RBAC-v3-audit.md`) :
+- la logique interne des guards, l'ordre d'exécution, le bypass SUPER_ADMIN
+- `User.status` / `Session.status` / `lastLoginAt` / révocation / permissions
+- le choix final des noms de codes métier (mais les deux documents doivent citer le même nom)
+
+**Références croisées obligatoires** :
+- Si `RBAC-v3-audit.md` décide officiellement un code (ex. `AUTH_SESSION_REQUIRED`), ce document l'enregistre en §5 sans le redéfinir.
+- Si `RBAC-v3-audit.md` tranche la question de l'anti-énumération (§8bis.4), mettre à jour §8bis.4 et §5 en conséquence.
+- Checkpoint inter-document : voir §14.
+
+**Tests** : définis côté RBAC (voir `RBAC-v3-audit.md`) ; ce document valide seulement la conformité du format `ApiErrorResponse`.
+
+**Critères d'acceptation** :
+- [ ] Codes alignés entre les deux documents (même nom, même sémantique)
+- [ ] Anti-énumération (§8bis.4) tranchée dans `RBAC-v3-audit.md` et reflétée ici
+- [ ] Aucun doublon de définition entre les deux documents
+- [ ] `details` conformes §8.1
+
+**Checkpoint de validation** : §14 + checkpoint inter-document (§14.2).
+
+**Instructions d'implémentation pour DeepSeek** : lire d'abord `RBAC-v3-audit.md` pour les décisions propriétaires ; ne pas réinventer les codes ; coordonner toute modification avec l'autre document.
+
+---
+
+### Notes de retour d'expérience (héritées des Phases 1-4 — conservées pour les phases futures)
+
+1. **`api<T>()` sans défaut = typage requis** : déjà traité par la Phase 5.
+2. **Fallback `UNKNOWN_ERROR`** : à trancher en Phase 5.
+3. **Pattern codes métier** : §6 Exemple E.
+4. **`try/catch` inutile pour les erreurs techniques** : le filtre mappe déjà `Error` natif → `500 INTERNAL_ERROR`.
+5. **`console.log` de debug à retirer** : `leads.service.ts` (Phase 6), `auth.guard.ts` (hors périmètre Error Handling — RBAC).
+6. **`X-Request-Id` exploitable** : déjà posé par `RequestIdMiddleware` (Phase 2).
+
+---
+
+
 
 ## 10. CE QU'IL NE FAUT PAS AJOUTER (anti-sur-ingénierie)
 
@@ -868,13 +1149,15 @@ Si un besoin de cette nature apparaît pendant l'implémentation, il doit être 
 | **2 — Backend core** | `request-id.middleware.ts`<br>`global-exception.filter.ts` | `app.module.ts`<br>`logger.middleware.ts`<br>`main.ts` | Tous les controllers, services, guards<br>`schema.prisma`<br>`auth.ts` (Better Auth) |
 | **3 — Frontend core** | — | `api-client.ts`<br>`upload.service.ts` | Tous les composants, pages, hooks<br>Tous les autres services |
 | **4 — Turnstile** | — | `turnstile.guard.ts`<br>`multi-step-form.tsx`<br>`quick-apply-form.tsx` | Tout le reste, y compris `applications.service.ts` |
-| **5+** | ∅ | ∅ | Tout — aucune modification autorisée |
+| **5-9 — planifiées** | ∅ (non autorisées) | détaillées en §9 (fichiers indicatifs par phase) | Tout — aucune modification autorisée sans validation |
 
-**Total périmètre validé : 2 fichiers créés, 8 fichiers modifiés.**
+**Total périmètre validé (Phases 1-4) : 2 fichiers créés, 8 fichiers modifiés.** Les Phases 5-9 sont planifiées mais non autorisées ; leur périmètre fichier est indicatif et sera confirmé au lancement de chaque phase.
 
 ---
 
-## 12. DÉCISIONS — TOUTES TRANCHÉES
+## 12. DÉCISIONS
+
+> D1-D10 : tranchées et figées (implémentation Phases 1-4). D11 tranchée en Phase 5.
 
 | # | Décision | Choix retenu |
 |---|----------|--------------|
@@ -888,8 +1171,9 @@ Si un besoin de cette nature apparaît pendant l'implémentation, il doit être 
 | D8 | Contrat `api<T>()` | `Promise<T>`, jamais `Response`, lève toujours `ApiError` en cas d'échec |
 | D9 | Validation runtime des réponses API | Aucune (pas de Zod) dans ce chantier |
 | D10 | `FormData` dans `api()` | Détection automatique, pas de `Content-Type` forcé si `body instanceof FormData` |
+| D11 | `INTERNAL_ERROR` vs `UNKNOWN_ERROR` | `INTERNAL_ERROR` = backend (500, erreur interne réelle) ; `UNKNOWN_ERROR` = frontend-only (fallback `api-client.ts` quand le corps n'est pas `ApiErrorResponse`). Jamais émis par l'API ; ne remplace jamais une erreur métier connue (§5) |
 
-**Aucune décision en attente. Implémentation autorisée pour les Phases 2 à 4, dans l'ordre, avec validation humaine entre chaque phase.**
+**Phases 1-5 : implémentées et validées. Phases 6-9 : planifiées, non autorisées — validation humaine requise entre chaque phase (voir §14).**
 
 ---
 
@@ -903,4 +1187,56 @@ Si un besoin de cette nature apparaît pendant l'implémentation, il doit être 
 | ✅ | Fait / Validé |
 | ⬜ | À faire |
 | ⛔ | Explicitement hors périmètre |
+| 📋 | Planifié / en attente d'autorisation |
 | ❓ | À vérifier |
+
+---
+
+## 14. CHECKPOINTS DE VALIDATION
+
+### 14.1 Bloc standard de validation (à appliquer à chaque phase 5-9)
+
+```
+### Checkpoint de validation
+- [ ] Build backend (npm run build)
+- [ ] Typecheck frontend (npx tsc --noEmit)
+- [ ] Tests HTTP / fonctionnels ciblés (curl / manuel)
+- [ ] Tests de non-régression (routes existantes, flux Better Auth)
+- [ ] Vérification du périmètre (git diff limité aux fichiers autorisés)
+- [ ] Vérification des logs (pas de donnée sensible §8.2)
+- [ ] Vérification sécurité (details conformes §8.1)
+- [ ] Mise à jour de §5 (codes) et §9 (résultat de phase)
+- [ ] Validation humaine explicite
+- [ ] Phase suivante autorisée uniquement après validation
+```
+
+> Une phase non validée ne doit **jamais** être considérée comme une dépendance satisfaite par une phase ultérieure. La validation humaine est bloquante.
+
+### 14.2 Checkpoints inter-documents (Error Handling ↔ RBAC)
+
+> Ces vérifications doivent être faites conjointement à chaque phase ayant une dépendance croisée (essentiellement Phase 9 ↔ RBAC P0 #38/#39).
+
+**Avant Phase 9 (Error Handling) :**
+- [ ] Phase RBAC correspondante prête ou clairement ordonnancée
+- [ ] Codes communs alignés (`AUTH_SESSION_REQUIRED`, `AUTH_ACCOUNT_INACTIVE`, `AUTHZ_ROLE_INSUFFICIENT`, `AUTHZ_PERMISSION_INSUFFICIENT`) — même nom, même sémantique dans les deux documents
+- [ ] HTTP statuses alignés (401/403 — voir §8bis.4)
+- [ ] `requestId` cohérent (déjà fourni par Phase 2 — vérifier que RBAC ne le redéfinit pas)
+- [ ] `ApiErrorResponse` cohérent (RBAC référence §4.1, ne redéfinit pas la forme)
+- [ ] Tests RBAC prévus dans `RBAC-v3-audit.md`
+
+**Avant clôture d'une phase RBAC qui utilise Error Handling :**
+- [ ] Contrat Error Handling inchangé ou correctement référencé
+- [ ] Nouveaux codes enregistrés dans le bon document (définition propriétaire + référence croisée)
+- [ ] Aucun doublon de définition
+- [ ] Aucun code contradictoire entre les deux documents
+
+### 14.3 Règle de synchronisation documentaire
+
+Quand une décision touche les deux chantiers :
+1. Identifier le document propriétaire (voir §8bis.1).
+2. Mettre à jour le propriétaire.
+3. Mettre à jour l'autre document **uniquement** pour référence / dépendance / contrainte / impact.
+4. Vérifier les références croisées.
+5. Vérifier qu'aucune ancienne version de la décision ne subsiste.
+
+Objectif : éviter deux définitions concurrentes d'un même contrat (ex. `AUTH_ACCOUNT_INACTIVE = 401` dans un document et `= 403` dans l'autre).

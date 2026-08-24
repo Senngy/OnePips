@@ -23,6 +23,19 @@ export type LeadDto = {
     };
 }
 
+export type Lead = LeadDto & {
+    id: string;
+    name: string;
+    email: string;
+    source: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    score?: number;
+    tags?: string[];
+    application?: unknown;
+};
+
 export type CreateLeadDto = {
     name: string;
     email: string;
@@ -63,7 +76,7 @@ export type GetLeadsParams = {
 
 export const createLead = async (data: CreateLeadDto) => {
     console.log("[Leads Service] Lead created (data sent):", data);
-    const apiCall = await api("/leads", {
+    const apiCall = await api<Lead>("/leads", {
         method: "POST",
         body: JSON.stringify(data),
     });
@@ -73,7 +86,7 @@ export const createLead = async (data: CreateLeadDto) => {
 };
 
 export const updateLead = async (id: string, data: UpdateLeadDto) =>
-    api(`/leads/${id}`, {
+    api<Lead>(`/leads/${id}`, {
         method: "PATCH",
         body: JSON.stringify(data),
     });
@@ -85,7 +98,7 @@ export const getLeads = async (params: GetLeadsParams = {}) => {
     );
     const query = new URLSearchParams(cleanParams as Record<string, string>).toString();
     console.log("[FRONT Leads Service] Fetching leads with params:", cleanParams);
-    const res = await api(`/leads${query ? `?${query}` : ""}`);
+    const res = await api<{ data: Lead[]; meta: { total: number; page: number; lastPage: number } }>(`/leads${query ? `?${query}` : ""}`);
     console.log("[FRONT Leads Service] Fetched leads:", res);
     const leads = res.data;
     const total = res.meta.total;
@@ -94,21 +107,21 @@ export const getLeads = async (params: GetLeadsParams = {}) => {
     return { leads, total, page, lastPage };
 };
 
-export const getLeadById = async (id: string) => api(`/leads/${id}`);
+export const getLeadById = async (id: string) => api<Lead>(`/leads/${id}`);
 
 export const updateLeadStatus = async (id: string, status: string) =>
-    api(`/leads/${id}/status`, {
+    api<Lead>(`/leads/${id}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
     });
 
 export const deleteLead = async (id: string) =>
-    api(`/leads/${id}`, {
+    api<{ message: string }>(`/leads/${id}`, {
         method: "DELETE",
     });
 
 export const deleteBulkLeads = async (ids: string[]) =>
-    api("/leads/bulk", {
+    api<{ message: string }>("/leads/bulk", {
         method: "DELETE",
         body: JSON.stringify({ ids }),
     });

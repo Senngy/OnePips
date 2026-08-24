@@ -23,7 +23,11 @@ export class ApplicationsService {
     });
 
     if (!lead) {
-      throw new NotFoundException(`Lead with ID ${dto.leadId} not found`);
+      throw new NotFoundException({
+        code: 'LEAD_NOT_FOUND',
+        message: 'Le lead est introuvable.',
+        details: { id: dto.leadId },
+      });
     }
 
     // 1b. Check if application already exists for this lead
@@ -32,9 +36,11 @@ export class ApplicationsService {
     });
 
     if (existing) {
-      throw new ConflictException(
-        'Cette candidature a déjà été soumise. Vous allez être recontacté par notre équipe.',
-      );
+      throw new ConflictException({
+        code: 'APPLICATION_ALREADY_EXISTS',
+        message:
+          'Cette candidature a déjà été soumise. Vous allez être recontacté par notre équipe.',
+      });
     }
 
     // 2. Compute score for the application

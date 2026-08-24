@@ -1,8 +1,9 @@
 # RBAC v3 — Audit & Suivi
 
-> Dernière mise à jour : 17/08/2026 (v4.2 — §5.1 Helmet mis à jour : backend fait/partiel, frontend non commencé — voir `Plan-P0-2-Helmet-Headers-Securite.md`)
+> Dernière mise à jour : 24/08/2026 (v4.3 — synchronisation avec `.tracking/Error-Handling-Architecture.md` : P0 #9 Request ID déjà fait par Error Handling Phase 2 ; référence croisée sur le contrat d'erreur)
 > Statut global : ⚠️ En cours (Phases 1-8 terminées)
-> **P0 vérifié le 17/08 contre le code réel** (git log + lecture directe) : seul #1 est fait, #2 est partiel, tout le reste (#3-9, #36-39) reste à faire. Voir statuts détaillés en §10.
+> **P0 vérifié le 17/08 contre le code réel** : #1 fait, #2 partiel, #9 fait via Error Handling (Phase 2), reste #3-8 et #36-39 à faire. Voir statuts détaillés en §10.
+> **Coordination inter-document** : ce document est propriétaire d'`AuthGuard`/`RolesGuard`/`PermissionsGuard`/`User.status`/`Session.status`/`lastLoginAt`/permissions/révocation. Le contrat d'erreur (`ApiErrorResponse`, `requestId`, codes, format `{ code, message, details }`) appartient à `.tracking/Error-Handling-Architecture.md` (§4, §5, §7) — le référencer, ne jamais le redéfinir.
 
 ---
 
@@ -211,6 +212,8 @@ Authorization (RolesGuard / PermissionsGuard)
 `SUSPENDED` n'est pas une permission. `DISABLED` n'est pas un rôle. Ces contrôles se font **avant** toute logique de rôle/permission, exclusivement dans `AuthGuard`.
 
 **🔴 Interdiction explicite — pas de bypass `SUPER_ADMIN` sur le statut** : le bypass `user.role === Role.SUPER_ADMIN` existant dans `RolesGuard`/`PermissionsGuard` est un mécanisme d'**autorisation** et ne doit **jamais** s'appliquer au contrôle `status` (**authentification**, plus en amont). Un `SUPER_ADMIN` avec `status = DISABLED` doit être bloqué en `401` dans `AuthGuard`, avant même d'atteindre `RolesGuard`/`PermissionsGuard`. Sinon : `SUPER_ADMIN` désactivé = accès "god mode" malgré la désactivation → incohérence de sécurité inacceptable.
+
+> **🟡 Question ouverte (coordination avec Error Handling — non tranchée)** : l'anti-énumération est assurée au niveau `statusCode` (`401` pour session absente **et** compte `DISABLED`/`SUSPENDED`). Mais si `AuthGuard` (P0 #38) émet un `code` d'erreur distinct pour ces deux cas (ex. `AUTH_SESSION_REQUIRED` vs `AUTH_ACCOUNT_INACTIVE`), la distinction redeviendrait visible dans le corps JSON. **Décision à trancher ici (document propriétaire)** : soit un `code` unique pour tous les 401 d'authentification (anti-énumération préservée de bout en bout), soit accepter une distinction au niveau `code` (à justifier). Le contrat de format des codes est défini dans `.tracking/Error-Handling-Architecture.md` (§5, §6 Exemple E, §8bis.4) — ce document décide de la sémantique, Error Handling décide du format.
 
 ### 3.3 Typage de `request.user`
 
@@ -500,7 +503,7 @@ Leads        —       Uses(global) Uses guard  —     —     —        —  
 | 6 | Corriger `GET /uploads/:filename` (path traversal) | Sécurité | ⬜ |
 | 7 | Désactiver/restreindre le signup public OU restreindre par domaine | Sécurité | ⬜ |
 | 8 | Déplacer `lastLoginAt` au login + refresh de session (plus de write à chaque requête) | Perf | ⬜ |
-| 9 | Ajouter Request ID / Correlation ID (middleware + réponse) | Observabilité | ⬜ |
+| 9 | ~~Ajouter Request ID / Correlation ID (middleware + réponse)~~ ✅ **Fait via Error Handling Phase 2** — `RequestIdMiddleware` génère `req.requestId`, pose `X-Request-Id`, `LoggerMiddleware` le logge, `GlobalExceptionFilter` l'injecte dans les erreurs. Référence : `.tracking/Error-Handling-Architecture.md` §7. Plus aucune action RBAC requise | Observabilité | ✅ |
 | 36 | Ajouter la colonne `status` sur `User` (type `UserStatus` **déjà existant** dans le schéma — `ACTIVE`/`SUSPENDED`/`DISABLED`, défaut `ACTIVE`) — voir §2.1. **Pas de nouvel enum à créer**, migration légère (ajout de colonne uniquement). `SUSPENDED` sans mécanique de verrouillage automatique pour l'instant | Prisma | ⬜ |
 | 37 | Supprimer `Session.status` + `enum UserStatus` (Session) — confirmé mort : 0 référence dans `src/`, absent du schéma Better Auth (`sessionSchema` core) | Prisma | ⬜ |
 | 38 | `AuthGuard` : vérifier `user.status === ACTIVE` juste après le `findUnique`, sinon `401` — **avant** `RolesGuard`/`PermissionsGuard`, sans bypass `SUPER_ADMIN` (§3.2bis) | Backend | ⬜ |
@@ -519,10 +522,10 @@ Chaque ligne ci-dessus a été confrontée au code source (pas seulement à l'in
 | 6 | `upload.controller.ts` (modifié le 08/08, mais pas sur ce point) : `serveFile()` fait toujours `join(UPLOAD_DIR, filename)` avec le paramètre brut, sans `basename()` ni vérification `resolve()` | ⬜ Inchangé — 🔴 toujours exploitable |
 | 7 | `auth.ts` inchangé depuis l'audit (`emailAndPassword.enabled: true` sans restriction), `AuthController` toujours `@All('*')` sans filtre sur `sign-up` | ⬜ Inchangé |
 | 8 | `auth.guard.ts:44-47` : `this.prisma.session.update({ lastLoginAt })` toujours exécuté à **chaque** requête authentifiée | ⬜ Inchangé |
-| 9 | Aucun middleware / header `X-Request-Id` trouvé dans `src/` | ⬜ Inchangé |
+| 9 | ~~Aucun middleware / header `X-Request-Id`~~ ✅ **Fait depuis le 24/08** — implémenté par Error Handling Phase 2 (`RequestIdMiddleware`, `X-Request-Id`, `requestId` dans `ApiErrorResponse`) | ✅ Fait via Error Handling |
 | 36-39 | `schema.prisma` non modifié depuis le 25/07/2026 (dernier commit touchant ce fichier : `b71bf00`, antérieur à la décision §2.1) : pas de `User.status`, `Session.status` toujours présent, `AuthGuard` sans contrôle de statut, aucun appel à `revokeSessions` dans le code | ⬜ Non commencé (normal — décision actée seulement le 17/08, après le dernier commit schéma) |
 
-**Conclusion : sur 13 items P0, 1 est fait (#1) et 1 est partiel (#2 — Helmet sans CSP). Les 11 autres (#3-9, #36-39) n'ont aucune trace d'implémentation dans le code actuel.** Rien à cocher de plus à ce stade.
+**Conclusion : sur 13 items P0, 2 sont faits (#1, #9 — ce dernier via Error Handling Phase 2) et 1 est partiel (#2 — Helmet sans CSP). Les 10 autres (#3-8, #36-39) n'ont aucune trace d'implémentation dans le code actuel.** Rien à cocher de plus à ce stade.
 
 ### P1 — Important
 
@@ -601,3 +604,4 @@ Chaque ligne ci-dessus a été confrontée au code source (pas seulement à l'in
 | 17/08 | **Décision 5 — `lastLoginAt`** : confirmé — mise à jour au login + refresh de session uniquement, jamais à chaque requête (inchangé depuis le 30/07) | §7.2 / P0 #8 |
 | 17/08 | **Décision 6 — Codes HTTP** : pas de session → `401` ; compte `DISABLED`/`LOCKED` → `401` (anti-énumération, pas de fuite d'information sur l'état du compte) ; authentifié mais rôle/permission insuffisant → `403` | §3.2bis |
 | 17/08 | **Décision 7 — Ordre des travaux** : (1) figer `User.status` → (2) supprimer `Session.status` → (3) implémenter révocation `DISABLED`/`LOCKED` → (4) adapter `AuthGuard` → (5) `lastLoginAt` (déjà en P0 #8) → (6) tests manuels du cycle de vie → **puis seulement** tests RBAC backend (§10 checklist) | P0 #36-39 |
+| 24/08 | **Coordination inter-document** : le contrat d'erreur (`ApiErrorResponse`, `requestId`, codes, format `{ code, message, details }`) est propriété de `.tracking/Error-Handling-Architecture.md` (§4, §5, §7, §8bis) — ce document le référence sans le redéfinir. **P0 #9 (Request ID) marqué fait** car implémenté par Error Handling Phase 2. La migration des guards vers des exceptions structurées (`AUTH_SESSION_REQUIRED`, `AUTH_ACCOUNT_INACTIVE`, `AUTHZ_ROLE_INSUFFICIENT`, `AUTHZ_PERMISSION_INSUFFICIENT`) sera coordonnée avec Error Handling Phase 9 (voir sa §14.2) | §3.2bis / §10 #9 |

@@ -50,7 +50,7 @@ export default function AdminUsersPage() {
     console.log("[UsersPage] fetchUsers START");
     try {
       setLoading(true);
-      const data = await api("/users/permissions");
+      const data = await api<UserWithPerms[]>("/users/permissions");
       console.log("[UsersPage] fetchUsers SUCCESS:", data);
       console.log("[UsersPage] fetchUsers DATA TYPE:", typeof data);
       console.log("[UsersPage] fetchUsers ARRAY:", Array.isArray(data));

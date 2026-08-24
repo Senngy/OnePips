@@ -18,7 +18,6 @@ export class LeadsService {
     maxScore?: number;
   }) {
     const where: any = {};
-    console.log('[API] Query received in service:', query);
 
     if (query?.status) {
       where.status = query.status;
@@ -80,10 +79,8 @@ export class LeadsService {
   }
 
   async create(dto: CreateLeadDto) {
-    console.log('[API lead service] create : called');
     const score = calculateScore(dto);
     const status = getLeadStatus(score);
-    console.log('[API lead service] create', dto);
 
     // Exclude cfTurnstileToken from persistence (it's only for validation)
     const { cfTurnstileToken, ...safeDto } = dto;
@@ -101,7 +98,6 @@ export class LeadsService {
         status,
       },
     });
-    console.log('[API] Lead created or updated:', lead);
     return lead;
   }
 
@@ -115,7 +111,11 @@ export class LeadsService {
   async update(id: string, dto: UpdateLeadDto) {
     const existing = await this.prisma.lead.findUnique({ where: { id } });
     if (!existing) {
-      throw new NotFoundException(`Lead with ID ${id} not found`);
+      throw new NotFoundException({
+        code: 'LEAD_NOT_FOUND',
+        message: 'Le lead est introuvable.',
+        details: { id },
+      });
     }
 
     // Merge existing data with incoming partial data for score calculation
