@@ -15,22 +15,4 @@ export const authClient = createAuthClient({
       },
     })
   ],
-  fetchOptions: {
-    onResponse(context) {
-      if (context.response?.url?.includes("get-session")) {
-        context.response
-          .clone()
-          .json()
-          .then((raw) => {
-            console.log("[AuthClient] RAW get-session response (JSON):", JSON.stringify(raw, null, 2));
-            console.log("[AuthClient] raw.user:", raw?.user);
-            console.log("[AuthClient] raw.user.role:", raw?.user?.role);
-            console.log("[AuthClient] raw.user keys:", Object.keys(raw?.user || {}));
-          })
-          .catch(() => {
-            console.log("[AuthClient] RAW get-session — could not parse body");
-          });
-      }
-    },
-  },
 });
