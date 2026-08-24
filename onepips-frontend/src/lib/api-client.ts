@@ -1,70 +1,77 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
-export class ApiError extends Error {
-  status: number;
-  data: unknown;
+export interface ApiErrorResponse {
+  statusCode: number;
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
+  requestId: string;
+}
 
-  constructor(message: string, status: number, data?: unknown) {
-    super(message);
-    this.status = status;
-    this.data = data;
+export class ApiError extends Error {
+  readonly statusCode: number;
+  readonly code: string;
+  readonly details?: Record<string, unknown>;
+  readonly requestId: string;
+
+  constructor(data: ApiErrorResponse) {
+    super(data.message);
+    this.name = "ApiError";
+    this.statusCode = data.statusCode;
+    this.code = data.code;
+    this.details = data.details;
+    this.requestId = data.requestId;
   }
 }
 
-export async function api(
+function isApiErrorResponse(
+  value: unknown,
+): value is ApiErrorResponse {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const body = value as Record<string, unknown>;
+
+  return (
+    typeof body.statusCode === "number" &&
+    typeof body.code === "string" &&
+    typeof body.message === "string"
+  );
+}
+
+export async function api<T>(
   endpoint: string,
   options: RequestInit = {},
-) {
-  const headers = new Headers(options.headers);
+): Promise<T> {
+  const isFormData = options.body instanceof FormData;
 
-  if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
+  const headers = new Headers(options.headers);
+  if (!isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  const url = `${API_URL}${endpoint}`;
-  console.log("[API] REQUEST:", options.method || "GET", url);
-  console.log("[API] REQUEST HEADERS:", Object.fromEntries(headers.entries()));
-  console.log(
-  "[API] REQUEST BODY:",
-  options.body instanceof FormData
-    ? Object.fromEntries(options.body.entries())
-    : options.body,
-);
-
-  const res = await fetch(url, {
+  const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
-    credentials: "include", // important
+    credentials: "include",
   });
 
-  console.log("[API] STATUS:", res.status, url);
-
-  if (res.status === 304) {
-    console.log("[API] 304 NOT MODIFIED — no body expected");
-  }
-
-  let data = null;
-
-  try {
-    data = await res.json();
-    if (res.status === 304) {
-      console.log("[API] 304 parsed body:", data);
-    }
-  } catch {
-    throw new ApiError("Invalid JSON response", res.status);
-  }
-
-  console.log("[API] OK:", res.ok, "| url:", url);
+  const data: unknown = await res.json().catch(() => null);
 
   if (!res.ok) {
-    throw new ApiError(
-      (data as any)?.message ?? "Une erreur est survenue",
-      res.status,
-      data,
-    );
+    const errorData = isApiErrorResponse(data)
+      ? data
+      : {
+        statusCode: res.status,
+        code: "UNKNOWN_ERROR",
+        message: "Une erreur est survenue.",
+        requestId:
+          res.headers.get("X-Request-Id") ?? "req_unknown",
+      };
+
+    throw new ApiError(errorData);
   }
 
-  console.log("[API] RESPONSE:", data);
-  return data;
+  return data as T;
 }
-

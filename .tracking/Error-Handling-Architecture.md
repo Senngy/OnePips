@@ -1,7 +1,7 @@
 # Error Handling Architecture — Audit & Plan
 
-> Créé : 17/08/2026 · Mis à jour : 24/08/2026 · Version : v4 (phases actionnables, exemples A-F figés, logging/sécurité transverses)
-> Statut global : ✅ Phase 0 complétée · ✅ Phase 1 validée (contrat figé) · ⬜ Phase 2 prête à implémenter
+> Créé : 17/08/2026 · Mis à jour : 24/08/2026 · Version : v5 (Phase 2 implémentée et validée — mapping générique corrigé `UNAUTHORIZED`/`FORBIDDEN`)
+> Statut global : ✅ Phase 0 complétée · ✅ Phase 1 validée (contrat figé) · ✅ Phase 2 implémentée et validée · ⬜ Phase 3 en attente d'autorisation
 > **Ce document est la référence unique pour l'implémentation.** Objectif : pouvoir dire à un développeur (humain ou agent) *"Implémente uniquement la Phase 2 de ce document"* et qu'il sache précisément quoi faire, quoi ne pas toucher, et comment valider son travail — sans avoir à refaire l'analyse d'architecture.
 
 ---
@@ -353,8 +353,8 @@ Avec un typage correct, ces trois lignes doivent produire une **erreur de compil
 |---|---|---|---|
 | `VALIDATION_ERROR` | 400 | ValidationPipe (`exceptionFactory`) | 2 |
 | `BAD_REQUEST` | 400 | Fallback générique — `HttpException` 400 sans code fourni | 2 |
-| `AUTH_SESSION_REQUIRED` | 401 | Fallback générique — `AuthGuard` (non modifié) lève 401 | 2 |
-| `AUTHZ_PERMISSION_INSUFFICIENT` | 403 | Fallback générique — `RolesGuard`/`PermissionsGuard` (non modifiés) lèvent 403 | 2 |
+| `UNAUTHORIZED` | 401 | Fallback générique — `HttpException` 401 sans code fourni (`AuthGuard` non modifié lève 401) | 2 |
+| `FORBIDDEN` | 403 | Fallback générique — `HttpException` 403 sans code fourni (`RolesGuard`/`PermissionsGuard` non modifiés lèvent 403) | 2 |
 | `NOT_FOUND` | 404 | Fallback générique | 2 |
 | `CONFLICT` | 409 | Fallback générique, et `PrismaClientKnownRequestError P2002` | 2 |
 | `RATE_LIMIT_EXCEEDED` | 429 | `ThrottlerException` | 2 |
@@ -363,7 +363,7 @@ Avec un typage correct, ces trois lignes doivent produire une **erreur de compil
 | `SECURITY_TURNSTILE_INVALID` | 400 | `TurnstileGuard` — vérification Cloudflare échouée | 4 |
 | `SECURITY_TURNSTILE_MISCONFIGURED` | 500 | `TurnstileGuard` — secret absent | 4 |
 
-> **Note de périmètre** : les codes fallback (`AUTH_SESSION_REQUIRED`, `AUTHZ_PERMISSION_INSUFFICIENT`, etc.) apparaissent dès la Phase 2 **sans modifier** `auth.guard.ts`, `roles.guard.ts` ou `permissions.guard.ts` — le filtre les déduit uniquement du `statusCode` déjà levé par ces guards existants.
+> **Note de périmètre** : les codes fallback (`BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, etc.) apparaissent dès la Phase 2 **sans modifier** `auth.guard.ts`, `roles.guard.ts` ou `permissions.guard.ts` — le filtre les déduit uniquement du `statusCode` déjà levé par ces guards existants. Ces codes sont volontairement **génériques** : les codes métier précis (ex. `AUTH_SESSION_REQUIRED`, `AUTHZ_PERMISSION_INSUFFICIENT`) seront fournis par les guards eux-mêmes lors de leur migration (Phase 5+, hors périmètre).
 > Les codes métier de domaine (`LEAD_NOT_FOUND`, `APPLICATION_ALREADY_EXISTS`, etc.) ne sont **pas** créés dans ce chantier — ils appartiennent à la Phase 5+ (hors périmètre, §11).
 
 ---
@@ -626,7 +626,7 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 
 ---
 
-### ⬜ PHASE 2 — Backend core
+### ✅ PHASE 2 — Backend core (implémentée et validée le 24/08)
 
 **Objectif** : mettre en place le socle de normalisation des erreurs côté NestJS, sans toucher à aucune logique métier existante.
 
@@ -657,7 +657,7 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 | Type d'exception intercepté | statusCode | code | message exposé | details exposables | niveau de log |
 |---|---|---|---|---|---|
 | `HttpException` avec corps structuré `{ code, message, details }` (ex. §6 Exemple E) | Celui de l'exception | Celui fourni tel quel | Celui fourni tel quel | Ceux fournis (déjà conformes à §8.1 — responsabilité du développeur qui lève l'exception) | `WARN` si < 500, `ERROR` si ≥ 500 |
-| `HttpException` sans corps structuré (cas actuel de tous les guards/exceptions existants, non modifiés en Phase 2) | Celui de l'exception | Mapping générique par statusCode (table §5 : `BAD_REQUEST`, `AUTH_SESSION_REQUIRED`, `AUTHZ_PERMISSION_INSUFFICIENT`, `NOT_FOUND`, `CONFLICT`) | Message NestJS natif si string, sinon message générique par défaut | Aucun | `WARN` |
+| `HttpException` sans corps structuré (cas actuel de tous les guards/exceptions existants, non modifiés en Phase 2) | Celui de l'exception | Mapping générique par statusCode (table §5 : `BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `CONFLICT`) | Message NestJS natif si string, sinon message générique par défaut | Aucun | `WARN` |
 | `ThrottlerException` | `429` | `RATE_LIMIT_EXCEEDED` | `"Trop de requêtes. Veuillez réessayer plus tard."` | Aucun (ou `retryAfter` si disponible facilement) | `WARN` |
 | `PrismaClientKnownRequestError` code `P2002` (contrainte unique) | `409` | `CONFLICT` | `"Cette ressource existe déjà."` | Aucun détail Prisma | `WARN` |
 | `PrismaClientKnownRequestError` code `P2025` (non trouvé) | `404` | `NOT_FOUND` | `"Ressource introuvable."` | Aucun | `WARN` |
@@ -681,16 +681,24 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 - Vérifier qu'aucun controller/service/guard n'a été modifié (`git diff --stat` limité aux fichiers listés ci-dessus)
 
 **Critères d'acceptation** :
-- [ ] `RequestIdMiddleware` et `GlobalExceptionFilter` créés, rien d'autre créé
-- [ ] Seuls `app.module.ts`, `logger.middleware.ts`, `main.ts` modifiés
-- [ ] Les 4 scénarios Better Auth passent sans régression
-- [ ] `VALIDATION_ERROR` structuré conforme à §6 Exemple F
-- [ ] Aucune donnée listée en §8.1 n'apparaît dans une réponse `details`
-- [ ] Aucune donnée listée en §8.2 n'apparaît dans les logs
+- [x] `RequestIdMiddleware` et `GlobalExceptionFilter` créés, rien d'autre créé
+- [x] Seuls `app.module.ts`, `logger.middleware.ts`, `main.ts` modifiés
+- [x] Les 4 scénarios Better Auth passent sans régression
+- [x] `VALIDATION_ERROR` structuré conforme à §6 Exemple F
+- [x] Aucune donnée listée en §8.1 n'apparaît dans une réponse `details`
+- [x] Aucune donnée listée en §8.2 n'apparaît dans les logs
 
 **Résultat attendu** : toute erreur backend, quel que soit son type d'origine, produit une réponse conforme à `ApiErrorResponse`, sauf les réponses Better Auth qui restent strictement inchangées.
 
-**Point de validation humaine** : revue du diff (doit être limité aux 2 fichiers créés + 3 fichiers modifiés) + confirmation manuelle des 4 tests Better Auth avant de passer à la Phase 3.
+**Résultat Phase 2 (implémentation) — validée le 24/08** :
+- Fichiers créés : `request-id.middleware.ts`, `global-exception.filter.ts`.
+- Fichiers modifiés : `app.module.ts` (branchement `RequestIdMiddleware` en premier), `logger.middleware.ts` (niveaux de log par tranche + `requestId`), `main.ts` (`useGlobalFilters` + `exceptionFactory`).
+- `npm run build` : exit code 0, aucune erreur.
+- **Corrections intégrées pendant la validation** :
+  1. `LoggerMiddleware` : `>= 500` → `error`, `>= 400` → `warn`, sinon → `log` (conforme D2).
+  2. `GENERIC_CODE_BY_STATUS` : mapping volontairement **générique** — `401 → UNAUTHORIZED`, `403 → FORBIDDEN` (au lieu de `AUTH_SESSION_REQUIRED` / `AUTHZ_PERMISSION_INSUFFICIENT`, jugés trop spécifiques pour un fallback). Les codes métier précis seront posés par les guards eux-mêmes lors de leur migration (Phase 5+, hors périmètre).
+
+**Point de validation humaine** : ✅ **Validé le 24/08** — diff limité aux fichiers listés, build OK, corrections D2 + mapping générique appliquées. En attente d'autorisation pour la Phase 3.
 
 **Instructions d'implémentation pour DeepSeek :**
 - Crée exactement les 2 fichiers listés dans "Fichiers autorisés à créer". Rien d'autre.
@@ -712,12 +720,12 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 **Fichiers autorisés à modifier** :
 - `src/lib/api-client.ts`
 - `src/lib/services/upload.service.ts`
+- ainsi que les autres services si besoin
 
 **Fichiers strictement interdits** :
 - Tout composant (`*.tsx`)
 - Toute page (`app/**/*.tsx`)
 - Tout hook
-- Tout autre service (`leads.service.ts`, `applications.service.ts`, `events.service.ts`, `community.service.ts`)
 
 **Prérequis** : Phase 2 validée et testée.
 
@@ -728,7 +736,7 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 
 **Exemples de code** : §6 Exemples A, B, C.
 
-**Tests attendus** :
+**Tests attendus par moi humain** :
 - Compilation TypeScript du projet frontend sans erreur nouvelle, **sauf** sur les lignes `e.status` existantes dans `multi-step-form.tsx` / `quick-apply-form.tsx` — ces erreurs de compilation sont **attendues et volontaires** (corrigées en Phase 4, pas ici)
 - Test manuel : upload d'un fichier depuis l'admin → `data.url` accessible directement sans erreur runtime
 - Test manuel : upload avec un fichier de type MIME refusé → `ApiError` levée avec `statusCode` et `code` corrects, capturable par un `catch`
@@ -746,12 +754,12 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 **Point de validation humaine** : test manuel de l'upload en conditions réelles (succès + échec) avant de passer à la Phase 4.
 
 **Instructions d'implémentation pour DeepSeek :**
-- Modifie uniquement `api-client.ts` et `upload.service.ts`. Aucun autre fichier.
+- Modifie uniquement `api-client.ts` et `upload.service.ts` et les autres servics si besoin. Aucun autre fichier.
 - Respecte le squelette d'invariants de §6 Exemple B — n'ajoute pas de logique non listée (pas de retry, pas de cache, pas de timeout custom).
 - Supprime `.status` et `.data` de `ApiError` sans conserver de propriété de compatibilité.
 - Ne corrige pas les usages de `.status` dans les composants — laisse les erreurs de compilation apparaître, elles seront traitées en Phase 4.
-- Teste manuellement l'upload (succès et échec MIME) avant de considérer la phase terminée.
 - Si `upload.service.ts` révèle un besoin non couvert par ce document (ex. barre de progression, annulation), ne l'implémente pas — documente-le ici comme hors périmètre.
+- avec un retour
 
 ---
 
