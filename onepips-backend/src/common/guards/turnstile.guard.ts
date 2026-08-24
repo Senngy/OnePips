@@ -12,22 +12,38 @@ export class TurnstileGuard implements CanActivate {
 
   private getToken(request: any): string | undefined {
     const body = request?.body ?? {};
-
-    return (
+    console.log(
+      '[API] turnstile.guard.ts - lecture du token dans la requête, retourne le corps de la requête:',
+      body,
+    );
+    console.log('[API] Turnstile - BODY KEYS:', Object.keys(body));
+    const token =
       body.cfTurnstileToken ??
       body['cf-turnstile-response'] ??
       body.cfTurnstileResponse ??
-      body.token
+      body.token;
+
+    console.log(
+      '[API] turnstile.guard.ts - token lu, retourne un token présent:',
+      Boolean(token),
     );
+
+    return token;
   }
 
   private getTurnstileSecret(): string {
     const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
 
     if (!secret) {
+      console.log(
+        '[API] turnstile.guard.ts - secret Turnstile absent, retourne une erreur de configuration',
+      );
       throw new UnauthorizedException('Turnstile secret is not configured');
     }
 
+    console.log(
+      '[API] turnstile.guard.ts - secret Turnstile chargé, retourne un secret valide',
+    );
     return secret;
   }
 
@@ -36,12 +52,18 @@ export class TurnstileGuard implements CanActivate {
     const token = this.getToken(request);
 
     if (!token) {
+      console.log(
+        '[API] turnstile.guard.ts - token absent, retourne une erreur 401',
+      );
       throw new UnauthorizedException('Turnstile token is required');
     }
 
     const bypassToken = process.env.TURNSTILE_BYPASS_TOKEN || 'DEV_BYPASS';
 
     if (token === bypassToken) {
+      console.log(
+        '[API] turnstile.guard.ts - token bypass reconnu, retourne true',
+      );
       delete request.body?.cfTurnstileToken;
       delete request.body?.['cf-turnstile-response'];
       delete request.body?.cfTurnstileResponse;
@@ -52,6 +74,9 @@ export class TurnstileGuard implements CanActivate {
       const formData = new URLSearchParams();
       formData.append('secret', this.getTurnstileSecret());
       formData.append('response', token);
+      console.log(
+        '[API] turnstile.guard.ts - requête Cloudflare envoyée, retourne une réponse de vérification',
+      );
 
       const result = await fetch(
         'https://challenges.cloudflare.com/turnstile/v0/siteverify',
@@ -63,17 +88,35 @@ export class TurnstileGuard implements CanActivate {
       );
 
       const outcome = await result.json();
+      console.log(
+        '[API] turnstile.guard.ts - réponse Cloudflare reçue, retourne success:',
+        Boolean(outcome?.success),
+      );
 
       if (!outcome.success) {
+        console.log(
+          '[API] turnstile.guard.ts - vérification Cloudflare refusée, retourne une erreur 401',
+        );
         throw new UnauthorizedException('Turnstile verification failed');
       }
 
       delete request.body?.cfTurnstileToken;
       delete request.body?.['cf-turnstile-response'];
       delete request.body?.cfTurnstileResponse;
+      console.log(
+        '[API] turnstile.guard.ts - token nettoyé, retourne true',
+      );
       return true;
     } catch (error) {
-      if (error instanceof UnauthorizedException) throw error;
+      if (error instanceof UnauthorizedException) {
+        console.log(
+          '[API] turnstile.guard.ts - erreur d autorisation détectée, retourne une erreur 401',
+        );
+        throw error;
+      }
+      console.log(
+        '[API] turnstile.guard.ts - erreur technique de vérification, retourne une erreur 401',
+      );
       throw new UnauthorizedException('Turnstile verification error');
     }
   }

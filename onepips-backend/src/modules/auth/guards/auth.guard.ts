@@ -24,8 +24,10 @@ export class AuthGuard implements CanActivate {
     });
 
     if (!session) {
-      console.log('❌ AuthGuard: No valid Better Auth session');
-      throw new UnauthorizedException();
+      console.error(
+        '[API] auth/guards/auth.guard.ts | !session | 401 - Utilisateur non authentifié ❌ ', req.method, req.originalUrl, 'Headers:', req.headers,
+      );
+      throw new UnauthorizedException('[API] auth/guards/auth.guard.ts | 401 - Utilisateur non authentifié ❌');
     }
 
     const user = await this.prisma.user.findUnique({
@@ -35,7 +37,14 @@ export class AuthGuard implements CanActivate {
     });
 
     if (!user) {
-      throw new UnauthorizedException();
+      console.error(
+        '[API] auth/guards/auth.guard.ts | 404 - Utilisateur non trouvé ❌',
+        req.method,
+        req.originalUrl,
+        'Headers:',
+        req.headers,
+      );
+      throw new UnauthorizedException('[API] auth/guards/auth.guard.ts | 404 - Utilisateur non trouvé ❌');
     }
 
     const now = new Date();
