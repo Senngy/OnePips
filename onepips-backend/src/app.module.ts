@@ -21,7 +21,7 @@ import { PrismaModule } from '../prisma/prisma.module.js';
 import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
 import { AuthRateLimitMiddleware } from './common/middleware/auth-rate-limit.middleware.js';
 import { SecurityService } from './common/security.service.js';
-import { auth } from './modules/auth/auth.js';
+import { jsonBodyParserMiddleware } from './common/middleware/json-body-parser.middleware.js';
 
 @Module({
   imports: [
@@ -73,9 +73,13 @@ import { auth } from './modules/auth/auth.js';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+      // Apply JSON body parser middleware globally; middleware itself filters to /api/auth
+    consumer.apply(jsonBodyParserMiddleware).forRoutes('*');
+    
     consumer.apply(LoggerMiddleware).forRoutes('*');
 
     // Apply auth rate limit middleware globally; middleware itself filters to /api/auth
     consumer.apply(AuthRateLimitMiddleware).forRoutes('*');
+
   }
 }

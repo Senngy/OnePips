@@ -50,6 +50,7 @@ function createSafeFilename(originalName: string, mimeType: string) {
 export class UploadController {
   @Get('uploads/:filename')
   serveFile(@Req() req: Request, @Res() res: Response) {
+    console.log('[API] UploadFile - Request params:', req.params); // Log the request parameters for debugging
     // req.params.filename can be string | string[] depending on how params are parsed
     const rawFilename = (req.params as Record<string, any>).filename;
     const filename = Array.isArray(rawFilename) ? rawFilename[0] : rawFilename;
@@ -57,6 +58,7 @@ export class UploadController {
 
     if (!existsSync(filePath)) {
       throw new BadRequestException('Fichier non trouvé.');
+      console.error(`[API] UploadFile - 404 File not found: ${filePath}`); // Log the error for debugging
     }
     return res.sendFile(filePath);
   }
