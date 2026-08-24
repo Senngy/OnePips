@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { EventStateDto } from './DTO/event-state.DTO.js';
 import { EventCreateDto } from './DTO/create-event.DTO.js';
@@ -100,7 +100,10 @@ export class EventsService {
     if (!eventId) {
       const nextEvent = await this.getNextEvent();
       if (!nextEvent) {
-        throw new Error('No upcoming event found for registration');
+        throw new NotFoundException({
+          code: 'EVENT_NOT_FOUND',
+          message: 'Aucun événement à venir disponible.',
+        });
       }
       eventId = nextEvent.id;
     }

@@ -1,7 +1,7 @@
 # Error Handling Architecture — Audit & Plan
 
-> Créé : 17/08/2026 · Mis à jour : 24/08/2026 · Version : v9 (Phase 5 validée — typage `api<T>()` + décision `UNKNOWN_ERROR` frontend-only)
-> Statut global : ✅ Phase 0 complétée · ✅ Phase 1 validée · ✅ Phase 2 validée · ✅ Phase 3 validée · ✅ Phase 4 validée · ✅ Phase 5 validée · 📋 Phases 6-9 planifiées, en attente d'autorisation phase par phase
+> Créé : 17/08/2026 · Mis à jour : 24/08/2026 · Version : v11 (Phase 7 validée — code `EVENT_NOT_FOUND`)
+> Statut global : ✅ Phase 0 complétée · ✅ Phase 1 validée · ✅ Phase 2 validée · ✅ Phase 3 validée · ✅ Phase 4 validée · ✅ Phase 5 validée · ✅ Phase 6 validée · ✅ Phase 7 validée · 📋 Phases 8-9 en attente d'autorisation / de prérequis
 > **Document distinct de `RBAC-v3-audit.md`.** Ce document est propriétaire du contrat d'erreur (`ApiErrorResponse`, codes, `requestId`, `api<T>()`) et de son intégration progressive dans les domaines métier. `RBAC-v3-audit.md` reste seul propriétaire d'`AuthGuard`, `RolesGuard`, `PermissionsGuard`, `User.status`, `Session.status`, `lastLoginAt`, permissions, révocation de session. Voir §8bis pour la répartition détaillée et §14 pour les checkpoints de synchronisation.
 > **Ce document est la référence unique pour l'implémentation.** Objectif : pouvoir dire à un développeur (humain ou agent) *"Implémente uniquement la Phase 2 de ce document"* et qu'il sache précisément quoi faire, quoi ne pas toucher, et comment valider son travail — sans avoir à refaire l'analyse d'architecture.
 
@@ -366,6 +366,7 @@ Avec un typage correct, ces trois lignes doivent produire une **erreur de compil
 | `SECURITY_TURNSTILE_MISCONFIGURED` | 500 | `TurnstileGuard` — secret absent | 4 |
 | `LEAD_NOT_FOUND` | 404 | `LeadsService.update` / `ApplicationsService.create` — lead inexistant | 6 |
 | `APPLICATION_ALREADY_EXISTS` | 409 | `ApplicationsService.create` — candidature déjà soumise pour ce lead | 6 |
+| `EVENT_NOT_FOUND` | 404 | `EventsService.register` — aucun événement à venir pour l'inscription | 7 |
 
 **Distinction `INTERNAL_ERROR` vs `UNKNOWN_ERROR` (figée le 24/08) :**
 
@@ -953,7 +954,7 @@ const lead = await api<LeadDto>(`/leads/${id}`);
 
 ---
 
-### ⬜ PHASE 6 — Leads + Applications
+### ✅ PHASE 6 — Leads + Applications (implémentée et validée le 24/08)
 
 **Objectif** : migrer les erreurs métier vers les codes structurés, en exploitant le contrat Error Handling en place. Codes attendus : `LEAD_NOT_FOUND`, `APPLICATION_ALREADY_EXISTS` (uniquement si le cas métier existe réellement).
 
@@ -983,11 +984,18 @@ const lead = await api<LeadDto>(`/leads/${id}`);
 - Aucune régression sur les routes existantes
 
 **Critères d'acceptation** :
-- [ ] `LEAD_NOT_FOUND` et `APPLICATION_ALREADY_EXISTS` produits avec les bons `statusCode`
-- [ ] Aucun nouveau code créé sans cas métier réel
-- [ ] `console.log` de debug retirés de `leads.service.ts`
-- [ ] §5 mis à jour avec les codes ajoutés
-- [ ] Aucun fichier hors périmètre modifié
+- [x] `LEAD_NOT_FOUND` et `APPLICATION_ALREADY_EXISTS` produits avec les bons `statusCode`
+- [x] Aucun nouveau code créé sans cas métier réel
+- [x] `console.log` de debug retirés de `leads.service.ts`
+- [x] §5 mis à jour avec les codes ajoutés
+- [x] Aucun fichier hors périmètre modifié
+
+**Résultat Phase 6 (implémentation) — validée le 24/08** :
+- Fichiers modifiés : `src/modules/leads/leads.service.ts`, `src/modules/applications/applications.service.ts` (backend), + §5 du présent document.
+- `leads.service.ts` : suppression des 4 `console.log` de debug (P9/§8.3) ; `NotFoundException("Lead with ID ... not found")` → `NotFoundException({ code: 'LEAD_NOT_FOUND', message: 'Le lead est introuvable.', details: { id } })`.
+- `applications.service.ts` : `NotFoundException` (lead inexistant) → `LEAD_NOT_FOUND` (`details: { id: dto.leadId }`) ; `ConflictException("Cette candidature a déjà été soumise...")` → `{ code: 'APPLICATION_ALREADY_EXISTS', message: '...' }`.
+- Non touchés (périmètre respecté) : `leads.controller.ts` (`BadRequestException('At least one ID is required')` — validation générique, couverte par le fallback `BAD_REQUEST`), `updateStatus`/`delete` (Prisma P2025 → fallback générique `NOT_FOUND`), guards, `users.service.ts`, `auth.ts`, `schema.prisma`.
+- `npm run build` : exit 0.
 
 **Checkpoint de validation** : §14.
 
@@ -995,7 +1003,7 @@ const lead = await api<LeadDto>(`/leads/${id}`);
 
 ---
 
-### ⬜ PHASE 7 — Events + Community + Upload
+### ✅ PHASE 7 — Events + Community + Upload (implémentée et validée le 24/08)
 
 **Objectif** : migrer **uniquement ce qui reste réellement à migrer** côté Error Handling ; supprimer les `throw new Error()` métier/techniques lorsqu'ils doivent devenir structurés ;
 
@@ -1029,10 +1037,19 @@ Frontend :
 **Tests** : ciblés sur les flux modifiés ; build backend ; pas de régression.
 
 **Critères d'acceptation** :
-- [ ] `throw new Error()` métier restants → structurés là où un cas réel existe
-- [ ] Aucun flux déjà conforme re-migré (Upload notamment)
-- [ ] §5 mis à jour si nouveaux codes
-- [ ] Aucun fichier hors périmètre modifié
+- [x] `throw new Error()` métier restants → structurés là où un cas réel existe
+- [x] Aucun flux déjà conforme re-migré (Upload notamment)
+- [x] §5 mis à jour si nouveaux codes
+- [x] Aucun fichier hors périmètre modifié
+
+**Résultat Phase 7 (implémentation) — validée le 24/08** :
+- Fichier modifié : `src/modules/events/events.service.ts` + §5 du présent document (aucun créé).
+- `events.service.ts` : `throw new Error('No upcoming event found for registration')` → `NotFoundException({ code: 'EVENT_NOT_FOUND', message: 'Aucun événement à venir disponible.' })` (404).
+- **Community** : audité — `community.service.ts` ne contient aucun `throw` ni `console.log` (CRUD Prisma pur, erreurs couvertes par le fallback générique du filtre). Déjà conforme → rien migré.
+- **Upload** : déjà validé/migré (Phase 3) → non retouché.
+- **Frontend `events.service.ts` / `community.service.ts`** : utilisent déjà `api()` qui lève `ApiError` automatiquement → conformes côté Error Handling, aucun alignement requis.
+- `npm run build` : exit 0.
+- Restes hors périmètre documentés : `app.module.ts` (validation d'env au démarrage) et `stripe.service.ts:23` (Phase 8 Payments).
 
 **Checkpoint de validation** : §14.
 
@@ -1173,7 +1190,7 @@ Si un besoin de cette nature apparaît pendant l'implémentation, il doit être 
 | D10 | `FormData` dans `api()` | Détection automatique, pas de `Content-Type` forcé si `body instanceof FormData` |
 | D11 | `INTERNAL_ERROR` vs `UNKNOWN_ERROR` | `INTERNAL_ERROR` = backend (500, erreur interne réelle) ; `UNKNOWN_ERROR` = frontend-only (fallback `api-client.ts` quand le corps n'est pas `ApiErrorResponse`). Jamais émis par l'API ; ne remplace jamais une erreur métier connue (§5) |
 
-**Phases 1-5 : implémentées et validées. Phases 6-9 : planifiées, non autorisées — validation humaine requise entre chaque phase (voir §14).**
+**Phases 1-7 : implémentées et validées. Phases 8-9 : planifiées, non autorisées — validation humaine requise entre chaque phase (voir §14).**
 
 ---
 
