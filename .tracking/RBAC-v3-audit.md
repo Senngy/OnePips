@@ -1,7 +1,8 @@
 # RBAC v3 — Audit & Suivi
 
-> Dernière mise à jour : 30/07/2026 (v3 — corrections stratégiques)
+> Dernière mise à jour : 17/08/2026 (v4.2 — §5.1 Helmet mis à jour : backend fait/partiel, frontend non commencé — voir `Plan-P0-2-Helmet-Headers-Securite.md`)
 > Statut global : ⚠️ En cours (Phases 1-8 terminées)
+> **P0 vérifié le 17/08 contre le code réel** (git log + lecture directe) : seul #1 est fait, #2 est partiel, tout le reste (#3-9, #36-39) reste à faire. Voir statuts détaillés en §10.
 
 ---
 
@@ -67,12 +68,64 @@ L'audit v1 ne distinguait pas. Il faut **trois** opérations, ce sont des exigen
 | **Delete** | Suppression physique (RGPD art. 17) | Supprimées + cascade | Détruit `Session`, `Account`, `UserPermission`, `SuperAdmin`. **Ne doit PAS casser les références business** (`Customer`, `Booking`…) → prévoir anonymisation/`onDelete: SetNull` ou garde |
 | **Anonymize** | Données conservées mais PII effacées (RGPD art. 5/25) | Conservées, dépersonnalisées | Email → `anonyme-<uuid>`, name → null, liens OAuth coupés |
 
-### Implications Schéma (à décider)
+### Implications Schéma
 
-- `User.status` : `ACTIVE | DISABLED | LOCKED` (blocage pour Disable)
-- `User.deletedAt` / `User.anonymizedAt` : horodatage des opérations
+- `User.deletedAt` / `User.anonymizedAt` : horodatage des opérations — **toujours à décider**.
 - `Booking.customerId`, `Payment.customerId` : actuellement `onDelete` non défini (restrict par défaut) → un `Delete` physique d'un `Customer` peut échouer ou casser. Décision requise.
 - Le `Delete` physique d'un `User` Better Auth doit passer par Better Auth (sinon reprise de la règle §1).
+
+### 2.1 État de compte — `User.status` (DÉCIDÉ le 17/08, révisé le 17/08 — réutilisation de l'enum existant)
+
+> Décision : **3 états**, avec sémantique strictement séparée. `SUSPENDED` n'est **pas** un deuxième `DISABLED`.
+>
+> ⚠️ **Correction** : l'enum `UserStatus { ACTIVE SUSPENDED DISABLED }` **existe déjà** dans `schema.prisma` (actuellement porté par `Session.status`, cf. §2.1 historique). On **réutilise ce même enum** pour `User.status` — pas de nouveau type à créer. Le nom `LOCKED` envisagé initialement est remplacé par **`SUSPENDED`** pour coller à l'enum réel et éviter une migration de type. **Seule une migration légère d'ajout de colonne est nécessaire** : `ALTER TABLE "User" ADD COLUMN "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE'` (le type `UserStatus` existe déjà en base).
+
+```prisma
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+```
+
+| État | Origine | Nature | Effet |
+|------|---------|--------|-------|
+| `ACTIVE` | Défaut | — | Compte normalement utilisable |
+| `DISABLED` | **Décision administrative** (retrait d'équipe, désactivation manuelle) | Permanent jusqu'à réactivation manuelle | Login refusé · sessions existantes révoquées · aucune nouvelle session |
+| `SUSPENDED` | **Mécanisme de sécurité automatique** (anti-brute-force, comportement suspect) | Temporaire | Login refusé temporairement · sessions révoquées · retour à `ACTIVE` après levée de la suspension |
+
+```
+ACTIVE
+  │
+  ├── désactivation administrative ──→ DISABLED
+  │
+  └── protection automatique ────────→ SUSPENDED
+                                          │
+                                          └── levée de la suspension → ACTIVE
+```
+
+**Règle d'or** : `DISABLED` = décision métier permanente jusqu'à action admin. `SUSPENDED` = état de sécurité temporaire. Ne jamais fusionner les deux (sinon on recrée artificiellement le besoin de `disabledBy`/`suspendReason`/`suspendedUntil` pour distinguer après coup deux causes différentes sous un seul état).
+
+**Portée minimale aujourd'hui** : l'enum à 3 valeurs (déjà existant) est réutilisé tel quel, mais `SUSPENDED` n'est pas fonctionnellement piloté tant que la protection anti-brute-force n'existe pas (lié à P3 — device fingerprint / rate limiting, §10). **Ne pas ajouter `suspendedUntil` maintenant** : ce champ n'a de sens que lorsque le verrouillage automatique sera réellement implémenté. Avant cela, `SUSPENDED` reste un état positionnable uniquement via action manuelle (debug/admin), pas encore déclenché automatiquement.
+
+**Levée de la suspension (`SUSPENDED → ACTIVE`)** : ne restaure **pas** les sessions révoquées. L'utilisateur doit se ré-authentifier — choix de sécurité assumé, pas un oubli.
+
+**Révocation de session obligatoire** (`DISABLED` **et** `SUSPENDED`, pas seulement `DISABLED`) :
+
+```
+Admin désactive / suspend un user
+        │
+        ▼
+Prisma : User.status = DISABLED | SUSPENDED
+        │
+        ▼
+Better Auth : auth.api.revokeSessions({ userId })
+        │
+        ▼
+Sessions existantes invalidées immédiatement
+```
+
+La révocation est une **mesure complémentaire**, pas la seule protection : le contrôle `User.status !== ACTIVE` dans `AuthGuard` (§3.2bis) bloque de toute façon la requête suivante même si une session survivait.
 
 ---
 
@@ -102,6 +155,62 @@ L'audit v1 ne distinguait pas. Il faut **trois** opérations, ce sont des exigen
 - **Guards non déclarés en `providers`** : instanciés ad-hoc par chaque module. C'est le **symptôme** du vrai sujet : l'absence de stratégie globale (voir §3.4). Ça marche uniquement grâce aux modules `@Global` — fragile en DI.
 - **`RolesGuard`** : bypass SUPER_ADMIN + vérifie `request.user`. Dépend de l'ordre `@UseGuards(AuthGuard, RolesGuard)` — pas d'assertion de l'ordre dans le code.
 - **`GET /:id` users** : `USERS_READ` seulement — n'importe quel user avec `USERS_READ` peut voir un user précis. OK par design (à confirmer).
+
+### 3.2bis Flux cible `AuthGuard` — Authentication vs Authorization (DÉCIDÉ le 17/08)
+
+```
+Request
+   │
+   ▼
+Better Auth getSession()
+   │
+   ├── aucune session valide ─────────────► 401 Unauthorized
+   │
+   ▼
+Prisma User (findUnique)
+   │
+   ├── user introuvable ───────────────────► 401 Unauthorized
+   │
+   ├── user.status !== ACTIVE ─────────────► 401 Unauthorized
+   │
+   ▼
+req.user = Prisma User (objet complet — ne pas se limiter à session.user)
+req.session = Better Auth Session
+   │
+   ▼
+RolesGuard / PermissionsGuard  (Authorization)
+   │
+   ├── rôle/permission insuffisant ────────► 403 Forbidden
+   │
+   ▼
+Handler
+```
+
+**Codes HTTP — règle actée :**
+
+| Cas | Code | Justification |
+|-----|------|----------------|
+| Pas de session / session expirée | `401 Unauthorized` | Non authentifié |
+| `User.status = DISABLED` ou `SUSPENDED` (session par ailleurs valide) | `401 Unauthorized` | **Volontairement 401, pas 403** — évite de révéler l'existence/l'état d'un compte à qui possède un cookie volé (anti-énumération) |
+| Authentifié + `status = ACTIVE` mais rôle/permission insuffisant | `403 Forbidden` | Authentifié, action refusée |
+
+**Authentication ≠ Authorization — ne pas mélanger `SUSPENDED`/`DISABLED` avec le RBAC :**
+
+```
+Authentication (AuthGuard)
+├── Session valide ?
+├── User existe ?
+└── User.status = ACTIVE ?
+        │
+        ▼
+Authorization (RolesGuard / PermissionsGuard)
+├── Role ?
+└── Permissions ?
+```
+
+`SUSPENDED` n'est pas une permission. `DISABLED` n'est pas un rôle. Ces contrôles se font **avant** toute logique de rôle/permission, exclusivement dans `AuthGuard`.
+
+**🔴 Interdiction explicite — pas de bypass `SUPER_ADMIN` sur le statut** : le bypass `user.role === Role.SUPER_ADMIN` existant dans `RolesGuard`/`PermissionsGuard` est un mécanisme d'**autorisation** et ne doit **jamais** s'appliquer au contrôle `status` (**authentification**, plus en amont). Un `SUPER_ADMIN` avec `status = DISABLED` doit être bloqué en `401` dans `AuthGuard`, avant même d'atteindre `RolesGuard`/`PermissionsGuard`. Sinon : `SUPER_ADMIN` désactivé = accès "god mode" malgré la désactivation → incohérence de sécurité inacceptable.
 
 ### 3.3 Typage de `request.user`
 
@@ -185,16 +294,20 @@ Config réelle (`auth.ts`) : `emailAndPassword.enabled: true`, `baseURL`, `trust
 
 ### 5.1 Helmet — c'est toute une suite, pas `npm install`
 
-| Politique | Statut | Détail |
-|-----------|--------|--------|
-| Helmet (paquet) | 🔴 Non installé | Aucun header sécurité |
-| **CSP** (Content-Security-Policy) | 🔴 Absent | Aucune restriction de sources (script/style/img) |
-| **Clickjacking** (`X-Frame-Options` / CSP frame-ancestors) | 🔴 Absent | Le site peut être embeddé dans un iframe hostile |
-| **HSTS** (`Strict-Transport-Security`) | 🔴 Absent | Pas de force HTTPS navigateur (uniquement en prod HTTPS) |
-| **Referrer Policy** | 🔴 Absent | L'URL peut fuiter vers des tiers |
-| **Permissions Policy** | 🔴 Absent | Camera, géoloc, micro, etc. non restreintes |
-| X-Content-Type-Options, X-DNS-Prefetch-Control, etc. | 🔴 Absents | Défauts Helmet |
-| `Cache-Control` sur les réponses dynamiques | ❌ Non défini | Risque de cache de données admin sur les GET protégés |
+> 🔄 **Mis à jour le 17/08** — plan détaillé et vérification complète : `.tracking/Plan-P0-2-Helmet-Headers-Securite.md`. Résumé ci-dessous.
+
+| Politique | Statut Backend (Nest) | Statut Frontend (Next.js) | Détail |
+|-----------|------------------------|----------------------------|--------|
+| Helmet (paquet) | ✅ Installé (`v8.3.0`) et branché dans `main.ts` | — (Helmet ne s'applique pas au frontend) | `src/common/helmet.config.ts` |
+| **CSP** (Content-Security-Policy) | ⚪ Désactivée volontairement (API JSON, pas de HTML) | 🔴 Absent | Doit être posée côté Next.js (`next.config.ts`) — **non commencé** |
+| **Clickjacking** (`X-Frame-Options` / frame-ancestors) | ✅ `frameguard: deny` | 🔴 Absent | Pages HTML du site toujours embeddables dans un iframe hostile |
+| **HSTS** (`Strict-Transport-Security`) | 🟡 Configuré mais `maxAge` codé en dur (pas de progression phase-a/b/c), prod only | 🔴 Absent | — |
+| **Referrer Policy** | ✅ `no-referrer` | 🔴 Absent | — |
+| **Permissions Policy** | ❌ Absent (pas dans `helmet.config.ts`) | 🔴 Absent | À ajouter des deux côtés |
+| `X-Content-Type-Options` / `X-DNS-Prefetch-Control` | ✅ Présents (`noSniff`, `xDnsPrefetchControl`) | 🔴 Absents | — |
+| `Cache-Control` sur les réponses dynamiques | ❌ Non défini | ❌ Non défini | Risque de cache de données admin sur les GET protégés — toujours ouvert |
+
+**Verdict** : le backend a fait le strict minimum Helmet (commits C1-C3 du plan P0-2), mais **le frontend Next.js n'a reçu aucun header de sécurité et aucune CSP** — c'est la partie la plus importante en volume (CSP = protection XSS) et elle n'a pas démarré.
 
 ### 5.2 Autres points sécurité
 
@@ -211,7 +324,7 @@ Config réelle (`auth.ts`) : `emailAndPassword.enabled: true`, `baseURL`, `trust
 | Rate limiting global | ✅ Throttler 20 req/60s | Bon |
 | Rate limiting auth | ⚠️ In-memory `Map` | Perdu au restart, pas distribué, pas Redis. Clé `ip:path` (pas de compte-rendu IP derrière proxy non configuré) |
 | SQL injection | ✅ Prisma | — |
-| Secrets | ⚠️ `.env` local | Vérifier que `.env` n'est pas commité + rotation des secrets Stripe/BetterAuth |
+| Secrets | 🟡 `.env` local — non commité **confirmé** (17/08 : présent dans `.gitignore` backend, absent de `git ls-files`) | Rotation des secrets Stripe/BetterAuth toujours à vérifier |
 
 ---
 
@@ -380,7 +493,7 @@ Leads        —       Uses(global) Uses guard  —     —     —        —  
 | # | Tâche | Catégorie | Statut |
 |---|-------|-----------|--------|
 | 1 | ~~Appliquer la migration DB `rbac_v3`~~ ✅ **Fait** — 17/17 migrations appliquées, colonne `granted` présente sur `UserPermission`, enum `Permission` = 20 valeurs (dont `USERS_READ`, `ADMINS_MANAGE`, `ROLES_MANAGE`, `FILES_UPLOAD`). Vérifié en base le 30/07 | Prisma | ✅ |
-| 2 | Installer Helmet + configurer **toute la suite** : CSP, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy, nosniff | Sécurité | ⬜ |
+| 2 | Installer Helmet + configurer **toute la suite** : CSP, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy, nosniff | Sécurité | 🟡 |
 | 3 | CSRF : vérifier ce que Better Auth fournit, sinon implémenter | Sécurité | ⬜ |
 | 4 | **Audit log admin** (modèle `AdminAuditLog` + écriture sur role/permissions change) | Observabilité | ⬜ |
 | 5 | Rate limiting auth → Redis (pas in-memory) | Sécurité | ⬜ |
@@ -388,12 +501,34 @@ Leads        —       Uses(global) Uses guard  —     —     —        —  
 | 7 | Désactiver/restreindre le signup public OU restreindre par domaine | Sécurité | ⬜ |
 | 8 | Déplacer `lastLoginAt` au login + refresh de session (plus de write à chaque requête) | Perf | ⬜ |
 | 9 | Ajouter Request ID / Correlation ID (middleware + réponse) | Observabilité | ⬜ |
+| 36 | Ajouter la colonne `status` sur `User` (type `UserStatus` **déjà existant** dans le schéma — `ACTIVE`/`SUSPENDED`/`DISABLED`, défaut `ACTIVE`) — voir §2.1. **Pas de nouvel enum à créer**, migration légère (ajout de colonne uniquement). `SUSPENDED` sans mécanique de verrouillage automatique pour l'instant | Prisma | ⬜ |
+| 37 | Supprimer `Session.status` + `enum UserStatus` (Session) — confirmé mort : 0 référence dans `src/`, absent du schéma Better Auth (`sessionSchema` core) | Prisma | ⬜ |
+| 38 | `AuthGuard` : vérifier `user.status === ACTIVE` juste après le `findUnique`, sinon `401` — **avant** `RolesGuard`/`PermissionsGuard`, sans bypass `SUPER_ADMIN` (§3.2bis) | Backend | ⬜ |
+| 39 | `Disable`/`Lock` : appeler `auth.api.revokeSessions({ userId })` immédiatement après l'écriture de `User.status` (§2.1) | Backend | ⬜ |
+
+#### Vérification P0 contre le code réel — 17/08/2026
+
+Chaque ligne ci-dessus a été confrontée au code source (pas seulement à l'intention). Détail :
+
+| # | Preuve vérifiée | Verdict |
+|---|------------------|---------|
+| 2 | `helmet.config.ts` (commit `294fab8`, message *"Helmet security headers (P0-2 **Phase A**)"*) : `hsts`, `noSniff`, `frameguard`, `referrerPolicy`, `hidePoweredBy`, `xDnsPrefetchControl`, `ieNoOpen` configurés. **`contentSecurityPolicy: false`** (explicitement désactivée) et **`Permissions-Policy` absente**. Le commit s'auto-désigne "Phase A" → une "Phase B" (CSP + Permissions-Policy) reste nécessaire pour clore ce point | 🟡 Partiel |
+| 3 | `grep -r "csrf\|CSRF" src/` → 0 résultat | ⬜ Inchangé |
+| 4 | Pas de modèle `AdminAuditLog` dans `schema.prisma`, `grep -r "AuditLog" src/` → 0 résultat | ⬜ Inchangé |
+| 5 | `auth-rate-limit.middleware.ts` : toujours `const store = new Map<string, Entry>()`, en mémoire, non distribué | ⬜ Inchangé |
+| 6 | `upload.controller.ts` (modifié le 08/08, mais pas sur ce point) : `serveFile()` fait toujours `join(UPLOAD_DIR, filename)` avec le paramètre brut, sans `basename()` ni vérification `resolve()` | ⬜ Inchangé — 🔴 toujours exploitable |
+| 7 | `auth.ts` inchangé depuis l'audit (`emailAndPassword.enabled: true` sans restriction), `AuthController` toujours `@All('*')` sans filtre sur `sign-up` | ⬜ Inchangé |
+| 8 | `auth.guard.ts:44-47` : `this.prisma.session.update({ lastLoginAt })` toujours exécuté à **chaque** requête authentifiée | ⬜ Inchangé |
+| 9 | Aucun middleware / header `X-Request-Id` trouvé dans `src/` | ⬜ Inchangé |
+| 36-39 | `schema.prisma` non modifié depuis le 25/07/2026 (dernier commit touchant ce fichier : `b71bf00`, antérieur à la décision §2.1) : pas de `User.status`, `Session.status` toujours présent, `AuthGuard` sans contrôle de statut, aucun appel à `revokeSessions` dans le code | ⬜ Non commencé (normal — décision actée seulement le 17/08, après le dernier commit schéma) |
+
+**Conclusion : sur 13 items P0, 1 est fait (#1) et 1 est partiel (#2 — Helmet sans CSP). Les 11 autres (#3-9, #36-39) n'ont aucune trace d'implémentation dans le code actuel.** Rien à cocher de plus à ce stade.
 
 ### P1 — Important
 
 | # | Tâche | Catégorie | Statut |
 |---|-------|-----------|--------|
-| 10 | Décider du cycle de vie : `User.status`, `deletedAt`, `anonymizedAt` + modèles GDPR | Prisma | ⬜ |
+| 10 | ~~Décider du cycle de vie : `User.status`~~ ✅ **Statut décidé** (§2.1 : `ACTIVE/SUSPENDED/DISABLED`, enum déjà existant réutilisé, implémentation en P0 #36-39). Restent ouverts : `deletedAt`, `anonymizedAt` + modèles GDPR | Prisma | 🟡 |
 | 11 | Création admin par **invitation** (`AdminInvitation` + flux Better Auth natif, PAS `prisma.user.create`) | Backend | ⬜ |
 | 12 | `POST /users` (SUPER_ADMIN) + DTO `CreateUserDto` (email, name, role) | Backend | ⬜ |
 | 13 | UI frontend "Créer un administrateur" + "Désactiver" | Frontend | ⬜ |
@@ -438,6 +573,7 @@ Leads        —       Uses(global) Uses guard  —     —     —        —  
 |---------|---------------|
 | ✅ | Fait / Validé |
 | ⚠️ | Partiel / À améliorer |
+| 🟡 | Partiel — en cours, vérifié dans le code (nuance de ⬜) |
 | ❌ | Manquant / Pas fait |
 | 🔴 | Critique |
 | ⬜ | À faire (todo) |
@@ -458,3 +594,10 @@ Leads        —       Uses(global) Uses guard  —     —     —        —  
 | 30/07 | **`lastLoginAt`** : mise à jour **au login** + **au refresh de session**, jamais à chaque requête (pas de suppression de la feature) | §3.2 / §7.2 |
 | 30/07 | **Typage `request.user`** (`RequestWithUser` + `AuthenticatedUser`) — à implémenter avant d'ajouter des routes | §3.3 |
 | 30/07 | **Stratégie globale des guards** (`APP_GUARD` + `@Public()`/`@Roles()`) — évolution à évaluer, pas immédiate | §3.4 |
+| 17/08 | **Décision 1 — `User.status`** : 3 états `ACTIVE / SUSPENDED / DISABLED`. `SUSPENDED` ≠ deuxième `DISABLED` (sémantique strictement séparée : décision admin permanente vs sécurité automatique temporaire). Révisé le 17/08 : l'enum `UserStatus` **existe déjà** dans le schéma (porté par `Session.status`) → **réutilisé tel quel** pour `User.status`, pas de nouveau type créé, `LOCKED` renommé en `SUSPENDED` pour coller à l'enum réel. Non piloté tant que l'anti-brute-force n'existe pas (pas de `suspendedUntil` prématuré) | §2.1 |
+| 17/08 | **Décision 2 — `Session.status`** : suppression actée (confirmé mort : 0 référence code, absent du schéma Better Auth). Remplacé par `User.status` comme source d'autorité unique | §2.1 / P0 #37 |
+| 17/08 | **Décision 3 — Révocation de session** : `DISABLED` **et** `LOCKED` déclenchent `auth.api.revokeSessions({ userId })`. Déverrouillage `LOCKED → ACTIVE` ne restaure pas les sessions (ré-authentification obligatoire) | §2.1 / P0 #39 |
+| 17/08 | **Décision 4 — `AuthGuard` cible** : `getSession()` Better Auth → `findUnique` Prisma → `status === ACTIVE` → `req.user`/`req.session` → guards de rôle/permission. Contrôle du statut **avant** toute logique RBAC, **sans bypass `SUPER_ADMIN`** | §3.2bis / P0 #38 |
+| 17/08 | **Décision 5 — `lastLoginAt`** : confirmé — mise à jour au login + refresh de session uniquement, jamais à chaque requête (inchangé depuis le 30/07) | §7.2 / P0 #8 |
+| 17/08 | **Décision 6 — Codes HTTP** : pas de session → `401` ; compte `DISABLED`/`LOCKED` → `401` (anti-énumération, pas de fuite d'information sur l'état du compte) ; authentifié mais rôle/permission insuffisant → `403` | §3.2bis |
+| 17/08 | **Décision 7 — Ordre des travaux** : (1) figer `User.status` → (2) supprimer `Session.status` → (3) implémenter révocation `DISABLED`/`LOCKED` → (4) adapter `AuthGuard` → (5) `lastLoginAt` (déjà en P0 #8) → (6) tests manuels du cycle de vie → **puis seulement** tests RBAC backend (§10 checklist) | P0 #36-39 |

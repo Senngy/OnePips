@@ -17,21 +17,44 @@ export async function api(
 ) {
   const headers = new Headers(options.headers);
 
-  if (!headers.has("Content-Type")) {
+  if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  const res = await fetch(`${API_URL}${endpoint}`, {
+  const url = `${API_URL}${endpoint}`;
+  console.log("[API] REQUEST:", options.method || "GET", url);
+  console.log("[API] REQUEST HEADERS:", Object.fromEntries(headers.entries()));
+  console.log(
+  "[API] REQUEST BODY:",
+  options.body instanceof FormData
+    ? Object.fromEntries(options.body.entries())
+    : options.body,
+);
+
+  const res = await fetch(url, {
     ...options,
     headers,
     credentials: "include", // important
   });
 
+  console.log("[API] STATUS:", res.status, url);
+
+  if (res.status === 304) {
+    console.log("[API] 304 NOT MODIFIED — no body expected");
+  }
+
   let data = null;
 
   try {
     data = await res.json();
-  } catch {}
+    if (res.status === 304) {
+      console.log("[API] 304 parsed body:", data);
+    }
+  } catch {
+    throw new ApiError("Invalid JSON response", res.status);
+  }
+
+  console.log("[API] OK:", res.ok, "| url:", url);
 
   if (!res.ok) {
     throw new ApiError(
@@ -41,6 +64,7 @@ export async function api(
     );
   }
 
+  console.log("[API] RESPONSE:", data);
   return data;
 }
 

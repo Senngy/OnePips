@@ -84,7 +84,9 @@ export const getLeads = async (params: GetLeadsParams = {}) => {
         Object.entries(params).filter(([, v]) => v !== undefined && v !== "" && v !== null)
     );
     const query = new URLSearchParams(cleanParams as Record<string, string>).toString();
+    console.log("[FRONT Leads Service] Fetching leads with params:", cleanParams);
     const res = await api(`/leads${query ? `?${query}` : ""}`);
+    console.log("[FRONT Leads Service] Fetched leads:", res);
     const leads = res.data;
     const total = res.meta.total;
     const page = res.meta.page;

@@ -1,9 +1,9 @@
 # P0-2 — Helmet + Headers Sécurité (Plan d'implémentation détaillé)
 
-> Date : 30/07/2026 · Version : v9 (**correction majeure** — le plan mélangeait décisions de production avec le développement local ; D1/D2/D7 ne sont plus « bloquantes avant C1 », elles sont réparties par étape réelle de déploiement ; ajout du chemin de travail concret §13.5 et du résumé « Maintenant ? » §13.0 ; SOUS-ÉTAPE 0 et checklist réécrites en conséquence) · Statut : 📝 Plan (aucune modification appliquée)
+> Date : 30/07/2026 · Version : v10 (17/08 — **vérification réelle du code** : commits C1-C3 (backend) confirmés implémentés, C4-C13 (tests headers + tout le frontend Next.js) confirmés non commencés) · Statut : 🟡 Backend partiel implémenté / Frontend non démarré
 > Source : `.tracking/RBAC-v3-audit.md` §5.1, P0 #2
 > Périmètre : Backend NestJS **+** Frontend Next.js (les deux doivent être durcis)
-> Règle : **document de plan uniquement — aucune modification du projet tant que non validée.**
+> Règle : **document de plan — les cases cochées ci-dessous reflètent l'état réel du code vérifié le 17/08/2026, pas une intention.**
 
 ---
 
@@ -426,12 +426,12 @@ Pour ne **jamais** casser la prod en déployant une CSP trop stricte :
 
 | # | Tâche | Où | Quand | Statut |
 |---|-------|-----|-------|--------|
-| 1 | Décider **D9** (Helmet seul, pas de compression) | Décision | ✅ Maintenant | ⬜ |
-| 2 | Poser les placeholders d'environnement (`FRONT_URL`/`API_URL` en local) | Backend/Frontend | ✅ Maintenant | ⬜ |
-| 3 | Installer `helmet` (v8.3.0 — options v8 confirmées) | `onepips-backend` | ✅ Maintenant (C1) | ⬜ |
-| 4 | Créer `src/common/helmet.config.ts` | Backend | ✅ Maintenant (C2) | ⬜ |
-| 5 | Brancher Helmet dans `main.ts` (CSP off, HSTS off en dev) | Backend | ✅ Maintenant (C3) | ⬜ |
-| 6 | Retester Better Auth (signup/login/logout) + uploads + API en local | Backend | ✅ Immédiatement après C3 | ⬜ |
+| 1 | Décider **D9** (Helmet seul, pas de compression) | Décision | ✅ Maintenant | ✅ |
+| 2 | Poser les placeholders d'environnement (`FRONT_URL`/`API_URL` en local) | Backend/Frontend | ✅ Maintenant | ✅ |
+| 3 | Installer `helmet` (v8.3.0 — options v8 confirmées) | `onepips-backend` | ✅ Maintenant (C1) | ✅ |
+| 4 | Créer `src/common/helmet.config.ts` | Backend | ✅ Maintenant (C2) | ✅ |
+| 5 | Brancher Helmet dans `main.ts` (CSP off, HSTS off en dev) | Backend | ✅ Maintenant (C3) | ✅ |
+| 6 | Retester Better Auth (signup/login/logout) + uploads + API en local | Backend | ✅ Immédiatement après C3 | ❓ **À confirmer par toi** — non vérifiable par lecture de code |
 | 7 | Automatiser les tests headers (`curl`/script — §14 `security-check.sh`) | Backend | ✅ Maintenant (C4) | ⬜ |
 | 8 | Headers Next.js non-CSP (X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy) | Frontend | ✅ Maintenant (C5) | ⬜ |
 | 9 | Établir une **première allowlist CSP** à partir des dépendances réelles du code (pas besoin d'être finale) | Frontend | ✅ Maintenant (avant C6/C7) | ⬜ |
@@ -444,7 +444,24 @@ Pour ne **jamais** casser la prod en déployant une CSP trop stricte :
 | 16 | **Phase C** : durcir `script-src` (nonce/SRI), HSTS phase-c | Frontend/Backend | ❌ Après Phase B | ⬜ |
 | 17 | **Avant production** : trancher D1/D2 définitifs (domaines + HTTPS prod) | Décision/Infra | ❌ Pas avant | ⬜ |
 | 18 | Score `securityheaders.com` ≥ A ou A+ (prod) | Prod | ❌ Après mise en prod | ⬜ |
-| 19 | Mettre à jour l'audit (section 5.1 → ✅, P0 #2 → ✅) | Audit | Fin | ⬜ |
+| 19 | Mettre à jour l'audit (section 5.1 → ✅, P0 #2 → ✅) | Audit | Fin | 🟡 Fait partiellement — `RBAC-v3-audit.md` reflète désormais P0 #2 = 🟡 **partiel** (pas ✅, car CSP/Permissions-Policy manquantes) |
+
+#### Vérification contre le code réel — 17/08/2026
+
+| Élément | Preuve | Verdict |
+|---------|--------|---------|
+| `helmet` installé | `package.json:39` → `"helmet": "^8.3.0"`, `node_modules/helmet/package.json` → version exacte **8.3.0** (celle vérifiée dans ce plan) | ✅ |
+| `compression` absent (D9) | `grep '"compression"' package.json` → 0 résultat | ✅ conforme à D9 |
+| `src/common/helmet.config.ts` | Fichier existe, options quasi identiques à la référence §3 (SOUS-ÉTAPE 1) : `contentSecurityPolicy:false`, `crossOriginEmbedderPolicy:false`, `crossOriginOpenerPolicy:same-origin`, `crossOriginResourcePolicy:same-origin`, `xDnsPrefetchControl:off`, `frameguard:deny`, `hidePoweredBy`, `hsts` (prod only, `maxAge:86400`), `ieNoOpen`, `noSniff`, `referrerPolicy:no-referrer` | ✅ — **mais différence notée ci-dessous** |
+| HSTS progressif (`HSTS_PHASE` phase-a/b/c) | Le fichier réel a `maxAge: 86400` **codé en dur**, pas de lecture de `process.env.HSTS_PHASE` ni de map `phase-a/b/c` comme le prévoyait la référence §3 | ⚠️ Simplifié par rapport au plan — reste en "Phase A" figée, à généraliser avant la Phase B (§4) |
+| Helmet branché dans `main.ts` | `app.use(helmet(helmetOptions(...)))` présent, positionné **avant** `setGlobalPrefix`, `useStaticAssets`, `ValidationPipe` et `enableCors` — ordre conforme à la recommandation §3 | ✅ |
+| `FRONT_URL` / `NEXT_PUBLIC_API_URL` en placeholders | Présents dans `onepips-backend/.env` et `onepips-frontend/.env` (valeurs non affichées ici) | ✅ — fait directement en `.env` plutôt que `.env.development`, fonctionnellement équivalent en local |
+| `scripts/security-check.sh` | `Test-Path` → absent, aucun fichier `security-check*` trouvé hors `node_modules` | ⬜ Non fait (C4) |
+| Headers Next.js (`next.config.ts`) | Contenu actuel : uniquement `{ reactCompiler: true }` — **aucun `headers()`, aucune CSP, aucun header non-CSP** | ⬜ Non fait (C5 à C13 — tout le frontend est à zéro) |
+| `crossOriginResourcePolicy` (D4) | Implémenté avec `{ policy: 'same-origin' }` dans `helmet.config.ts` | ✅ **D4 est en réalité déjà tranché et implémenté** (voir mise à jour §8 ci-dessous) — le plan le listait encore comme "à trancher" |
+| Cache-Control uploads (D8) | `app.useStaticAssets(..., { prefix: '/uploads' })` sans option `maxAge`/`immutable` | ⬜ Non fait — D8 reste à trancher **et** implémenter |
+
+**Conclusion : les commits C1, C2, C3 (backend Helmet) sont réellement faits et conformes au plan, avec une seule simplification (HSTS non progressif). C4 (tests automatisés) et tout le frontend (C5 à C13, soit toute la CSP et les headers Next.js) n'ont aucune trace dans le code — rien n'a été commencé côté Next.js.**
 
 ---
 
@@ -457,7 +474,7 @@ Pour ne **jamais** casser la prod en déployant une CSP trop stricte :
 | D1 | Domaine(s) de production | **`TBD`** maintenant (placeholder) → `app.<domaine>` + `api.<domaine>` / mono-domaine derrière reverse-proxy | CORS, CSP `connect-src`/`img-src`, HSTS `includeSubDomains` | ❌ Pas maintenant — partiel avant staging (D10), définitif avant production |
 | D2 | Terminaison HTTPS | **`TBD`** en local (HTTP) → Caddy/Nginx (recommandé) devant Nest | HSTS, score securityheaders | ❌ Pas maintenant — pertinent seulement dès staging |
 | D3 | COEP | **Off** (recommandé) / On | Compatibilité Google Fonts, YouTube, Cloudflare | ✅ Déjà tranché (off) |
-| D4 | CORP sur uploads | **`same-origin`** (recommandé — anti-hotlink strict) / `same-site` (si front et API sur origines différentes) / `cross-origin` | Affichage des images : même-origin bloquera un front sur `app.…` si l'API est sur `api.…` | 🟡 Peut être tranché maintenant (indépendant du domaine réel, dépend de l'architecture) |
+| D4 | CORP sur uploads | **`same-origin`** (recommandé — anti-hotlink strict) / `same-site` (si front et API sur origines différentes) / `cross-origin` | Affichage des images : même-origin bloquera un front sur `app.…` si l'API est sur `api.…` | ✅ **Déjà implémenté** — `crossOriginResourcePolicy: { policy: 'same-origin' }` présent dans `helmet.config.ts` (vérifié 17/08). ⚠️ À revalider si front/API finissent sur des origines différentes en prod (D1) |
 | D5 | `script-src` en prod | **nonce ou hashs** (durci) / `unsafe-inline` (exception dev uniquement) | Niveau de protection XSS | ❌ Phase C uniquement |
 | D6 | HSTS `preload` | Non (recommandé — seulement après Phase C) / Oui | Engagement 2 ans non révocable | ❌ Après Phase C, jamais avant |
 | D7 | Collecte des violations CSP | **Console** (local/dev, suffisant pour démarrer) → `Reporting-Endpoints` + `report-to` (recommandé en staging/prod) / `report-uri` (fallback) | Qualité de la phase Report-Only | ✅ Console maintenant — ❌ réel pas avant staging |
@@ -623,16 +640,16 @@ production
 
 ### 13.1 PHASE A — Report-Only
 
-| # | Commit (message type) | Fichiers | Comportement | Test avant de passer au suivant | Rollback |
-|---|------------------------|----------|--------------|----------------------------------|----------|
-| C1 | `chore(backend): install helmet` (+ `compression` si D9) | `package.json`, `package-lock.json` | **Aucun** (paquet non importé) | `npm ls helmet` → confirmer version → lire sa doc | `npm uninstall` / revert |
-| C2 | `feat(backend): add helmet.config.ts factory` | `src/common/helmet.config.ts` (nouveau) | **Aucun** (non importé) | Relecture manuelle des options vs doc de la version installée | Supprimer le fichier |
-| C3 | `feat(backend): wire Helmet in main.ts (CSP off, HSTS phase-a)` | `src/main.ts` | **Changement réel** — tous les endpoints reçoivent les headers | §3.1 (4 `curl`) **+ retest signup/login/logout Better Auth + upload** avant tout autre commit | Retirer la ligne `app.use(helmet(...))` |
-| C4 | `test(backend): add header regression checks` | tests / script curl documenté | Aucun changement runtime | Exécuter la matrice §3.3 (partie backend) | — |
-| C5 | `chore(frontend): add non-CSP security headers` | `next.config.ts` | **Changement réel** — toutes les pages reçoivent ces headers | DevTools Network sur 2-3 pages + `/admin/login` | Retirer le bloc `headers()` |
-| C6 | `feat(frontend): add CSP Report-Only (bloc public)` | `next.config.ts` | Aucune page bloquée (Report-Only) | Naviguer `/methode`, formulaires publics, vérifier console + rapports | Retirer le header CSP |
-| C7 | `feat(frontend): add CSP Report-Only (bloc /admin/*)` | `next.config.ts` | Aucune page bloquée | Naviguer tout `/admin/*` | Retirer le bloc |
-| C8 | `docs: update tracking (checklist 1-12, audit partiel)` | `.tracking/*.md` | Aucun | — | — |
+| # | Commit (message type) | Fichiers | Comportement | Test avant de passer au suivant | Rollback | Statut réel (17/08) |
+|---|------------------------|----------|--------------|----------------------------------|----------|----|
+| C1 | `chore(backend): install helmet` (+ `compression` si D9) | `package.json`, `package-lock.json` | **Aucun** (paquet non importé) | `npm ls helmet` → confirmer version → lire sa doc | `npm uninstall` / revert | ✅ Fait (v8.3.0, sans `compression`) |
+| C2 | `feat(backend): add helmet.config.ts factory` | `src/common/helmet.config.ts` (nouveau) | **Aucun** (non importé) | Relecture manuelle des options vs doc de la version installée | Supprimer le fichier | ✅ Fait (⚠️ HSTS non progressif, `maxAge` codé en dur — voir §7 vérification) |
+| C3 | `feat(backend): wire Helmet in main.ts (CSP off, HSTS phase-a)` | `src/main.ts` | **Changement réel** — tous les endpoints reçoivent les headers | §3.1 (4 `curl`) **+ retest signup/login/logout Better Auth + upload** avant tout autre commit | Retirer la ligne `app.use(helmet(...))` | ✅ Fait (ordre middleware conforme) — ❓ retest fonctionnel non confirmable par lecture de code |
+| C4 | `test(backend): add header regression checks` | tests / script curl documenté | Aucun changement runtime | Exécuter la matrice §3.3 (partie backend) | — | ⬜ Non fait |
+| C5 | `chore(frontend): add non-CSP security headers` | `next.config.ts` | **Changement réel** — toutes les pages reçoivent ces headers | DevTools Network sur 2-3 pages + `/admin/login` | Retirer le bloc `headers()` | ⬜ Non fait — `next.config.ts` ne contient que `{ reactCompiler: true }` |
+| C6 | `feat(frontend): add CSP Report-Only (bloc public)` | `next.config.ts` | Aucune page bloquée (Report-Only) | Naviguer `/methode`, formulaires publics, vérifier console + rapports | Retirer le header CSP | ⬜ Non fait |
+| C7 | `feat(frontend): add CSP Report-Only (bloc /admin/*)` | `next.config.ts` | Aucune page bloquée | Naviguer tout `/admin/*` | Retirer le bloc | ⬜ Non fait |
+| C8 | `docs: update tracking (checklist 1-12, audit partiel)` | `.tracking/*.md` | Aucun | — | — | 🟡 Partiel — fait pour le backend (RBAC audit + ce document), pas pour le frontend puisque C5-C7 restent à faire |
 
 **GATE Phase A** (§4) — se déroule en **2 temps** (correction v9) :
 1. **En local (maintenant)** : boucle itérative Report-Only → tester l'app (`/methode`, formulaires, `/admin/*`) → lire les violations en **console** → corriger l'allowlist §2 → retester, jusqu'à zéro violation critique en local. Aucun domaine/staging requis.

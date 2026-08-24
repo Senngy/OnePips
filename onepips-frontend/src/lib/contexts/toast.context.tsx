@@ -90,6 +90,8 @@ function ToastCard({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
         setTimeout(onDismiss, 350);
     }, [onDismiss]);
 
+    console.log("[FRONT ToastCard] Rendering toast:", toast, "| exiting:", exiting);
+
     return (
         <div
             className={`w-96 bg-surface-container rounded-xl border ${cfg.borderColor} shadow-2xl overflow-hidden etched-edge transition-all

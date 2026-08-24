@@ -12,18 +12,27 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    console.log("[AdminLayout] useEffect");
+    console.log("[AdminLayout] loading:", loading);
+    console.log("[AdminLayout] user:", user);
+    console.log("[AdminLayout] user role:", user?.role);
+    console.log("[AdminLayout] pathname:", pathname);
+
     if (loading) {
+      console.log("[AdminLayout] loading=true — skip checks");
       return;
     }
 
     if (PUBLIC_ADMIN_ROUTES.includes(pathname)) {
       if (user) {
+        console.log("[AdminLayout] REDIRECT public+auth -> /admin/dashboard");
         router.replace("/admin/dashboard");
       }
       return;
     }
 
     if (!user) {
+      console.log("[AdminLayout] REDIRECT no-user -> /admin/login");
       router.replace("/admin/login");
     }
   }, [loading, user, pathname, router]);

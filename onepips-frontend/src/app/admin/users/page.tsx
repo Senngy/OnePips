@@ -47,23 +47,39 @@ export default function AdminUsersPage() {
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
+    console.log("[UsersPage] fetchUsers START");
     try {
       setLoading(true);
       const data = await api("/users/permissions");
+      console.log("[UsersPage] fetchUsers SUCCESS:", data);
+      console.log("[UsersPage] fetchUsers DATA TYPE:", typeof data);
+      console.log("[UsersPage] fetchUsers ARRAY:", Array.isArray(data));
       setUsers(data);
     } catch (err: any) {
+      console.log("[UsersPage] fetchUsers ERROR:", err?.message);
       setError(err?.message ?? "Erreur lors du chargement");
     } finally {
+      console.log("[UsersPage] fetchUsers FINALLY (loading -> false)");
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!currentUser) return;
+    console.log("[UsersPage] useEffect");
+    console.log("[UsersPage] currentUser:", currentUser);
+    console.log("[UsersPage] currentUser?.role:", currentUser?.role);
+    console.log("[UsersPage] loading:", loading);
+    if (!currentUser) {
+      console.log("[UsersPage] currentUser absent — early return");
+      return;
+    }
+    console.log("[UsersPage] role check:", currentUser.role);
     if (currentUser.role !== "SUPER_ADMIN") {
+      console.log("[UsersPage] REDIRECT TO DASHBOARD (role=" + currentUser.role + ")");
       router.replace("/admin/dashboard");
       return;
     }
+    console.log("[UsersPage] SUPER_ADMIN confirmed — calling fetchUsers");
     fetchUsers();
   }, [fetchUsers, currentUser, router]);
 
