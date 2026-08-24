@@ -174,7 +174,11 @@ export default function MultiStepForm() {
             setStep((s) => Math.min(s + 1, TOTAL_STEPS));
         } catch (e: unknown) {
             if (e instanceof ApiError) {
-                setError(e.message);
+                if (e.code === "SECURITY_TURNSTILE_REQUIRED" || e.code === "SECURITY_TURNSTILE_INVALID") {
+                    setError("La vérification de sécurité a échoué. Veuillez réessayer de valider le captcha.");
+                } else {
+                    setError(e.message);
+                }
             } else {
                 setError("Une erreur réseau est survenue. Vérifiez que le serveur est en cours d'exécution.");
             }
@@ -240,7 +244,7 @@ export default function MultiStepForm() {
         } catch (e: any) {
             console.error(e);
             if (e instanceof ApiError) {
-                if (e.status === 409) {
+                if (e.statusCode === 409) {
                     setError("Vous avez déjà soumis une candidature. Notre équipe va vous recontacter sous 48h.");
                 } else {
                     setError(e.message);

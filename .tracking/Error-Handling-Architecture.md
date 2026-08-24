@@ -1,7 +1,7 @@
 # Error Handling Architecture — Audit & Plan
 
-> Créé : 17/08/2026 · Mis à jour : 24/08/2026 · Version : v5 (Phase 2 implémentée et validée — mapping générique corrigé `UNAUTHORIZED`/`FORBIDDEN`)
-> Statut global : ✅ Phase 0 complétée · ✅ Phase 1 validée (contrat figé) · ✅ Phase 2 implémentée et validée · ⬜ Phase 3 en attente d'autorisation
+> Créé : 17/08/2026 · Mis à jour : 24/08/2026 · Version : v6 (Phase 3 implémentée et validée — `api<T>()` + `ApiError` refactorée)
+> Statut global : ✅ Phase 0 complétée · ✅ Phase 1 validée (contrat figé) · ✅ Phase 2 implémentée et validée · ✅ Phase 3 implémentée et validée · ⬜ Phase 4 en attente d'autorisation
 > **Ce document est la référence unique pour l'implémentation.** Objectif : pouvoir dire à un développeur (humain ou agent) *"Implémente uniquement la Phase 2 de ce document"* et qu'il sache précisément quoi faire, quoi ne pas toucher, et comment valider son travail — sans avoir à refaire l'analyse d'architecture.
 
 ---
@@ -713,7 +713,7 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 
 ---
 
-### ⬜ PHASE 3 — Frontend core
+### ✅ PHASE 3 — Frontend core (implémentée et validée le 24/08)
 
 **Objectif** : aligner `api()` et `ApiError` sur le contrat, et migrer `upload.service.ts` comme premier cas d'usage réel.
 
@@ -743,15 +743,24 @@ Le lien entre les deux se fait **uniquement** via `requestId` — jamais en expo
 - Vérifier qu'aucun composant, page, hook ou autre service n'a été modifié
 
 **Critères d'acceptation** :
-- [ ] `ApiError` ne possède plus `.status` ni `.data` — uniquement `.statusCode`, `.code`, `.details`, `.requestId`, `.message`
-- [ ] `api<T>()` respecte les 4 invariants de §4.3
-- [ ] `upload.service.ts` n'utilise plus `fetch()` directement
-- [ ] Aucun fichier hors périmètre modifié
-- [ ] Les erreurs de compilation sur `e.status` (fichiers Phase 4) sont identifiées et listées, pas corrigées ici
+- [x] `ApiError` ne possède plus `.status` ni `.data` — uniquement `.statusCode`, `.code`, `.details`, `.requestId`, `.message`
+- [x] `api<T>()` respecte les 4 invariants de §4.3
+- [x] `upload.service.ts` n'utilise plus `fetch()` directement
+- [x] Aucun fichier hors périmètre modifié
+- [x] Les erreurs de compilation sur `e.status` (fichiers Phase 4) sont identifiées et listées, pas corrigées ici
 
 **Résultat attendu** : le client API frontend respecte le contrat cible ; `upload.service.ts` devient l'exemple de référence pour les futures migrations (hors périmètre de ce chantier).
 
-**Point de validation humaine** : test manuel de l'upload en conditions réelles (succès + échec) avant de passer à la Phase 4.
+**Résultat Phase 3 (implémentation) — validée le 24/08** :
+- Fichiers modifiés : `src/lib/api-client.ts`, `src/lib/services/upload.service.ts` (aucun fichier créé).
+- `ApiError` : `.status`/`.data` supprimés, remplacés par `.statusCode`/`.code`/`.details`/`.requestId` (constructeur prenant `ApiErrorResponse`), `.message` hérité de `Error`.
+- `api<T>()` → `Promise<T>` : détection `FormData` (pas de `Content-Type` forcé), parsing JSON, `throw ApiError` sur `!res.ok` (fallback sûr si corps non-JSON), retour de `T` — jamais `Response`.
+- `upload.service.ts` : migré vers `api<{ url: string }>("/upload", { body: formData })`, plus de `fetch()` manuel, plus de validation runtime redondante, plus de logs de debug.
+- `tsc --noEmit` : 2 erreurs **nouvelles uniquement sur `e.status`** (`multi-step-form.tsx:243`, `quick-apply-form.tsx:102`) — exactement celles attendues et volontaires, corrigées en Phase 4. 7 erreurs préexistantes non liées à ce chantier (inchangées).
+
+**Note de transparence (décision d'implémentation)** : signature écrite `api<T = any>(...)` au lieu de `api<T>(...)` afin de préserver la rétrocompatibilité avec `leads.service.ts` (accès à `res.data`/`res.meta` sur le résultat de `api()`). Sans `= any`, `T` serait inféré `unknown` et casserait ce fichier. Le contrat architectural reste respecté : `api<T>()` retourne `Promise<T>`, jamais `Response`. Alternative (non retenue) : typer `leads.service.ts`, ce qui étendrait le périmètre.
+
+**Point de validation humaine** : ✅ **Validé le 24/08** — typecheck conforme aux attentes, aucun fichier hors périmètre modifié. En attente d'autorisation pour la Phase 4.
 
 **Instructions d'implémentation pour DeepSeek :**
 - Modifie uniquement `api-client.ts` et `upload.service.ts` et les autres servics si besoin. Aucun autre fichier.

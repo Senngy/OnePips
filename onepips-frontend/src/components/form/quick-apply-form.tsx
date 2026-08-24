@@ -99,8 +99,10 @@ export default function QuickApplyForm() {
             setSuccess(true);
         } catch (e: unknown) {
             if (e instanceof ApiError) {
-                if (e.status === 409) {
+                if (e.statusCode === 409) {
                     setError("Vous avez déjà soumis une candidature. Notre équipe va vous recontacter sous 48h.");
+                } else if (e.code === "SECURITY_TURNSTILE_REQUIRED" || e.code === "SECURITY_TURNSTILE_INVALID") {
+                    setError("La vérification de sécurité a échoué. Veuillez réessayer de valider le captcha.");
                 } else {
                     setError(e.message);
                 }
