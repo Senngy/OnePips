@@ -79,7 +79,7 @@ export class UsersService {
   }
 
   async createInvitation(dto: CreateInvitationDto) {
-    
+
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -94,6 +94,7 @@ export class UsersService {
     const tokenHash = createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 heures
 
+    // Le rôle est imposé par le backend : une invitation crée toujours un ADMIN.
     const invitation = await this.prisma.adminInvitation.create({
       data: {
         email: dto.email,

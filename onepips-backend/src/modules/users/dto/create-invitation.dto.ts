@@ -1,7 +1,7 @@
-import { IsEmail, IsEnum } from 'class-validator';
+import { IsEmail } from 'class-validator';
 
 export class CreateInvitationDto {
   @IsEmail()
-  email: string;
+  email!: string;
 
 }
