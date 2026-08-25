@@ -79,12 +79,7 @@ export class UsersService {
   }
 
   async createInvitation(dto: CreateInvitationDto) {
-    if (dto.role === Role.SUPER_ADMIN) {
-      throw new ForbiddenException(
-        "La création d'un SUPER_ADMIN n'est pas autorisée via l'API.",
-      );
-    }
-
+    
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -102,7 +97,7 @@ export class UsersService {
     const invitation = await this.prisma.adminInvitation.create({
       data: {
         email: dto.email,
-        role: dto.role,
+        role: Role.ADMIN,
         tokenHash,
         expiresAt,
       },
