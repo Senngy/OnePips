@@ -367,6 +367,13 @@ Avec un typage correct, ces trois lignes doivent produire une **erreur de compil
 | `LEAD_NOT_FOUND` | 404 | `LeadsService.update` / `ApplicationsService.create` — lead inexistant | 6 |
 | `APPLICATION_ALREADY_EXISTS` | 409 | `ApplicationsService.create` — candidature déjà soumise pour ce lead | 6 |
 | `EVENT_NOT_FOUND` | 404 | `EventsService.register` — aucun événement à venir pour l'inscription | 7 |
+| `ADMIN_INVITATION_NOT_FOUND` | 404 | `UsersService.completeInvitation` — token ne correspondant à aucune invitation | Invitation |
+| `ADMIN_INVITATION_EXPIRED` | 400 | `UsersService.completeInvitation` — invitation expirée | Invitation |
+| `ADMIN_INVITATION_ALREADY_USED` | 400 | `UsersService.completeInvitation` — invitation déjà consommée | Invitation |
+| `ADMIN_INVITATION_EMAIL_EXISTS` | 409 | `UsersService.createInvitation` / `completeInvitation` — email déjà utilisé par un compte | Invitation |
+| `ADMIN_INVITATION_CREATE_FAILED` | 500 | `UsersService.completeInvitation` — `signUpEmail` n'a pas créé l'utilisateur | Invitation |
+
+> **Note Invitation (24/08)** : les codes `ADMIN_INVITATION_INVALID` et `ADMIN_INVITATION_SEND_FAILED` n'ont **pas** été créés — aucun cas réel distinct (token inconnu = `NOT_FOUND` ; envoi d'email non bloquant donc pas de 500). Le token d'invitation brut n'est jamais exposé dans `message`/`details` ni loggé ; le `requestId` est injecté par le `GlobalExceptionFilter`.
 
 **Distinction `INTERNAL_ERROR` vs `UNKNOWN_ERROR` (figée le 24/08) :**
 

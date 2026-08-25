@@ -3,11 +3,14 @@ import {
   Get,
   Body,
   Param,
+  Post,
   UseGuards,
   Patch,
   Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service.js';
+import { CreateInvitationDto } from './dto/create-invitation.dto.js';
+import { CompleteInvitationDto } from './dto/complete-invitation.dto.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
@@ -26,6 +29,21 @@ export class UsersController {
   @Permissions(Permission.USERS_MANAGE)
   async findAll() {
     return this.usersService.findAll();
+  }
+
+  @Post('invitations')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.SUPER_ADMIN)
+  async createInvitation(@Body() dto: CreateInvitationDto) {
+    return this.usersService.createInvitation(dto);
+  }
+
+  @Post('invitations/:token/complete')
+  async completeInvitation(
+    @Param('token') token: string,
+    @Body() dto: CompleteInvitationDto,
+  ) {
+    return this.usersService.completeInvitation(token, dto);
   }
 
   @Get('permissions')

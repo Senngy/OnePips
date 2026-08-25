@@ -3,6 +3,7 @@ import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { PrismaClient } from '../../../generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { emailService } from '../email/email.service.js';
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -30,6 +31,23 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      void emailService.send({
+        to: user.email,
+        subject: 'Définissez votre mot de passe',
+        text: `Définissez votre mot de passe : ${url}`,
+      });
+    },
+  },
+
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      void emailService.send({
+        to: user.email,
+        subject: 'Validez votre adresse email',
+        text: `Validez votre adresse email : ${url}`,
+      });
+    },
   },
 
   baseURL: process.env.BETTER_AUTH_URL,

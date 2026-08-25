@@ -3,16 +3,25 @@ import {
   ForbiddenException,
   NotFoundException,
   BadRequestException,
+  ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common';
+import { randomBytes, createHash } from 'node:crypto';
 import { PrismaService } from '../../../prisma/prisma.service.js';
-import type { User, Role } from '../../../generated/prisma/client.js';
+import { Role } from '../../../generated/prisma/client.js';
+import type { User } from '../../../generated/prisma/client.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
+import { auth } from '../auth/auth.js';
+import { EmailService } from '../email/email.service.js';
+import { CreateInvitationDto } from './dto/create-invitation.dto.js';
+import { CompleteInvitationDto } from './dto/complete-invitation.dto.js';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
     private permissionsService: PermissionsService,
+    private emailService: EmailService,
   ) {}
 
   async findAll() {
@@ -67,6 +76,138 @@ export class UsersService {
         updatedAt: true,
       },
     });
+  }
+
+  async createInvitation(dto: CreateInvitationDto) {
+    if (dto.role === Role.SUPER_ADMIN) {
+      throw new ForbiddenException(
+        "La création d'un SUPER_ADMIN n'est pas autorisée via l'API.",
+      );
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (existingUser) {
+      throw new ConflictException({
+        code: 'ADMIN_INVITATION_EMAIL_EXISTS',
+        message: 'Un utilisateur avec cet email existe déjà.',
+      });
+    }
+
+    const token = randomBytes(32).toString('hex');
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 heures
+
+    const invitation = await this.prisma.adminInvitation.create({
+      data: {
+        email: dto.email,
+        role: dto.role,
+        tokenHash,
+        expiresAt,
+      },
+    });
+
+    const invitationUrl = `${process.env.FRONT_URL || 'http://localhost:3000'}/admin/invitation?token=${token}`;
+    void this.emailService
+      .send({
+        to: dto.email,
+        subject: 'Invitation à rejoindre OnePips Admin',
+        text: `Vous avez été invité à rejoindre l'espace admin OnePips. Définissez votre mot de passe ici : ${invitationUrl}`,
+      })
+      .catch(() => {
+        // Envoi non bloquant : l'invitation reste valide même si l'email échoue.
+        // Ne jamais logger le token ni les détails SMTP.
+        console.error(
+          "[invitation] Échec de l'envoi de l'email d'invitation.",
+        );
+      });
+
+    return {
+      id: invitation.id,
+      email: invitation.email,
+      role: invitation.role,
+      expiresAt: invitation.expiresAt,
+    };
+  }
+
+  async completeInvitation(token: string, dto: CompleteInvitationDto) {
+    const tokenHash = createHash('sha256').update(token).digest('hex');
+
+    const invitation = await this.prisma.adminInvitation.findUnique({
+      where: { tokenHash },
+    });
+
+    if (!invitation) {
+      throw new NotFoundException({
+        code: 'ADMIN_INVITATION_NOT_FOUND',
+        message: 'Invitation introuvable.',
+      });
+    }
+
+    if (invitation.consumedAt) {
+      throw new BadRequestException({
+        code: 'ADMIN_INVITATION_ALREADY_USED',
+        message: 'Cette invitation a déjà été utilisée.',
+      });
+    }
+
+    if (invitation.expiresAt < new Date()) {
+      throw new BadRequestException({
+        code: 'ADMIN_INVITATION_EXPIRED',
+        message: "L'invitation a expiré.",
+      });
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: invitation.email },
+    });
+    if (existingUser) {
+      throw new ConflictException({
+        code: 'ADMIN_INVITATION_EMAIL_EXISTS',
+        message: 'Un utilisateur avec cet email existe déjà.',
+      });
+    }
+
+    const result = await auth.api.signUpEmail({
+      body: {
+        email: invitation.email,
+        password: dto.password,
+        name: dto.name ?? invitation.email,
+      },
+    });
+
+    if (!result.user) {
+      throw new InternalServerErrorException({
+        code: 'ADMIN_INVITATION_CREATE_FAILED',
+        message: 'Création du compte impossible.',
+      });
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: result.user.id },
+      data: {
+        role: invitation.role,
+        // L'invitation, reçue par email, vaut validation de l'adresse.
+        emailVerified: true,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        emailVerified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    await this.prisma.adminInvitation.update({
+      where: { id: invitation.id },
+      data: { consumedAt: new Date() },
+    });
+
+    return user;
   }
 
   async updateRole(

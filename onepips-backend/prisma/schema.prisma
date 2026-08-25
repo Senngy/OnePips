@@ -92,6 +92,20 @@ model SuperAdmin {
   createdAt DateTime @default(now())
 }
 
+model AdminInvitation {
+  id String @id @default(cuid())
+
+  email String
+  role  Role
+
+  tokenHash String @unique
+
+  expiresAt  DateTime
+  consumedAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
 model UserPermission {
   id     String @id @default(cuid())
   userId String
