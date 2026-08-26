@@ -43,6 +43,9 @@ export const ALL_PERMISSIONS = [
 export const getUsersWithPermissions = () =>
   api<UserWithPerms[]>("/users/permissions");
 
+export const getMyUserEffectivePermissions = () =>
+  api<{ effectivePermissions: string[] }>("/users/me/permissions");
+
 export const inviteAdmin = (email: string) =>
   api<{
     id: string;
@@ -96,6 +99,8 @@ export function getUserFacingError(error: unknown): string {
         return "Cette invitation a déjà été utilisée.";
       case "VALIDATION_ERROR":
         return "Les données saisies sont invalides.";
+      case "PERMISSION_DEPENDENCY_VIOLATION":
+        return "Impossible : une permission d'écriture/suppression nécessite la permission de lecture correspondante.";
       case "FORBIDDEN":
       case "AUTHZ_PERMISSION_INSUFFICIENT":
         return "Vous n'avez pas les droits pour effectuer cette action.";

@@ -2,6 +2,7 @@
 
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
+import PermissionGate from "@/components/admin/permission-gate";
 import NewLiveModal from "@/components/admin/live/new-live-modal";
 import { EventParticipants } from "@/components/admin/live/event-participants";
 import ConfirmModal from "@/components/modals/confirm-modal";
@@ -14,6 +15,20 @@ import { usePublishEvent } from "@/lib/hooks/events/usePublishEvent";
 import { useCancelEvent } from "@/lib/hooks/events/useCancelEvent";
 
 export default function AdminEventsPage() {
+  return (
+    <div className="font-body selection:bg-primary/30">
+      <Sidebar />
+      <main className="ml-64 min-h-screen">
+        <Navbar />
+        <PermissionGate permission="EVENTS_READ">
+          <EventsContent />
+        </PermissionGate>
+      </main>
+    </div>
+  );
+}
+
+function EventsContent() {
   const [isNewLiveModalOpen, setIsNewLiveModalOpen] = useState(false);
   const [isUpdateLiveModalOpen, setIsUpdateLiveModalOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -40,13 +55,10 @@ export default function AdminEventsPage() {
   };
 
   return (
-    <div className="font-body selection:bg-primary/30">
+    <>
       {isNewLiveModalOpen && <NewLiveModal setIsOpen={setIsNewLiveModalOpen} />}
-      <Sidebar />
-      <main className="ml-64 min-h-screen">
-        <Navbar />
-        <div className="p-8 max-w-[1600px] mx-auto">
-          <div className="flex items-center justify-between mb-8">
+      <div className="p-8 max-w-[1600px] mx-auto">
+        <div className="flex items-center justify-between mb-8">
             <h1 className="text-4xl font-headline font-bold">Gestion des Lives</h1>
             <div className="flex items-center gap-3">
               <button
@@ -320,7 +332,6 @@ export default function AdminEventsPage() {
             </div>
           </section>
         </div>
-      </main>
-    </div>
+    </>
   );
 }

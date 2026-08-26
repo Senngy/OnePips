@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getUsersWithPermissions,
   inviteAdmin,
@@ -8,81 +8,72 @@ import {
   updateUserPermissions,
   resetUserPermissions,
   getUserFacingError,
-  type UserWithPerms,
-  type PermissionOverride,
 } from "@/lib/services/users.service";
+import { invalidateMyPermissions, usePermissions } from "@/lib/hooks/permissions/usePermissions";
+
+export const USERS_QUERY_KEY = ["users-permissions"] as const;
 
 export function useUsers() {
-  const [users, setUsers] = useState<UserWithPerms[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { loading: permissionsLoading, hasPermission } = usePermissions();
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getUsersWithPermissions();
-      setUsers(data);
-    } catch (e) {
-      setError(getUserFacingError(e));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const usersQuery = useQuery({
+    queryKey: USERS_QUERY_KEY,
+    queryFn: getUsersWithPermissions,
+    enabled: !permissionsLoading && hasPermission("USERS_READ"),
+  });
 
-  useEffect(() => {
-    void fetchUsers();
-  }, [fetchUsers]);
+  // Après mutation : recharge la liste + invalide les effectivePermissions
+  // de l'utilisateur courant (dépendances WRITE/DELETE → READ recalculées).
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY }),
+      invalidateMyPermissions(queryClient),
+    ]);
 
-  const invite = async (email: string) => {
-    await inviteAdmin(email);
-    await fetchUsers();
-  };
+  const inviteMutation = useMutation({
+    mutationFn: (email: string) => inviteAdmin(email),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY }),
+  });
 
-  const changeRole = async (id: string, role: string) => {
-    await updateUserRole(id, role);
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, role } : u)),
-    );
-  };
+  const changeRoleMutation = useMutation({
+    mutationFn: ({ id, role }: { id: string; role: string }) =>
+      updateUserRole(id, role),
+    onSuccess: () => refresh(),
+  });
 
-  const togglePermission = async (
-    id: string,
-    permission: string,
-    granted: boolean,
-  ) => {
-    const overrides: PermissionOverride[] = [{ permission, granted }];
-    await updateUserPermissions(id, overrides);
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id
-          ? {
-              ...u,
-              permissions: [
-                ...u.permissions.filter((p) => p.permission !== permission),
-                { permission, granted },
-              ],
-            }
-          : u,
-      ),
-    );
-  };
+  const togglePermissionMutation = useMutation({
+    mutationFn: ({
+      id,
+      permission,
+      granted,
+    }: {
+      id: string;
+      permission: string;
+      granted: boolean;
+    }) => updateUserPermissions(id, [{ permission, granted }]),
+    onSuccess: () => refresh(),
+  });
 
-  const resetPermissions = async (id: string) => {
-    await resetUserPermissions(id);
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, permissions: [] } : u)),
-    );
-  };
+  const resetPermissionsMutation = useMutation({
+    mutationFn: (id: string) => resetUserPermissions(id),
+    onSuccess: () => refresh(),
+  });
 
   return {
-    users,
-    loading,
-    error,
-    refetch: fetchUsers,
-    invite,
-    changeRole,
-    togglePermission,
-    resetPermissions,
+    users: usersQuery.data ?? [],
+    loading: usersQuery.isLoading,
+    error: usersQuery.error ? getUserFacingError(usersQuery.error) : null,
+    refetch: usersQuery.refetch,
+    invite: async (email: string) => {
+      await inviteMutation.mutateAsync(email);
+    },
+    changeRole: (id: string, role: string) =>
+      changeRoleMutation.mutateAsync({ id, role }),
+    togglePermission: (id: string, permission: string, granted: boolean) =>
+      togglePermissionMutation.mutateAsync({ id, permission, granted }),
+    resetPermissions: (id: string) =>
+      resetPermissionsMutation.mutateAsync(id),
   };
 }

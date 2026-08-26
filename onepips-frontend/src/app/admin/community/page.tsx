@@ -3,6 +3,7 @@
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
 import ConfirmModal from "@/components/modals/confirm-modal";
+import PermissionGate from "@/components/admin/permission-gate";
 import { useState } from "react";
 import { useCommunityStats } from "@/lib/hooks/community/useCommunityStats";
 import {
@@ -18,6 +19,20 @@ import NewResultModal from "@/components/admin/community/new-result-modal";
 import ImageLightbox from "@/components/ui/image-lightbox";
 
 export default function AdminCommunityPage() {
+  return (
+    <div className="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
+      <Sidebar />
+      <main className="ml-64 min-h-screen">
+        <Navbar />
+        <PermissionGate permission="COMMUNITY_READ">
+          <CommunityContent />
+        </PermissionGate>
+      </main>
+    </div>
+  );
+}
+
+function CommunityContent() {
   const { data: stats, isLoading: statsLoading } = useCommunityStats();
   const { data: testimonials, isLoading: testimonialsLoading } =
     useTestimonials();
@@ -33,15 +48,12 @@ export default function AdminCommunityPage() {
   };
 
   return (
-    <div className="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
-      <Sidebar />
-      <main className="ml-64 min-h-screen">
-        <Navbar />
-        <div className="px-8 pt-8">
-          <h1 className="text-4xl font-headline font-bold mb-8">
-            Gestion de la Communauté
-          </h1>
-        </div>
+    <>
+      <div className="px-8 pt-8">
+        <h1 className="text-4xl font-headline font-bold mb-8">
+          Gestion de la Communauté
+        </h1>
+      </div>
         {/* Content Canvas */}
         <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
           {/* Statistics Overview (Bento Style) */}
@@ -313,12 +325,11 @@ export default function AdminCommunityPage() {
             </div>
           </div>
         </div>
-      </main>
       <NewResultModal
         isOpen={newResultOpen}
         onClose={() => setNewResultOpen(false)}
       />
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
-    </div>
+    </>
   );
 }

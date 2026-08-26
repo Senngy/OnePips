@@ -1,10 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getResults, createResult, updateResult, deleteResult } from "@/lib/services/community.service";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
 
 export function useResults() {
+    const { loading: permissionsLoading, hasPermission } = usePermissions();
+
     return useQuery({
         queryKey: ["results"],
         queryFn: getResults,
+        enabled: !permissionsLoading && hasPermission("COMMUNITY_READ"),
     });
 }
 
