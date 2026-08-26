@@ -22,8 +22,6 @@ export default function AdminEventsPage() {
 
   const { data: events, isLoading, isError, error, refetch, isFetching, isStale, isSuccess, status } = useUpcomingEvents();
   const { data: archivedEvents } = useArchivedEvents();
-  console.log("[ADMIN/EVENTS/PAGE.TSX] events", events);
-  console.log("[ADMIN/EVENTS/PAGE.TSX] archivedEvents", archivedEvents);
 
   const displayedEvent = events?.find(e => e.id === selectedEventId) || events?.[0];
   const displayedEventTimeLeft = getTimeLeft(displayedEvent?.startsAt as string);

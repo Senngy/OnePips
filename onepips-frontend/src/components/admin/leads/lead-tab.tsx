@@ -5,6 +5,7 @@ import { useState } from "react";
 import { formatDate, formatInterest, formatSource, formatStatus } from "@/lib/helpers/formatData";
 import { useToast } from "@/lib/hooks/useToast";
 import ConfirmModal from "@/components/modals/confirm-modal";
+import AccessDenied, { isForbiddenError } from "@/components/admin/access-denied";
 
 
 export default function LeadTab() {
@@ -21,6 +22,10 @@ export default function LeadTab() {
     const { success: toastSuccess, error: toastError } = useToast();
     const { mutate: deleteLead, isPending: isDeleting } = useDeleteLead();
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+    if (isForbiddenError(error)) {
+        return <AccessDenied />;
+    }
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
