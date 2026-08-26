@@ -529,19 +529,37 @@ Chaque ligne ci-dessus a été confrontée au code source (pas seulement à l'in
 
 ### P1 — Important
 
+> 🔄 **Réorganisé le 26/08** : items 10-13 validés (invitation admin + UI terminées). Nouveaux items 14-16 (RBAC frontend : exposer les `effectivePermissions`, `usePermissions()`, dépendances de permissions), puis session Better Auth (#17-18), observabilité (#19), et items optionnels/reportés en fin (#20-22).
+
 | # | Tâche | Catégorie | Statut |
 |---|-------|-----------|--------|
-| 10 | ~~Décider du cycle de vie : `User.status`~~ ✅ **Statut décidé** (§2.1 : `ACTIVE/SUSPENDED/DISABLED`, enum déjà existant réutilisé, implémentation en P0 #36-39). Restent ouverts : `deletedAt`, `anonymizedAt` + modèles GDPR | Prisma | 🟡 |
-| 11 | Création admin par **invitation** (`AdminInvitation` + flux Better Auth natif, PAS `prisma.user.create`) | Backend | ⬜ |
-| 12 | `POST /users` (SUPER_ADMIN) + DTO `CreateUserDto` (email, name, role) | Backend | ⬜ |
-| 13 | UI frontend "Créer un administrateur" + "Désactiver" | Frontend | ⬜ |
-| 14 | DTO sur `payments.controller` (`@Body() any` → DTO) | Backend | ⬜ |
-| 15 | N+1 `findAllWithPermissions()` → requête groupée | Perf | ⬜ |
-| 16 | Cache `getEffectivePermissions` **local + invalidation immédiate** sur override (pas de TTL fixe) | Perf | ⬜ |
-| 17 | Pagination + tri sur `GET /users` | Perf | ⬜ |
-| 18 | Configurer Better Auth : session `expiresIn`, rotation, rememberMe, cookies Secure/HttpOnly/SameSite | Sécurité | ⬜ |
-| 19 | Vérifier session fixation / rotation par test | Sécurité | ⬜ |
-| 20 | Logs structurés (JSON) + intégrer `console.log` AuthGuard | Observabilité | ⬜ |
+| 10 | ~~Décider du cycle de vie : `User.status`~~ ✅ **Statut décidé** (§2.1 : `ACTIVE/SUSPENDED/DISABLED`, enum déjà existant réutilisé, implémentation en P0 #36-39). Restent ouverts : `deletedAt`, `anonymizedAt` + modèles GDPR | Prisma | ✅ |
+| 11 | Création admin par **invitation** (`AdminInvitation` + flux Better Auth natif, PAS `prisma.user.create`) — **fait** : `POST /users/invitations` + `:token/complete`, email Mailpit, rôle imposé ADMIN | Backend | ✅ |
+| 12 | `POST /users` (SUPER_ADMIN) + DTO `CreateUserDto` — **superseded par #11** (invitation, plus de mot de passe fantôme) | Backend | ✅ |
+| 13 | UI frontend "Créer un administrateur" + "Désactiver" — **création faite** (`InviteAdminModal` + `/admin/invitation`) ; "Désactiver" = placeholder en attente de P0 #36-39 | Frontend | ✅ |
+| 14 | Exposer les `effectivePermissions` du user courant au frontend — endpoint sécurisé ou intégration dans la session Better Auth ; la source doit inclure `ROLE_PERMISSIONS` + overrides `UserPermission` | RBAC / Backend + Frontend | ⬜ |
+| 15 | Créer `usePermissions()` basé sur les `effectivePermissions` réelles + état centralisé et mécanisme de refresh/invalidation après modification des permissions | RBAC / Frontend | ⬜ |
+| 16 | Définir et faire respecter les dépendances entre permissions : `WRITE → READ`, `DELETE → READ` pour les familles CRUD ; aucune cascade universelle pour les permissions non-CRUD ; UI cohérente + validation backend | RBAC | ⬜ |
+| 17 | Configurer Better Auth : session `expiresIn`, rotation, rememberMe, cookies Secure/HttpOnly/SameSite | Sécurité | ⬜ |
+| 18 | Vérifier session fixation / rotation par test | Sécurité | ⬜ |
+| 19 | Logs structurés (JSON) + intégrer/remplacer les `console.log` AuthGuard | Observabilité | ⬜ |
+| 20 | N+1 `findAllWithPermissions()` → requête groupée — **optionnel, reporté en fin** | Perf | ⬜ |
+| 21 | Pagination + tri sur `GET /users` — **optionnel, reporté en fin** | Perf | ⬜ |
+| 22 | DTO sur `payments.controller` (`@Body() any` → DTO) — **dernière phase P1**, après implémentation réelle de Payments | Backend | ⬜ |
+
+### 🔄 CHECKPOINT — RBAC Frontend / comportements utilisateur
+
+> Objectif : aligner l'expérience frontend sur les permissions effectives une fois celles-ci exposées au client. Le backend reste l'autorité de sécurité.
+
+- [ ] Filtrer la sidebar selon `effectivePermissions`
+- [ ] Protéger les accès directs aux pages
+- [ ] Masquer/désactiver les actions sans permission
+- [ ] Harmoniser les états `403` avec `AccessDenied` / toasts
+- [ ] Ne pas vider les formulaires après un `403`
+- [ ] Loading + anti-double-submit sur les mutations
+- [ ] Confirmation sur les actions destructives
+- [ ] Vérifier le comportement après modification d'une permission sans F5
+- [ ] Documenter les écarts constatés sur Leads / Applications / Events / Community
 
 ### P2 — Secondaire (qualité + dette)
 

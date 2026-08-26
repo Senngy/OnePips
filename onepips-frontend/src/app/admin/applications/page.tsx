@@ -8,12 +8,25 @@ import { useApplicants } from "@/lib/hooks/applicants/useApplicants";
 import { useState } from "react";
 import { ApplicationDto } from "@/lib/services/applications.service";
 import { formatInterest, formatAccountType } from "@/lib/helpers/formatData";
+import AccessDenied, { isForbiddenError } from "@/components/admin/access-denied";
 
 
 export default function AdminApplicationsPage() {
   const { applicants, isLoading, error } = useApplicants();
   const [selectedApplicant, setSelectedApplicant] = useState<ApplicationDto | null>(null);
   const [showModal, setShowModal] = useState(false);
+
+  if (isForbiddenError(error)) {
+    return (
+      <>
+        <Sidebar />
+        <main className="ml-64 min-h-screen">
+          <Navbar />
+          <AccessDenied />
+        </main>
+      </>
+    );
+  }
 
   return (
     <>

@@ -43,14 +43,8 @@ export const ALL_PERMISSIONS = [
 export const getUsersWithPermissions = () =>
   api<UserWithPerms[]>("/users/permissions");
 
-export const inviteAdmin = (email: string) => {
-  
-  if (email) {
-    console.log("[inviteAdmin] email:", email);
-  } else {
-    console.error("[inviteAdmin] email is required");
-  }
-  const data =  api<{
+export const inviteAdmin = (email: string) =>
+  api<{
     id: string;
     email: string;
     role: "ADMIN";
@@ -59,9 +53,6 @@ export const inviteAdmin = (email: string) => {
     method: "POST",
     body: JSON.stringify({ email }),
   });
-  console.log("[inviteAdmin] data:", data);
-  return data;
-}
 export const updateUserRole = (id: string, role: string) =>
   api(`/users/${id}/role`, {
     method: "PATCH",

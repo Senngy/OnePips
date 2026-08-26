@@ -31,12 +31,6 @@ export default function AdminCommunityPage() {
   const getStatValue = (label: string) => {
     return stats?.find((s) => s.label === label)?.value ?? 0;
   };
-  console.log(
-    "[ADMIN COMMUNITY PAGE] results isLoading:",
-    resultsLoading,
-    "results:",
-    results,
-  );
 
   return (
     <div className="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
@@ -263,20 +257,6 @@ export default function AdminCommunityPage() {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           src={r.image}
                           alt="preview"
-                          onLoad={(e) => {
-                            const img = e.currentTarget;
-
-                            console.log("[RESULT IMAGE LOAD]", {
-                              src: img.src,
-                              naturalWidth: img.naturalWidth,
-                              naturalHeight: img.naturalHeight,
-                              clientWidth: img.clientWidth,
-                              clientHeight: img.clientHeight,
-                            });
-                          }}
-                          onError={() => {
-                            console.error("[RESULT IMAGE ERROR]", r.image);
-                          }}
                         />
                       </div>
                     )}

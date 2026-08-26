@@ -431,7 +431,7 @@ Pour ne **jamais** casser la prod en déployant une CSP trop stricte :
 | 3 | Installer `helmet` (v8.3.0 — options v8 confirmées) | `onepips-backend` | ✅ Maintenant (C1) | ✅ |
 | 4 | Créer `src/common/helmet.config.ts` | Backend | ✅ Maintenant (C2) | ✅ |
 | 5 | Brancher Helmet dans `main.ts` (CSP off, HSTS off en dev) | Backend | ✅ Maintenant (C3) | ✅ |
-| 6 | Retester Better Auth (signup/login/logout) + uploads + API en local | Backend | ✅ Immédiatement après C3 | ❓ **À confirmer par toi** — non vérifiable par lecture de code |
+| 6 | Retester Better Auth (signup/login/logout) + uploads + API en local | Backend | ✅ Immédiatement après C3 | ✅ **Validé** (test manuel effectué le 26/08) |
 | 7 | Automatiser les tests headers (`curl`/script — §14 `security-check.sh`) | Backend | ✅ Maintenant (C4) | ⬜ |
 | 8 | Headers Next.js non-CSP (X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy) | Frontend | ✅ Maintenant (C5) | ⬜ |
 | 9 | Établir une **première allowlist CSP** à partir des dépendances réelles du code (pas besoin d'être finale) | Frontend | ✅ Maintenant (avant C6/C7) | ⬜ |
