@@ -18,6 +18,7 @@ import { Roles } from '../auth/decorators/roles.decorator.js';
 import { PermissionsGuard } from '../permissions/guards/permissions.guard.js';
 import { Permissions } from '../permissions/decorators/permissions.decorator.js';
 import { Permission, Role } from '../../../generated/prisma/client.js';
+import { UpdatePermissionsDto } from '../permissions/dto/permissions.dto.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { User } from '../../../generated/prisma/client.js';
 
@@ -31,7 +32,7 @@ export class UsersController {
   @Get()
   @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  @Permissions(Permission.USERS_MANAGE)
+  @Permissions(Permission.USERS_READ)
   async findAll() {
     return this.usersService.findAll();
   }
@@ -66,7 +67,10 @@ export class UsersController {
   @Get('me/permissions')
   @UseGuards(AuthGuard)
   async getMyPermissions(@CurrentUser() currentUser: User) {
-    return this.permissionsService.getEffectivePermissions(currentUser.id);
+    return {
+      effectivePermissions:
+        await this.permissionsService.getEffectivePermissions(currentUser.id),
+    };
   }
 
   @Get(':id')
@@ -98,11 +102,10 @@ export class UsersController {
   @Permissions(Permission.ADMINS_MANAGE)
   async updatePermissions(
     @Param('id') userId: string,
-    @Body('permissions')
-    permissions: { permission: string; granted: boolean }[],
+    @Body() dto: UpdatePermissionsDto,
     @CurrentUser() currentUser: User,
   ) {
-    return this.usersService.updatePermissions(userId, permissions, currentUser);
+    return this.usersService.updatePermissions(userId, dto.permissions, currentUser);
   }
 
   @Delete(':id/permissions')

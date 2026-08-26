@@ -1,8 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { Permission, Role } from '../../../generated/prisma/client.js';
-import type { UserPermission } from '../../../generated/prisma/client.js';
+import type { User, UserPermission } from '../../../generated/prisma/client.js';
 import { ROLE_PERMISSIONS } from './role-permissions.js';
+
+type PermissionOverride = {
+  permission: Permission;
+  granted: boolean;
+};
 
 @Injectable()
 export class PermissionsService {
@@ -45,6 +54,80 @@ export class PermissionsService {
     }
 
     return [...rolePermissions];
+  }
+
+  validatePermissionDependencies(
+    permissions: Set<Permission>,
+  ): void {
+    const dependencies: Array<
+      [Permission, Permission]
+    > = [
+      // Leads
+      [Permission.LEADS_WRITE, Permission.LEADS_READ],
+      [Permission.LEADS_DELETE, Permission.LEADS_READ],
+
+      // Applications
+      [Permission.APPLICATIONS_WRITE, Permission.APPLICATIONS_READ],
+
+      // Bookings
+      [Permission.BOOKINGS_WRITE, Permission.BOOKINGS_READ],
+
+      // Payments
+      [Permission.PAYMENTS_WRITE, Permission.PAYMENTS_READ],
+
+      // Events
+      [Permission.EVENTS_WRITE, Permission.EVENTS_READ],
+      [Permission.EVENTS_DELETE, Permission.EVENTS_READ],
+
+      // Community
+      [Permission.COMMUNITY_WRITE, Permission.COMMUNITY_READ],
+    ];
+
+    for (const [permission, requiredPermission] of dependencies) {
+      if (
+        permissions.has(permission) &&
+        !permissions.has(requiredPermission)
+      ) {
+        throw new BadRequestException({
+          code: 'PERMISSION_DEPENDENCY_VIOLATION',
+          message: `La permission ${permission} nécessite ${requiredPermission}.`,
+          details: {
+            permission,
+            requiredPermission,
+          },
+        });
+      }
+    }
+  }
+
+  buildCandidateEffectivePermissions(
+    user: User,
+    currentOverrides: UserPermission[],
+    requestedOverrides: PermissionOverride[],
+  ): Set<Permission> {
+    const effectivePermissions = new Set(
+      this.getRolePermissions(user.role),
+    );
+
+    // État actuel des overrides
+    for (const override of currentOverrides) {
+      if (override.granted) {
+        effectivePermissions.add(override.permission);
+      } else {
+        effectivePermissions.delete(override.permission);
+      }
+    }
+
+    // État demandé
+    for (const override of requestedOverrides) {
+      if (override.granted) {
+        effectivePermissions.add(override.permission);
+      } else {
+        effectivePermissions.delete(override.permission);
+      }
+    }
+
+    return effectivePermissions;
   }
 
   async hasPermission(
