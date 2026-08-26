@@ -79,6 +79,7 @@ export class UsersService {
   }
 
   async createInvitation(dto: CreateInvitationDto) {
+
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
