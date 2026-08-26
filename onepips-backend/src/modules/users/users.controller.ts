@@ -56,7 +56,7 @@ export class UsersController {
   @Get('permissions')
   @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  @Permissions(Permission.USERS_MANAGE)
+  @Permissions(Permission.ADMINS_MANAGE)
   async findAllWithPermissions() {
     return this.usersService.findAllWithPermissions();
   }
@@ -72,7 +72,7 @@ export class UsersController {
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  @Permissions(Permission.USERS_READ)
+  @Permissions(Permission.ADMINS_MANAGE)
   async findOne(
     @Param('id') id: string,
     @CurrentUser() currentUser: User,
@@ -95,7 +95,7 @@ export class UsersController {
   @Patch(':id/permissions')
   @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
-  @Permissions(Permission.USERS_MANAGE)
+  @Permissions(Permission.ADMINS_MANAGE)
   async updatePermissions(
     @Param('id') userId: string,
     @Body('permissions')
