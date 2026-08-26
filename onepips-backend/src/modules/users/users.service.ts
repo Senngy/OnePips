@@ -9,8 +9,9 @@ import {
 import { randomBytes, createHash } from 'node:crypto';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 import { Role } from '../../../generated/prisma/client.js';
-import type { User } from '../../../generated/prisma/client.js';
+import type { User, UserPermission } from '../../../generated/prisma/client.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
+import { PermissionOverrideDto } from '../permissions/dto/permissions.dto.js';
 import { auth } from '../auth/auth.js';
 import { EmailService } from '../email/email.service.js';
 import { CreateInvitationDto } from './dto/create-invitation.dto.js';
@@ -22,7 +23,7 @@ export class UsersService {
     private prisma: PrismaService,
     private permissionsService: PermissionsService,
     private emailService: EmailService,
-  ) {}
+  ) { }
 
   async findAll() {
     return this.prisma.user.findMany({
@@ -64,8 +65,8 @@ export class UsersService {
     );
   }
 
-  async findOne(id: string) {
-    return this.prisma.user.findUnique({
+  async findOne(id: string, currentUser: User) {
+    const targetUser = await this.prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
@@ -76,6 +77,25 @@ export class UsersService {
         updatedAt: true,
       },
     });
+
+    if (!targetUser) {
+      throw new NotFoundException({
+        code: 'USER_NOT_FOUND',
+        message: 'Utilisateur non trouvé'
+      });
+    }
+
+    if (
+      targetUser?.role === Role.SUPER_ADMIN &&
+      currentUser.role !== Role.SUPER_ADMIN
+    ) {
+      throw new ForbiddenException({
+        code: 'ADMIN_IS_NOT_AUTHORIZED',
+        message: 'Vous nous pouvez pas accéder à cette requête'
+      });
+    }
+
+    return targetUser;
   }
 
   async createInvitation(dto: CreateInvitationDto) {
@@ -211,6 +231,10 @@ export class UsersService {
     newRole: Role,
     currentUser: User,
   ): Promise<User> {
+
+    if (newRole === 'SUPER_ADMIN') {
+      throw new ForbiddenException('Promotion non authorisé');
+    }
     const targetUser = await this.prisma.user.findUnique({
       where: { id: targetUserId },
     });
@@ -225,19 +249,12 @@ export class UsersService {
       );
     }
 
-    if (newRole === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
-      throw new ForbiddenException(
-        'Seul un SUPER_ADMIN peut promouvoir en SUPER_ADMIN',
-      );
-    }
-
     if (
       targetUser.role === 'SUPER_ADMIN' &&
-      newRole !== 'SUPER_ADMIN' &&
       currentUser.role !== 'SUPER_ADMIN'
     ) {
       throw new ForbiddenException(
-        'Seul un SUPER_ADMIN peut rétrograder le SUPER_ADMIN',
+        'Vous ne pouvez pas modifier le rôle du SUPER_ADMIN.',
       );
     }
 
@@ -258,29 +275,56 @@ export class UsersService {
 
   async updatePermissions(
     userId: string,
-    overrides: { permission: string; granted: boolean }[],
+    requestedOverrides: PermissionOverrideDto[],
+    currentUser: User,
   ) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
+    const targetUser = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!targetUser) {
       throw new NotFoundException('Utilisateur non trouvé');
     }
-
-    for (const override of overrides) {
-      await this.prisma.userPermission.upsert({
-        where: {
-          userId_permission: {
-            userId,
-            permission: override.permission as any,
-          },
-        },
-        update: { granted: override.granted },
-        create: {
-          userId,
-          permission: override.permission as any,
-          granted: override.granted,
-        },
+    if (targetUser.role === Role.SUPER_ADMIN) {
+      throw new ForbiddenException({
+        code: 'USER_TARGET_FORBIDDEN',
+        message: 'Les permissions d’un SUPER_ADMIN ne peuvent pas être modifiées.',
       });
     }
+
+    if (targetUser.id === currentUser.id) {
+      throw new ForbiddenException({
+        code: 'SELF_PERMISSION_MODIFICATION_FORBIDDEN',
+        message: 'Vous ne pouvez pas modifier vos propres permissions.',
+      });
+    }
+    const currentOverrides = await this.permissionsService.getUserOverrides(targetUser.id);
+
+    const candidate = this.permissionsService.buildCandidateEffectivePermissions(
+      targetUser,
+      currentOverrides,
+      requestedOverrides,
+    );
+
+    this.permissionsService.validatePermissionDependencies(candidate);
+
+    await this.prisma.$transaction(
+      requestedOverrides.map((override) =>
+        this.prisma.userPermission.upsert({
+          where: {
+            userId_permission: {
+              userId,
+              permission: override.permission,
+            },
+          },
+          update: {
+            granted: override.granted,
+          },
+          create: {
+            userId,
+            permission: override.permission,
+            granted: override.granted,
+          },
+        }),
+      ),
+    );
 
     return { success: true };
   }
