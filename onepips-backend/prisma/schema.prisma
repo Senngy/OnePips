@@ -20,6 +20,7 @@ model User {
   name          String?
 
   role Role @default(VIEWER)
+  status UserStatus @default(ACTIVE)
 
   sessions    Session[]
   accounts    Account[]
@@ -43,7 +44,6 @@ model Session {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  status      UserStatus @default(ACTIVE)
   lastLoginAt DateTime?
 
   createdAt DateTime @default(now())

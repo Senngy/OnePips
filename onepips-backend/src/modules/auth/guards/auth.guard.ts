@@ -8,13 +8,14 @@ import {
 import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../auth.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
+import { UserStatus } from 'generated/prisma/browser.js';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   private readonly logger = new Logger(AuthGuard.name);
-  constructor(private readonly prisma: PrismaService,) {}
+  constructor(private readonly prisma: PrismaService,) { }
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    
+
     const req = context.switchToHttp().getRequest();
     const requestId = req.requestId ?? 'req_unknown';
 
@@ -53,7 +54,20 @@ export class AuthGuard implements CanActivate {
         path: req.originalUrl,
       });
       throw new UnauthorizedException('[API] auth/guards/auth.guard.ts | 404 - Utilisateur non trouvé ❌');
-    }
+      }
+      
+      if (user.status !== UserStatus.ACTIVE) {
+        this.logger.warn({
+          message: 'Inactive user attempted authenticated request',
+          requestId,
+          userId: user.id,
+          status: user.status,
+        });
+
+        throw new UnauthorizedException(
+          'Utilisateur non autorisé.',
+        );
+      }
 
     const now = new Date();
 
