@@ -21,8 +21,8 @@ Mener à terme l'ensemble des tâches « P1 — Important » du RBAC, en tenant 
 | 12 | `POST /users` + `CreateUserDto` | Backend | ✅ Superseded par #11 | Réalisé |
 | 13 | UI « Créer un administrateur » + « Désactiver » | Frontend | ✅ Fait (création) — désactivation en attente P0 | Réalisé |
 | 14 | Exposer les `effectivePermissions` du user courant | RBAC / Backend + Frontend | ✅ Validée | Réalisé |
-| 15 | `usePermissions()` (état centralisé + refresh/invalidation) | RBAC / Frontend | ⬜ | Phase A |
-| 16 | Dépendances entre permissions (`WRITE→READ`, `DELETE→READ`) | RBAC | ⬜ | Phase A |
+| 15 | `usePermissions()` (état centralisé + refresh/invalidation) | RBAC / Frontend | ✅ Validée | Réalisé |
+| 16 | Dépendances entre permissions (`WRITE→READ`, `DELETE→READ`) | RBAC | ✅ Validée | Réalisé |
 | 17 | Better Auth : session `expiresIn`, rotation, rememberMe, cookies | Sécurité | ⬜ | Phase B |
 | 18 | Vérifier session fixation / rotation par test | Sécurité | ⬜ | Phase B |
 | 19 | Logs structurés (JSON) + intégrer `console.log` AuthGuard | Observabilité | ⬜ | Phase C |
@@ -73,34 +73,100 @@ Flux implémenté (Better Auth natif, pas de `prisma.user.create` avec mot de pa
 - **Validée le 26/08** : `effectivePermissions` exposées pour l'utilisateur courant via `GET /users/me/permissions`, calculées par `PermissionsService` à partir du rôle et des overrides. Tests SUPER_ADMIN/ADMIN effectués.
 - **Note** : c'est la condition sine qua non pour un vrai `usePermissions()` — sans elle, le frontend ne peut pas simuler correctement les permissions (risque d'incohérence override).
 
-### 15 — `usePermissions()` basé sur les permissions réelles
-- [ ] Hook `usePermissions()` consommant les `effectivePermissions` (#14).
-- [ ] État **centralisé** (contexte/provider) + mécanisme de **refresh/invalidation** après modification d'une permission (ex. invalidation du cache query lors d'un changement de rôle/override).
+### 15 — `usePermissions()` basé sur les permissions réelles ✅ Validée
+- [x] Hook `usePermissions()` consommant les `effectivePermissions` (#14) : expose `permissions`, `loading`, `hasPermission(p)`, `hasAllPermissions(perms)`, `refresh()`.
+- [x] État **centralisé** (cache React Query partagé, clé `["my-effective-permissions"]`) + mécanisme de **refresh/invalidation** (`refresh()` + `invalidateMyPermissions()`, branché sur `changeRole` / `togglePermission` / `resetPermissions`).
 - **Note** : ne jamais reconstruire un mapping `rôle → permissions` côté front (déjà écarté — le backend est l'autorité).
+- **Validée le 26/08** : `usePermissions()` implémenté (`src/lib/hooks/permissions/usePermissions.ts`) ; invalidation intégrée dans `useUsers`.
 
-### 16 — Dépendances entre permissions
-- [ ] Définir les dépendances : `WRITE → READ`, `DELETE → READ` pour les familles CRUD.
-- [ ] Aucune cascade universelle pour les permissions non-CRUD (ex. `SETTINGS_MANAGE`).
-- [ ] **Distinguer UI et backend — ne jamais détruire silencieusement les overrides** :
+### 16 — Dépendances entre permissions ✅ Validée
+- [x] Définir les dépendances : `WRITE → READ`, `DELETE → READ` pour les familles CRUD.
+- [x] Aucune cascade universelle pour les permissions non-CRUD (ex. `SETTINGS_MANAGE`).
+- [x] **Distinguer UI et backend — ne jamais détruire silencieusement les overrides** :
   - **UI** : si `READ` est retiré, `WRITE`/`DELETE` deviennent **indisponibles** (grisés/masqués), sans effacement.
   - **Backend** : refuse une configuration incohérente (`WRITE`/`DELETE` sans `READ`).
   - **Exemple** : `ADMIN` avec `READ` hérité + `WRITE`/`DELETE` en override explicite `true`. Le SUPER_ADMIN retire `READ` → afficher `READ ❌`, `WRITE ⚠️ impossible sans READ`, `DELETE ⚠️ impossible sans READ`, **sans effacer les deux overrides en DB** (évite de perdre la configuration admin sans confirmation).
+- **Validée le 26/08** : panneau de permissions (`permissions-panel.tsx`) — WRITE/DELETE désactivées si READ absente (⚠️ « impossible sans READ »), overrides préservés, non-CRUD sans cascade ; recharge silencieuse après toggle (`refreshUsers`) pour débloquer/rebloquer sans F5 ; gestion de `PERMISSION_DEPENDENCY_VIOLATION`.
 
 ---
 
-## 5. 🔄 CHECKPOINT — RBAC Frontend / comportements utilisateur
+## 5. CHECKPOINT — RBAC Frontend (implémentation)
 
-> Objectif : aligner l'expérience frontend sur les permissions effectives une fois celles-ci exposées au client. Le backend reste l'autorité de sécurité.
+### Architecture cible
 
-- [ ] Filtrer la sidebar selon `effectivePermissions`
-- [ ] Protéger les accès directs aux pages
-- [ ] Masquer/désactiver les actions sans permission
-- [ ] Harmoniser les états `403` avec `AccessDenied` / toasts
-- [ ] Ne pas vider les formulaires après un `403`
-- [ ] Loading + anti-double-submit sur les mutations
-- [ ] Confirmation sur les actions destructives
-- [ ] Vérifier le comportement après modification d'une permission sans F5
-- [ ] Documenter les écarts constatés sur Leads / Applications / Events / Community
+```
+Login / bootstrap app
+        ↓
+/api/users/me/permissions
+        ↓
+React Query cache
+        ↓
+usePermissions()
+        ↓
+┌──────────────────────────────┐
+│ Sidebar                      │
+│ Route guards                 │
+│ Boutons / actions            │
+└──────────────────────────────┘
+```
+
+### Flux d'une page (ex. Leads)
+
+```
+permission connue ?
+   │
+   ├── non → état "permissions en cours de chargement"
+   │
+   └── oui
+        │
+        ├── LEADS_READ absent → AccessDenied, PAS de GET /leads
+        │
+        └── LEADS_READ présent → fetch /leads
+```
+
+> **Le point fondamental** : le fetch métier ne doit démarrer qu'après la décision d'autorisation.
+
+### Principes (Checkpoint RBAC Frontend — implémentation)
+
+> Objectif : utiliser les `effectivePermissions` réelles pour éviter les appels API métier inutiles et offrir une UX fluide. Le backend reste l'autorité finale.
+
+1. Utiliser uniquement `usePermissions()` + React Query comme source frontend. Aucun mapping `ROLE_PERMISSIONS` côté front.
+2. Charger `/users/me/permissions` une seule fois via le cache React Query, partagé entre Sidebar, pages et actions.
+3. Le shell admin (Sidebar/Navbar) peut s'afficher immédiatement ; le **contenu dépendant des permissions** reste en état de chargement jusqu'à résolution de `usePermissions()`. Éviter tout flash de menus/pages non autorisés, sans bloquer inutilement toute l'interface admin.
+4. Sidebar : afficher un item uniquement si la permission `READ` correspondante est présente.
+5. Accès direct à une page : vérifier `READ` avant de monter le contenu métier. Permission absente → `AccessDenied`, sans afficher la page cassée.
+6. Ne jamais lancer le fetch métier si la permission `READ` est absente. Avec React Query, utiliser `enabled: !permissionsLoading && hasPermission(...)`.
+7. Actions : `WRITE`, `DELETE`, etc. contrôlent leurs boutons/actions indépendamment de `READ`. Permission absente → action masquée ou désactivée selon la convention définie.
+8. Ne pas perdre les données utilisateur en cas de 403. Une erreur de mutation doit conserver l'état du formulaire.
+9. Gérer loading et double-submit : boutons désactivés pendant les mutations, état visuel cohérent.
+10. Si `/me/permissions` échoue, fail closed : ne pas afficher les actions/pages protégées ni supposer que l'utilisateur possède les permissions.
+11. Le backend reste le dernier filet de sécurité : si une permission devient obsolète entre le chargement frontend et l'action, le 403 backend doit être traité proprement par toast/erreur sans faux succès ni état incohérent.
+
+### Découpage en 6 étapes d'implémentation
+
+- **Étape 1 — Socle : source frontend unique + cache partagé** (principes 1, 2, 10)
+  - [x] `usePermissions()` + React Query comme unique source ; aucun mapping `ROLE_PERMISSIONS`.
+  - [x] `/users/me/permissions` chargé une seule fois, cache partagé.
+  - [x] Fail closed si `/me/permissions` échoue.
+
+- **Étape 2 — Layout : shell affiché, contenu permission-dépendant en attente** (principe 3)
+  - [x] Le shell admin (Sidebar/Navbar) s'affiche ; le contenu dépendant des permissions reste en état de chargement jusqu'à résolution de `usePermissions()` (pas de blocage global inutile).
+  - [x] Principe conservé : **permissions inconnues → aucune décision d'autorisation → aucun contenu métier protégé → aucun fetch métier**.
+
+- **Étape 3 — Sidebar** (principe 4)
+  - [x] Afficher un item uniquement si la permission `READ` correspondante est présente (Sidebar + MobileNav).
+
+- **Étape 4 — Gardes de pages + fetch conditionnel** (principes 5, 6)
+  - [x] Vérifier `READ` avant de monter le contenu métier ; absent → `AccessDenied`.
+  - [x] `enabled: !permissionsLoading && hasPermission(...)` sur le fetch métier.
+
+- **Étape 5 — Actions** (principes 7, 9)
+  - [x] `WRITE`/`DELETE` contrôlent les boutons/actions, indépendamment de `READ`.
+  - [x] Loading + anti-double-submit sur les mutations.
+
+- **Étape 6 — Robustesse** (principes 8, 11)
+  - [x] Conserver l'état des formulaires en cas de 403.
+  - [x] Traiter le 403 backend proprement (toast/erreur), sans faux succès ni état incohérent.
 
 ---
 

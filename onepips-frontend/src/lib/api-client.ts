@@ -1,3 +1,5 @@
+import { notifyUnauthorized } from "./auth-events";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 export interface ApiErrorResponse {
@@ -60,6 +62,12 @@ export async function api<T>(
   const data: unknown = await res.json().catch(() => null);
 
   if (!res.ok) {
+    // 401 = session absente/expirée/invalide → invalidation centralisée.
+    // 403 = authentifié mais non autorisé → laissé au traitement métier.
+    if (res.status === 401) {
+      notifyUnauthorized();
+    }
+
     const errorData = isApiErrorResponse(data)
       ? data
       : {

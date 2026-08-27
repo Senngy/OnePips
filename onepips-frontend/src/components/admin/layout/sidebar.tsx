@@ -2,22 +2,35 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
 
-const navItems = [
+type NavItem = {
+    name: string;
+    href: string;
+    icon: string;
+    permission?: string;
+};
+
+const navItems: NavItem[] = [
     { name: "Dashboard", href: "/admin/dashboard", icon: "dashboard" },
-    { name: "Leads", href: "/admin/leads", icon: "group" },
-    { name: "Applications", href: "/admin/applications", icon: "assignment" },
-    { name: "Booking", href: "/admin/booking", icon: "event_available" },
-    { name: "Payments", href: "/admin/payments", icon: "payments" },
-    { name: "Events", href: "/admin/events", icon: "calendar_month" },
+    { name: "Leads", href: "/admin/leads", icon: "group", permission: "LEADS_READ" },
+    { name: "Applications", href: "/admin/applications", icon: "assignment", permission: "APPLICATIONS_READ" },
+    { name: "Booking", href: "/admin/booking", icon: "event_available", permission: "BOOKINGS_READ" },
+    { name: "Payments", href: "/admin/payments", icon: "payments", permission: "PAYMENTS_READ" },
+    { name: "Events", href: "/admin/events", icon: "calendar_month", permission: "EVENTS_READ" },
     { name: "Analytics", href: "/admin/analytics", icon: "leaderboard" },
-    { name: "Community", href: "/admin/community", icon: "group" },
-    { name: "Settings", href: "/admin/settings", icon: "settings" },
-    { name: "Users", href: "/admin/users", icon: "manage_accounts" },
+    { name: "Community", href: "/admin/community", icon: "group", permission: "COMMUNITY_READ" },
+    { name: "Settings", href: "/admin/settings", icon: "settings", permission: "SETTINGS_MANAGE" },
+    { name: "Users", href: "/admin/users", icon: "manage_accounts", permission: "USERS_READ" },
 ];
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const { hasPermission } = usePermissions();
+
+    const visibleItems = navItems.filter(
+        (item) => !item.permission || hasPermission(item.permission)
+    );
 
     return (
         <>
@@ -32,7 +45,7 @@ export default function Sidebar() {
                 </div>
 
                 <nav className="flex-1 space-y-1">
-                    {navItems.map((item) => {
+                    {visibleItems.map((item) => {
                         const isActive = pathname === item.href;
 
                         return (

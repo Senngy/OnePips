@@ -3,39 +3,36 @@
 import { ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
 
 const PUBLIC_ADMIN_ROUTES = ["/admin/login", "/admin/invitation"];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
+  // Bootstrap des permissions au niveau admin : un seul fetch, cache partagé,
+  // disponible immédiatement pour toutes les pages qui consomment usePermissions().
+  usePermissions(!loading && !!user);
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    console.log("[AdminLayout] useEffect");
-    console.log("[AdminLayout] loading:", loading);
-    console.log("[AdminLayout] user:", user);
-    console.log("[AdminLayout] user role:", user?.role);
-    console.log("[AdminLayout] pathname:", pathname);
+  const isPublicRoute = PUBLIC_ADMIN_ROUTES.includes(pathname);
 
+  useEffect(() => {
     if (loading) {
-      console.log("[AdminLayout] loading=true — skip checks");
       return;
     }
 
-    if (PUBLIC_ADMIN_ROUTES.includes(pathname)) {
+    if (isPublicRoute) {
       if (user) {
-        console.log("[AdminLayout] REDIRECT public+auth -> /admin/dashboard");
         router.replace("/admin/dashboard");
       }
       return;
     }
 
     if (!user) {
-      console.log("[AdminLayout] REDIRECT no-user -> /admin/login");
       router.replace("/admin/login");
     }
-  }, [loading, user, pathname, router]);
+  }, [loading, user, isPublicRoute, router]);
 
   if (loading) {
     return (
@@ -45,11 +42,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user && !PUBLIC_ADMIN_ROUTES.includes(pathname)) {
-    return null;
+  if (isPublicRoute) {
+    if (user) {
+      return null;
+    }
+    return <>{children}</>;
   }
 
-  if (user && PUBLIC_ADMIN_ROUTES.includes(pathname)) {
+  if (!user) {
     return null;
   }
 

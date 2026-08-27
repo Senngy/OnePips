@@ -1,10 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCommunityStats, updateCommunityStat } from "@/lib/services/community.service";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
 
 export function useCommunityStats() {
+    const { loading: permissionsLoading, hasPermission } = usePermissions();
+
     return useQuery({
         queryKey: ["community-stats"],
         queryFn: getCommunityStats,
+        enabled: !permissionsLoading && hasPermission("COMMUNITY_READ"),
     });
 }
 

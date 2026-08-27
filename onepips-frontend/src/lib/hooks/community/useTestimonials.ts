@@ -1,10 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from "@/lib/services/community.service";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
 
 export function useTestimonials() {
+    const { loading: permissionsLoading, hasPermission } = usePermissions();
+
     return useQuery({
         queryKey: ["testimonials"],
         queryFn: getTestimonials,
+        enabled: !permissionsLoading && hasPermission("COMMUNITY_READ"),
     });
 }
 

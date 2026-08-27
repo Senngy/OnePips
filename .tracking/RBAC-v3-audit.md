@@ -537,9 +537,9 @@ Chaque ligne ci-dessus a été confrontée au code source (pas seulement à l'in
 | 11 | Création admin par **invitation** (`AdminInvitation` + flux Better Auth natif, PAS `prisma.user.create`) — **fait** : `POST /users/invitations` + `:token/complete`, email Mailpit, rôle imposé ADMIN | Backend | ✅ |
 | 12 | `POST /users` (SUPER_ADMIN) + DTO `CreateUserDto` — **superseded par #11** (invitation, plus de mot de passe fantôme) | Backend | ✅ |
 | 13 | UI frontend "Créer un administrateur" + "Désactiver" — **création faite** (`InviteAdminModal` + `/admin/invitation`) ; "Désactiver" = placeholder en attente de P0 #36-39 | Frontend | ✅ |
-| 14 | Exposer les `effectivePermissions` du user courant au frontend — endpoint sécurisé ou intégration dans la session Better Auth ; la source doit inclure `ROLE_PERMISSIONS` + overrides `UserPermission` | RBAC / Backend + Frontend | ⬜ |
-| 15 | Créer `usePermissions()` basé sur les `effectivePermissions` réelles + état centralisé et mécanisme de refresh/invalidation après modification des permissions | RBAC / Frontend | ⬜ |
-| 16 | Définir et faire respecter les dépendances entre permissions : `WRITE → READ`, `DELETE → READ` pour les familles CRUD ; aucune cascade universelle pour les permissions non-CRUD ; UI cohérente + validation backend | RBAC | ⬜ |
+| 14 | Exposer les `effectivePermissions` du user courant au frontend — endpoint sécurisé ou intégration dans la session Better Auth ; la source doit inclure `ROLE_PERMISSIONS` + overrides `UserPermission` | RBAC / Backend + Frontend | ✅ |
+| 15 | Créer `usePermissions()` basé sur les `effectivePermissions` réelles + état centralisé et mécanisme de refresh/invalidation après modification des permissions | RBAC / Frontend | ✅ |
+| 16 | Définir et faire respecter les dépendances entre permissions : `WRITE → READ`, `DELETE → READ` pour les familles CRUD ; aucune cascade universelle pour les permissions non-CRUD ; UI cohérente + validation backend — **fait** (UI : WRITE/DELETE désactivées si READ absente, overrides préservés ; backend : validation) | RBAC | ✅ |
 | 17 | Configurer Better Auth : session `expiresIn`, rotation, rememberMe, cookies Secure/HttpOnly/SameSite | Sécurité | ⬜ |
 | 18 | Vérifier session fixation / rotation par test | Sécurité | ⬜ |
 | 19 | Logs structurés (JSON) + intégrer/remplacer les `console.log` AuthGuard | Observabilité | ⬜ |

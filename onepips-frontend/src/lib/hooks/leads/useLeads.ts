@@ -1,19 +1,35 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getLeads, GetLeadsParams, updateLead, updateLeadStatus, deleteLead, deleteBulkLeads } from "@/lib/services/leads.service";
+import { usePermissions } from "../permissions/usePermissions";
+
 
 export function useLeads(params: GetLeadsParams = {}) {
-    const query = useQuery({
-        queryKey: ["leads", params],
-        queryFn: () => getLeads(params),
+    const {
+        page = 1,
+        limit = 10,
+    } = params;
+
+    const {
+        loading: permissionsLoading,
+        hasPermission,
+    } = usePermissions();
+
+    const canReadLeads = hasPermission("LEADS_READ");
+
+    const leadsQuery = useQuery({
+        queryKey: ["leads", page, limit],
+        queryFn: () => getLeads({ page, limit }),
+        enabled: !permissionsLoading && canReadLeads,
+        retry: false,
     });
 
     return {
-        leads: query.data?.leads ?? [],
-        isLoading: query.isLoading,
-        error: query.error,
-        total: query.data?.total ?? 0,
-        page: query.data?.page ?? 1,
-        lastPage: query.data?.lastPage ?? 1,
+        leads: leadsQuery.data?.leads ?? [],
+        isLoading: leadsQuery.isLoading,
+        error: leadsQuery.error,
+        total: leadsQuery.data?.total ?? 0,
+        page: leadsQuery.data?.page ?? 1,
+        lastPage: leadsQuery.data?.lastPage ?? 1,
     };
 }
 

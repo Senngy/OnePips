@@ -1088,7 +1088,11 @@ Elle ne bloque pas les autres chantiers tant que ses prérequis ne sont pas sati
 
 ---
 
-### ⬜ PHASE 9 — Auth / RBAC (inter-document avec `RBAC-v3-audit.md`)
+### ⬜ PHASE 9 — Auth / RBAC + Frontend erreur partagée (inter-document avec `RBAC-v3-audit.md`)
+
+> Restructurée en deux volets indépendants, validables séparément : **9.A Backend** (alignement des guards RBAC sur le contrat) et **9.B Frontend** (helper d'erreur partagé `getUserFacingError`).
+
+#### 9.A — Backend : aligner les guards RBAC sur le contrat `ApiErrorResponse`
 
 **Objectif** : aligner les guards RBAC sur le contrat `ApiErrorResponse` **sans recréer le plan RBAC**. Ce document définit uniquement *comment* les guards émettent leurs erreurs ; `RBAC-v3-audit.md` reste propriétaire de leur comportement. Error-Handling-Architecture.md est propriétaire du format et du transport des erreurs. RBAC-v3-audit.md est propriétaire de la sémantique et des conditions déclenchant les erreurs RBAC.
 
@@ -1131,6 +1135,32 @@ Ainsi aucun des deux documents ne peut devenir accidentellement propriétaire du
 **Checkpoint de validation** : §14 + checkpoint inter-document (§14.2).
 
 **Instructions d'implémentation pour DeepSeek** : lire d'abord `RBAC-v3-audit.md` pour les décisions propriétaires ; ne pas réinventer les codes ; coordonner toute modification avec l'autre document.
+
+#### 9.B — Frontend : helper d'erreur partagé `getUserFacingError`
+
+**Objectif** : déplacer `getUserFacingError` (aujourd'hui dans `src/lib/services/users.service.ts`) vers un module partagé `src/lib/errors.ts`, pour le rendre réutilisable par tous les domaines (leads, events, community, users) sans dépendance croisée vers `users.service.ts`.
+
+**Contexte** : introduit lors du checkpoint RBAC frontend (Étape 6 « Robustesse », principes 8 & 11), ce helper mappe `ApiError` → message humain : `FORBIDDEN` / `AUTHZ_PERMISSION_INSUFFICIENT` → « Vous n'avez pas les droits… », codes invitation → messages dédiés, fallback générique avec `requestId`. Il est actuellement importé depuis `users.service.ts` par des composants hors domaine users (live modals, `lead-tab`, `form-testimony`, `community/page`, `events/page`) — dépendance croisée à corriger.
+
+**Fichiers concernés** :
+- Créer : `src/lib/errors.ts` (export `getUserFacingError`, logique inchangée).
+- Modifier : `src/lib/services/users.service.ts` (retirer l'export local ; les consommateurs utilisent `@/lib/errors`).
+- Mettre à jour les imports : `users/page.tsx`, `invite-admin-modal.tsx`, `lead-tab.tsx`, `form-testimony.tsx`, `community/page.tsx`, `events/page.tsx`, `new-live-modal.tsx`, `update-live-modal.tsx`.
+
+**Fichiers interdits** : backend ; aucun changement de logique métier ni de nom de code.
+
+**Changements attendus** :
+1. Extraire `getUserFacingError` vers `src/lib/errors.ts` (même comportement, aucun message modifié).
+2. Remplacer les imports de ce helper par `@/lib/errors` dans les fichiers listés.
+3. Pur déplacement — aucun changement de comportement runtime.
+
+**Critères d'acceptation** :
+- [ ] `getUserFacingError` importé depuis `src/lib/errors.ts` partout
+- [ ] Plus aucun import de ce helper depuis `users.service.ts`
+- [ ] Messages identiques avant/après (aucune régression)
+- [ ] `npx tsc --noEmit` et eslint propres sur les fichiers touchés
+
+**Checkpoint de validation** : §14.1 (typecheck frontend).
 
 ---
 

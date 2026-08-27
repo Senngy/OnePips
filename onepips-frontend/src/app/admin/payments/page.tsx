@@ -1,5 +1,6 @@
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
+import PermissionGate from "@/components/admin/permission-gate";
 
 export default function AdminPaymentsPage() {
   return (
@@ -7,8 +8,18 @@ export default function AdminPaymentsPage() {
       <Sidebar />
       <main className="ml-64 min-h-screen">
         <Navbar />
-        <div className="p-8 max-w-[1600px] mx-auto">
-          <h1 className="text-4xl font-headline font-bold mb-8">Paiements & Abonnements</h1>
+        <PermissionGate permission="PAYMENTS_READ">
+          <PaymentsContent />
+        </PermissionGate>
+      </main>
+    </div>
+  );
+}
+
+function PaymentsContent() {
+  return (
+    <div className="p-8 max-w-[1600px] mx-auto">
+      <h1 className="text-4xl font-headline font-bold mb-8">Paiements & Abonnements</h1>
           <button
             className="flex items-center gap-2 bg-primary-container text-on-primary-container px-4 py-2 rounded-md font-medium text-sm active:scale-95 transition-transform">
             <span className="material-symbols-outlined text-sm">download</span>
@@ -403,7 +414,5 @@ export default function AdminPaymentsPage() {
             </div>
           </section>
         </div>
-      </main>
-    </div>
   );
 }

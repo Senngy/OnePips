@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useCreateEvent } from '@/lib/hooks/events/useCreateEvent';
+import { useToast } from '@/lib/hooks/useToast';
+import { getUserFacingError } from '@/lib/services/users.service';
 
 export default function NewLiveModal({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) {
     const [selectedDate, setSelectedDate] = useState<string>('');
@@ -9,7 +11,8 @@ export default function NewLiveModal({ setIsOpen }: { setIsOpen: (isOpen: boolea
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
 
-    const { mutateAsync: createEvent } = useCreateEvent();
+    const { mutateAsync: createEvent, isPending: creatingEvent } = useCreateEvent();
+    const { error: toastError } = useToast();
     const combinedDate = new Date(`${selectedDate}T${selectedTime}:00Z`);
 
     const handleSubmitCreateEvent = async () => {
@@ -19,11 +22,13 @@ export default function NewLiveModal({ setIsOpen }: { setIsOpen: (isOpen: boolea
                 description: description,
                 startsAt: combinedDate.toISOString(),
             };
-            console.log("(handleSubmitCreateEvent) Event created: ", event);
-            createEvent(event);
+            await createEvent(event);
             setIsOpen(false);
         } catch (error) {
-            console.error("(handleSubmitCreateEvent) Error creating event: ", error);
+            toastError({
+                title: "Échec de la création",
+                description: getUserFacingError(error),
+            });
         }
     };
 
@@ -108,16 +113,18 @@ export default function NewLiveModal({ setIsOpen }: { setIsOpen: (isOpen: boolea
                     <button
                         type="button"
                         onClick={() => setIsOpen(false)}
-                        className="px-6 py-2.5 rounded-xl font-bold text-sm text-outline hover:text-on-surface hover:bg-surface-variant transition-all"
+                        disabled={creatingEvent}
+                        className="px-6 py-2.5 rounded-xl font-bold text-sm text-outline hover:text-on-surface hover:bg-surface-variant transition-all disabled:opacity-50"
                     >
                         Annuler
                     </button>
                     <button
                         type="button"
                         onClick={handleSubmitCreateEvent}
-                        className="bg-primary-container text-on-primary-container px-8 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-[0_0_20px_rgba(124,58,237,0.3)] active:scale-[0.98]"
+                        disabled={creatingEvent}
+                        className="bg-primary-container text-on-primary-container px-8 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-[0_0_20px_rgba(124,58,237,0.3)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Créer un Live
+                        {creatingEvent ? "Création..." : "Créer un Live"}
                     </button>
                 </div>
             </div>

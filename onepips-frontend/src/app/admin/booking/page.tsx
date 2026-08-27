@@ -1,5 +1,6 @@
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
+import PermissionGate from "@/components/admin/permission-gate";
 
 export default function AdminBookingPage() {
   return (
@@ -7,8 +8,18 @@ export default function AdminBookingPage() {
       <Sidebar />
       <main className="ml-64 min-h-screen">
         <Navbar />
-        <div className="p-8 max-w-[1600px] mx-auto">
-          <h1 className="text-4xl font-headline font-bold mb-8">Prise de Rendez-vous</h1>
+        <PermissionGate permission="BOOKINGS_READ">
+          <BookingContent />
+        </PermissionGate>
+      </main>
+    </div>
+  );
+}
+
+function BookingContent() {
+  return (
+    <div className="p-8 max-w-[1600px] mx-auto">
+      <h1 className="text-4xl font-headline font-bold mb-8">Prise de Rendez-vous</h1>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div className="flex gap-3">
               <div className="flex bg-surface-container-low p-1 rounded-lg">
@@ -370,7 +381,5 @@ export default function AdminBookingPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
   );
 }

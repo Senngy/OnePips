@@ -1,5 +1,6 @@
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
+import PermissionGate from "@/components/admin/permission-gate";
 
 export default function AdminSettingsPage() {
   return (
@@ -7,9 +8,18 @@ export default function AdminSettingsPage() {
       <Sidebar />
       <main className="ml-64 min-h-screen">
         <Navbar />
+        <PermissionGate permission="SETTINGS_MANAGE">
+          <SettingsContent />
+        </PermissionGate>
+      </main>
+    </div>
+  );
+}
 
-        <div className="p-8 max-w-[1600px] mx-auto">
-          <h1 className="text-4xl font-headline font-bold mb-8">Paramètres du Site</h1>
+function SettingsContent() {
+  return (
+    <div className="p-8 max-w-[1600px] mx-auto">
+      <h1 className="text-4xl font-headline font-bold mb-8">Paramètres du Site</h1>
           {/* Grid Layout: Settings Navigation + Content */}
           <div className="grid grid-cols-12 gap-10">
             {/* Inner Nav Column (Asymmetrical Sidebar) */}
@@ -348,7 +358,5 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         </div >
-      </main >
-    </div >
   );
 }

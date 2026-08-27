@@ -3,6 +3,7 @@
 import Sidebar from "@/components/admin/layout/sidebar";
 import Navbar from "@/components/admin/layout/navbar";
 import ConfirmModal from "@/components/modals/confirm-modal";
+import PermissionGate from "@/components/admin/permission-gate";
 import { useState } from "react";
 import { useCommunityStats } from "@/lib/hooks/community/useCommunityStats";
 import {
@@ -11,6 +12,9 @@ import {
   useDeleteTestimonial,
 } from "@/lib/hooks/community/useTestimonials";
 import { useResults, useDeleteResult } from "@/lib/hooks/community/useResults";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
+import { useToast } from "@/lib/hooks/useToast";
+import { getUserFacingError } from "@/lib/services/users.service";
 import { TestimonialDto } from "@/lib/services/community.service";
 import { ResultDto } from "@/lib/services/community.service";
 import FormTestimony from "@/components/admin/community/form-testimony";
@@ -18,12 +22,30 @@ import NewResultModal from "@/components/admin/community/new-result-modal";
 import ImageLightbox from "@/components/ui/image-lightbox";
 
 export default function AdminCommunityPage() {
+  return (
+    <div className="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
+      <Sidebar />
+      <main className="ml-64 min-h-screen">
+        <Navbar />
+        <PermissionGate permission="COMMUNITY_READ">
+          <CommunityContent />
+        </PermissionGate>
+      </main>
+    </div>
+  );
+}
+
+function CommunityContent() {
   const { data: stats, isLoading: statsLoading } = useCommunityStats();
   const { data: testimonials, isLoading: testimonialsLoading } =
     useTestimonials();
-  const { mutate: deleteTestimonial } = useDeleteTestimonial();
+  const { mutate: deleteTestimonial, isPending: deletingTestimonial } =
+    useDeleteTestimonial();
   const { data: results, isLoading: resultsLoading } = useResults();
   const { mutate: deleteResult } = useDeleteResult();
+  const { hasPermission } = usePermissions();
+  const canWrite = hasPermission("COMMUNITY_WRITE");
+  const { error: toastError } = useToast();
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [newResultOpen, setNewResultOpen] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
@@ -33,15 +55,12 @@ export default function AdminCommunityPage() {
   };
 
   return (
-    <div className="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
-      <Sidebar />
-      <main className="ml-64 min-h-screen">
-        <Navbar />
-        <div className="px-8 pt-8">
-          <h1 className="text-4xl font-headline font-bold mb-8">
-            Gestion de la Communauté
-          </h1>
-        </div>
+    <>
+      <div className="px-8 pt-8">
+        <h1 className="text-4xl font-headline font-bold mb-8">
+          Gestion de la Communauté
+        </h1>
+      </div>
         {/* Content Canvas */}
         <div className="p-8 space-y-8 max-w-7xl mx-auto w-full">
           {/* Statistics Overview (Bento Style) */}
@@ -180,20 +199,31 @@ export default function AdminCommunityPage() {
                             </span>
                           </td>
                           <td className="px-6 py-5 text-right">
-                            <button
-                              onClick={() => setDeleteTargetId(t.id)}
-                              className="text-outline hover:text-tertiary"
-                            >
-                              <span className="material-symbols-outlined text-lg">
-                                delete
-                              </span>
-                            </button>
+                            {canWrite && (
+                              <button
+                                onClick={() => setDeleteTargetId(t.id)}
+                                className="text-outline hover:text-tertiary"
+                              >
+                                <span className="material-symbols-outlined text-lg">
+                                  delete
+                                </span>
+                              </button>
+                            )}
                             <ConfirmModal
                               open={deleteTargetId === t.id}
                               onCancel={() => setDeleteTargetId(null)}
+                              loading={deletingTestimonial}
                               onConfirm={() => {
-                                deleteTestimonial(t.id);
-                                setDeleteTargetId(null);
+                                deleteTestimonial(t.id, {
+                                  onSuccess: () => setDeleteTargetId(null),
+                                  onError: (err) => {
+                                    toastError({
+                                      title: "Suppression échouée",
+                                      description: getUserFacingError(err),
+                                    });
+                                    setDeleteTargetId(null);
+                                  },
+                                });
                               }}
                               title="Supprimer le témoignage"
                               description="Êtes-vous sûr de vouloir supprimer ce témoignage ?"
@@ -209,7 +239,7 @@ export default function AdminCommunityPage() {
             </section>
             {/* Right Column: Add New Form (Glassmorphism) */}
             <aside className="lg:col-span-4 space-y-6">
-              <FormTestimony />
+              {canWrite && <FormTestimony />}
             </aside>
           </div>
           {/* Performance Section Header */}
@@ -222,13 +252,15 @@ export default function AdminCommunityPage() {
                 Performance screenshots et analyses partagées.
               </p>
             </div>
-            <button
-              onClick={() => setNewResultOpen(true)}
-              className="flex items-center gap-2 text-primary font-headline text-sm font-semibold hover:opacity-80 transition-opacity"
-            >
-              <span className="material-symbols-outlined">cloud_upload</span>
-              UPLOADER UN RÉSULTAT
-            </button>
+            {canWrite && (
+              <button
+                onClick={() => setNewResultOpen(true)}
+                className="flex items-center gap-2 text-primary font-headline text-sm font-semibold hover:opacity-80 transition-opacity"
+              >
+                <span className="material-symbols-outlined">cloud_upload</span>
+                UPLOADER UN RÉSULTAT
+              </button>
+            )}
           </div>
           {/* Performance Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -282,12 +314,22 @@ export default function AdminCommunityPage() {
                         {r.description}
                       </span>
                       <div className="flex gap-2 pt-2">
-                        <span
-                          onClick={() => deleteResult(r.id)}
-                          className="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-tertiary"
-                        >
-                          delete
-                        </span>
+                        {canWrite && (
+                          <span
+                            onClick={() =>
+                              deleteResult(r.id, {
+                                onError: (err) =>
+                                  toastError({
+                                    title: "Suppression échouée",
+                                    description: getUserFacingError(err),
+                                  }),
+                              })
+                            }
+                            className="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-tertiary"
+                          >
+                            delete
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -295,30 +337,31 @@ export default function AdminCommunityPage() {
               ))
             )}
             {/* Add New Placeholder */}
-            <div
-              onClick={() => setNewResultOpen(true)}
-              className="bg-surface-container-low border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center p-8 group hover:border-primary/50 transition-colors cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
-                <span className="material-symbols-outlined text-primary group-hover:text-white">
-                  add_a_photo
-                </span>
+            {canWrite && (
+              <div
+                onClick={() => setNewResultOpen(true)}
+                className="bg-surface-container-low border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center p-8 group hover:border-primary/50 transition-colors cursor-pointer"
+              >
+                <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-4 group-hover:bg-primary-container transition-colors">
+                  <span className="material-symbols-outlined text-primary group-hover:text-white">
+                    add_a_photo
+                  </span>
+                </div>
+                <p className="text-sm font-headline font-bold text-on-surface">
+                  Ajouter un résultat
+                </p>
+                <p className="text-[10px] text-outline text-center mt-1">
+                  PNG, JPG ou Screenshot MT4/MT5
+                </p>
               </div>
-              <p className="text-sm font-headline font-bold text-on-surface">
-                Ajouter un résultat
-              </p>
-              <p className="text-[10px] text-outline text-center mt-1">
-                PNG, JPG ou Screenshot MT4/MT5
-              </p>
-            </div>
+            )}
           </div>
         </div>
-      </main>
       <NewResultModal
         isOpen={newResultOpen}
         onClose={() => setNewResultOpen(false)}
       />
       <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
-    </div>
+    </>
   );
 }

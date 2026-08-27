@@ -3,24 +3,40 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
 
-const navItems = [
-    { name: "Payments", href: "/admin/payments", icon: "payments" },
-    { name: "Events", href: "/admin/events", icon: "calendar_month" },
+type NavItem = {
+    name: string;
+    href: string;
+    icon: string;
+    permission?: string;
+};
+
+const navItems: NavItem[] = [
+    { name: "Payments", href: "/admin/payments", icon: "payments", permission: "PAYMENTS_READ" },
+    { name: "Events", href: "/admin/events", icon: "calendar_month", permission: "EVENTS_READ" },
     { name: "Analytics", href: "/admin/analytics", icon: "leaderboard" },
-    { name: "Settings", href: "/admin/settings", icon: "settings" },
-    { name: "Community", href: "/admin/community", icon: "group" },
+    { name: "Settings", href: "/admin/settings", icon: "settings", permission: "SETTINGS_MANAGE" },
+    { name: "Community", href: "/admin/community", icon: "group", permission: "COMMUNITY_READ" },
 ];
-const mainNavItems = [
+const mainNavItems: NavItem[] = [
     { name: "Dashboard", href: "/admin/dashboard", icon: "dashboard" },
-    { name: "Leads", href: "/admin/leads", icon: "group" },
-    { name: "Applications", href: "/admin/applications", icon: "assignment" },
-    { name: "Booking", href: "/admin/booking", icon: "event_available" },
+    { name: "Leads", href: "/admin/leads", icon: "group", permission: "LEADS_READ" },
+    { name: "Applications", href: "/admin/applications", icon: "assignment", permission: "APPLICATIONS_READ" },
+    { name: "Booking", href: "/admin/booking", icon: "event_available", permission: "BOOKINGS_READ" },
 ]
 
 export default function MobileNav() {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
+    const { hasPermission } = usePermissions();
+
+    const visibleNavItems = navItems.filter(
+        (item) => !item.permission || hasPermission(item.permission)
+    );
+    const visibleMainNavItems = mainNavItems.filter(
+        (item) => !item.permission || hasPermission(item.permission)
+    );
     return (
         <>
             {/* 🔻 MENU OVERLAY */}
@@ -30,7 +46,7 @@ export default function MobileNav() {
                         <h2 className="text-lg font-bold text-white mb-4">Menu</h2>
 
                         <div className="grid grid-cols-2 gap-4">
-                            {navItems.map((item) => (
+                            {visibleNavItems.map((item) => (
                                 <Link
                                     key={item.href}
                                     href={item.href}
@@ -59,7 +75,7 @@ export default function MobileNav() {
             <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#131317] border-t border-outline-variant/10 px-6 py-3 flex justify-between items-center z-50">
 
                 {/* LEFT ITEMS */}
-                {mainNavItems.slice(0, 2).map((item) => {
+                {visibleMainNavItems.slice(0, 2).map((item) => {
                     const isActive = pathname === item.href;
 
                     return (
@@ -88,7 +104,7 @@ export default function MobileNav() {
                 </button>
 
                 {/* RIGHT ITEMS */}
-                {mainNavItems.slice(2).map((item) => {
+                {visibleMainNavItems.slice(2).map((item) => {
                     const isActive = pathname === item.href;
 
                     return (
@@ -113,7 +129,7 @@ export default function MobileNav() {
                         <h2 className="text-lg font-bold text-white mb-4">Menu</h2>
 
                         <div className="grid grid-cols-2 gap-4">
-                            {navItems.map((item) => (
+                            {visibleNavItems.map((item) => (
                                 <Link
                                     key={item.href}
                                     href={item.href}
@@ -142,7 +158,7 @@ export default function MobileNav() {
             <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#131317] border-t border-outline-variant/10 px-6 py-3 flex justify-between items-center z-50">
 
                 {/* LEFT ITEMS */}
-                {mainNavItems.slice(0, 2).map((item) => {
+                {visibleMainNavItems.slice(0, 2).map((item) => {
                     const isActive = pathname === item.href;
 
                     return (
@@ -171,7 +187,7 @@ export default function MobileNav() {
                 </button>
 
                 {/* RIGHT ITEMS */}
-                {mainNavItems.slice(2).map((item) => {
+                {visibleMainNavItems.slice(2).map((item) => {
                     const isActive = pathname === item.href;
 
                     return (

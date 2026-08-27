@@ -4,6 +4,17 @@ import { ALL_PERMISSIONS, type UserWithPerms } from "@/lib/services/users.servic
 
 type Status = "inherited" | "granted" | "denied" | "none";
 
+// Dérive la permission READ parente d'une permission WRITE/DELETE.
+// Ex : LEADS_WRITE → LEADS_READ · LEADS_DELETE → LEADS_READ.
+// Retourne null pour les permissions non-CRUD (SETTINGS_MANAGE, USERS_MANAGE,
+// ADMINS_MANAGE, ROLES_MANAGE, FILES_UPLOAD) et pour les READ elles-mêmes.
+function getDependentRead(permission: string): string | null {
+  if (permission.endsWith("_WRITE") || permission.endsWith("_DELETE")) {
+    return permission.replace(/_(WRITE|DELETE)$/, "_READ");
+  }
+  return null;
+}
+
 export default function PermissionsPanel({
   user,
   onTogglePermission,
@@ -36,7 +47,7 @@ export default function PermissionsPanel({
 
       <p className="text-xs text-outline mb-4">
         ✅ Hérité du rôle · ⚡ Accordé explicitement · ✕ Refusé explicitement ·
-        ❌ Non accordé
+        ❌ Non accordé · ⚠️ Impossible sans la permission de lecture
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -53,8 +64,16 @@ export default function PermissionsPanel({
                   false)
                 : user.effectivePermissions.includes(perm);
 
-              const icon =
-                status === "inherited"
+              // Dépendance WRITE/DELETE → READ : si la READ est absente,
+              // la permission est visuellement indisponible (override conservé).
+              const dependentRead = getDependentRead(perm);
+              const isBlocked =
+                dependentRead !== null &&
+                !user.effectivePermissions.includes(dependentRead);
+
+              const icon = isBlocked
+                ? "⚠️"
+                : status === "inherited"
                   ? "✅"
                   : status === "granted"
                     ? "⚡"
@@ -62,23 +81,30 @@ export default function PermissionsPanel({
                       ? "✕"
                       : "❌";
 
+              const title = isBlocked
+                ? `Impossible sans ${dependentRead?.replace(/_/g, " ")}`
+                : status;
+
               return (
                 <label
                   key={perm}
-                  className="flex items-center gap-2 cursor-pointer group"
+                  className={`flex items-center gap-2 group ${
+                    isBlocked ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+                  }`}
                 >
                   <input
                     type="checkbox"
                     checked={checked}
+                    disabled={isBlocked}
                     onChange={() =>
                       onTogglePermission(user.id, perm, !checked)
                     }
-                    className="rounded border-outline-variant/30 text-primary focus:ring-primary"
+                    className="rounded border-outline-variant/30 text-primary focus:ring-primary disabled:cursor-not-allowed"
                   />
                   <span className="text-xs text-outline group-hover:text-on-surface transition-colors flex-1">
                     {perm.replace(/_/g, " ")}
                   </span>
-                  <span className="text-[10px] font-medium opacity-60" title={status}>
+                  <span className="text-[10px] font-medium opacity-60" title={title}>
                     {icon}
                   </span>
                 </label>
