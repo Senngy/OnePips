@@ -527,9 +527,9 @@ Chaque ligne ci-dessus a été confrontée au code source (pas seulement à l'in
 
 **Conclusion : sur 13 items P0, 2 sont faits (#1, #9 — ce dernier via Error Handling Phase 2) et 1 est partiel (#2 — Helmet sans CSP). Les 10 autres (#3-8, #36-39) n'ont aucune trace d'implémentation dans le code actuel.** Rien à cocher de plus à ce stade.
 
-### P1 — Important
+### P1 — Important ✅ Validé le 27/08 (finir 22 lorsque Payments sera implémenté)
 
-> 🔄 **Réorganisé le 26/08** : items 10-13 validés (invitation admin + UI terminées). Nouveaux items 14-16 (RBAC frontend : exposer les `effectivePermissions`, `usePermissions()`, dépendances de permissions), puis session Better Auth (#17-18), observabilité (#19), et items optionnels/reportés en fin (#20-22).
+> 🔄 **Réorganisé le 26/08** : items 10-13 validés (invitation admin + UI terminées). Nouveaux items 14-16 (RBAC frontend : exposer les `effectivePermissions`, `usePermissions()`, dépendances de permissions), puis session Better Auth (#17-18), observabilité (#19), et items optionnels/reportés en fin (#20-22). 8
 
 | # | Tâche | Catégorie | Statut |
 |---|-------|-----------|--------|
@@ -540,26 +540,26 @@ Chaque ligne ci-dessus a été confrontée au code source (pas seulement à l'in
 | 14 | Exposer les `effectivePermissions` du user courant au frontend — endpoint sécurisé ou intégration dans la session Better Auth ; la source doit inclure `ROLE_PERMISSIONS` + overrides `UserPermission` | RBAC / Backend + Frontend | ✅ |
 | 15 | Créer `usePermissions()` basé sur les `effectivePermissions` réelles + état centralisé et mécanisme de refresh/invalidation après modification des permissions | RBAC / Frontend | ✅ |
 | 16 | Définir et faire respecter les dépendances entre permissions : `WRITE → READ`, `DELETE → READ` pour les familles CRUD ; aucune cascade universelle pour les permissions non-CRUD ; UI cohérente + validation backend — **fait** (UI : WRITE/DELETE désactivées si READ absente, overrides préservés ; backend : validation) | RBAC | ✅ |
-| 17 | Configurer Better Auth : session `expiresIn`, rotation, rememberMe, cookies Secure/HttpOnly/SameSite | Sécurité | ⬜ |
-| 18 | Vérifier session fixation / rotation par test | Sécurité | ⬜ |
-| 19 | Logs structurés (JSON) + intégrer/remplacer les `console.log` AuthGuard | Observabilité | ⬜ |
-| 20 | N+1 `findAllWithPermissions()` → requête groupée — **optionnel, reporté en fin** | Perf | ⬜ |
-| 21 | Pagination + tri sur `GET /users` — **optionnel, reporté en fin** | Perf | ⬜ |
+| 17 | Configurer Better Auth : session `expiresIn`, rotation, rememberMe, cookies Secure/HttpOnly/SameSite | Sécurité | ✅ |
+| 18 | Vérifier session fixation / rotation par test | Sécurité | ✅ |
+| 19 | Logs structurés (JSON) + intégrer/remplacer les `console.log` AuthGuard | Observabilité | ✅ |
+| 20 | N+1 `findAllWithPermissions()` → requête groupée — **optionnel, reporté en P3** | Perf | P3 |
+| 21 | Pagination + tri sur `GET /users` — **optionnel, reporté en P3** | Perf | P3 |
 | 22 | DTO sur `payments.controller` (`@Body() any` → DTO) — **dernière phase P1**, après implémentation réelle de Payments | Backend | ⬜ |
 
-### 🔄 CHECKPOINT — RBAC Frontend / comportements utilisateur
+### 🔄 CHECKPOINT — RBAC Frontend / comportements utilisateur ✅ Validé le 27/08
 
 > Objectif : aligner l'expérience frontend sur les permissions effectives une fois celles-ci exposées au client. Le backend reste l'autorité de sécurité.
 
-- [ ] Filtrer la sidebar selon `effectivePermissions`
-- [ ] Protéger les accès directs aux pages
-- [ ] Masquer/désactiver les actions sans permission
-- [ ] Harmoniser les états `403` avec `AccessDenied` / toasts
-- [ ] Ne pas vider les formulaires après un `403`
-- [ ] Loading + anti-double-submit sur les mutations
-- [ ] Confirmation sur les actions destructives
-- [ ] Vérifier le comportement après modification d'une permission sans F5
-- [ ] Documenter les écarts constatés sur Leads / Applications / Events / Community
+- [✅] Filtrer la sidebar selon `effectivePermissions`
+- [✅] Protéger les accès directs aux pages
+- [✅] Masquer/désactiver les actions sans permission
+- [✅] Harmoniser les états `403` avec `AccessDenied` / toasts
+- [✅] Ne pas vider les formulaires après un `403`
+- [✅] Loading + anti-double-submit sur les mutations
+- [✅] Confirmation sur les actions destructives
+- [✅] Vérifier le comportement après modification d'une permission sans F5
+- [✅] Documenter les écarts constatés sur Leads / Applications / Events / Community
 
 ### P2 — Secondaire (qualité + dette)
 
@@ -567,10 +567,10 @@ Chaque ligne ci-dessus a été confrontée au code source (pas seulement à l'in
 |---|-------|-----------|--------|
 | 21 | Supprimer OU utiliser `ADMINS_MANAGE` + `ROLES_MANAGE` (mortes) | Dette | ⬜ |
 | 22 | Index manquants : `User.role`, `User.status`, `Session.userId`, `Session.expiresAt`, FK (`EXPLAIN ANALYZE` d'abord) | Perf | ⬜ |
-| 23 | Transaction dans `updatePermissions()` (`$transaction`) | Perf | ⬜ |
+| 23 | Transaction dans `updatePermissions()` (`$transaction`) | Perf | ✅ |
 | 24 | Compression HTTP + `Cache-Control` sur GET publics | Perf | ⬜ |
 | 25 | Confirmation UI (role/permissions reset) + remplacer `alert()` | UX | ⬜ |
-| 26 | Recherche/filtre par email/nom/rôle (page Users) | UX | ⬜ |
+| 26 | Recherche/filtre par email/nom/rôle (page Users) | UX | ✅ |
 | 27 | **Typer `request.user`** (`RequestWithUser` + `AuthenticatedUser`) | Archi | ⬜ |
 | 28 | **Évaluer la stratégie globale des guards** (`APP_GUARD` AuthGuard+PermissionsGuard, `@Public()`/`@Roles()`, exclusion `/api/auth/*`) | Archi | ⬜ |
 | 29 | Enregistrer guards en `providers` + importer explicitement leurs modules (fin du tout-global) | Archi | ⬜ |
@@ -585,6 +585,8 @@ Chaque ligne ci-dessus a été confrontée au code source (pas seulement à l'in
 | 33 | Logout global + limite multi-device | Sécurité | ⬜ |
 | 34 | Anonymisation GDPR de masse + purge sessions expirées | Feature | ⬜ |
 | 35 | Tracing distribué (OpenTelemetry) | Observabilité | ⬜ |
+| 36 | Optimisation en requête groupée (`groupBy`/`in`) | Perf | ⬜ |
+| 37 | Ajouter `page`/`limit` + tri sur `GET /users` | Perf | ⬜ |
 
 ---
 
