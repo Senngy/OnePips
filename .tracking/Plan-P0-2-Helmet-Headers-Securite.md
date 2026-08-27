@@ -420,7 +420,7 @@ Pour ne **jamais** casser la prod en déployant une CSP trop stricte :
 
 ---
 
-## 7. CHECKLIST P0-2 (à cocher pendant l'implémentation)
+## 7. CHECKLIST P0-2 (Phase d'avant staging ✅ validée 27/08)
 
 > ✅ **v9** : réordonnée pour que les tâches « Maintenant / local » soient clairement séparées des tâches « avant staging » et « avant production » (cf. §13.0).
 
@@ -432,12 +432,12 @@ Pour ne **jamais** casser la prod en déployant une CSP trop stricte :
 | 4 | Créer `src/common/helmet.config.ts` | Backend | ✅ Maintenant (C2) | ✅ |
 | 5 | Brancher Helmet dans `main.ts` (CSP off, HSTS off en dev) | Backend | ✅ Maintenant (C3) | ✅ |
 | 6 | Retester Better Auth (signup/login/logout) + uploads + API en local | Backend | ✅ Immédiatement après C3 | ✅ **Validé** (test manuel effectué le 26/08) |
-| 7 | Automatiser les tests headers (`curl`/script — §14 `security-check.sh`) | Backend | ✅ Maintenant (C4) | ⬜ |
-| 8 | Headers Next.js non-CSP (X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy) | Frontend | ✅ Maintenant (C5) | ⬜ |
-| 9 | Établir une **première allowlist CSP** à partir des dépendances réelles du code (pas besoin d'être finale) | Frontend | ✅ Maintenant (avant C6/C7) | ⬜ |
-| 10 | CSP Report-Only bloc public, rapports en **console** (localhost) | Frontend | ✅ Maintenant (C6) | ⬜ |
-| 11 | CSP Report-Only bloc `/admin/*` | Frontend | ✅ Maintenant (C7) | ⬜ |
-| 12 | Tester/corriger les violations CSP en local, en boucle | Frontend | ✅ Itératif, en local | ⬜ |
+| 7 | Automatiser les tests headers (`curl`/script — §14 `security-check.sh`) | Backend | ✅ Maintenant (C4) | ✅ |
+| 8 | Headers Next.js non-CSP (X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy) | Frontend | ✅ Maintenant (C5) | ✅ |
+| 9 | Établir une **première allowlist CSP** à partir des dépendances réelles du code (pas besoin d'être finale) | Frontend | ✅ Maintenant (avant C6/C7) | ✅ |
+| 10 | CSP Report-Only bloc public, rapports en **console** (localhost) | Frontend | ✅ Maintenant (C6) | ✅ |
+| 11 | CSP Report-Only bloc `/admin/*` | Frontend | ✅ Maintenant (C7) | ✅ |
+| 12 | Tester/corriger les violations CSP en local, en boucle | Frontend | ✅ Itératif, en local | ✅ |
 | 13 | **Avant staging** : trancher D1 (domaine staging) + D2 (HTTPS/reverse-proxy staging) + D7 (reporting CSP réel) | Décision/Infra | ❌ Pas avant | ⬜ |
 | 14 | Déployer sur staging, observer 3-7 jours (vraie Phase A, §4) | Staging | ❌ Après C6/C7 validés en local | ⬜ |
 | 15 | **Phase B** : basculer Enforce (staging puis prod) + matrice §3.3 | Les 2 | ❌ Après validation staging | ⬜ |

@@ -496,13 +496,14 @@ Leads        —       Uses(global) Uses guard  —     —     —        —  
 | # | Tâche | Catégorie | Statut |
 |---|-------|-----------|--------|
 | 1 | ~~Appliquer la migration DB `rbac_v3`~~ ✅ **Fait** — 17/17 migrations appliquées, colonne `granted` présente sur `UserPermission`, enum `Permission` = 20 valeurs (dont `USERS_READ`, `ADMINS_MANAGE`, `ROLES_MANAGE`, `FILES_UPLOAD`). Vérifié en base le 30/07 | Prisma | ✅ |
-| 2 | Installer Helmet + configurer **toute la suite** : CSP, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy, nosniff | Sécurité | 🟡 |
+| 2 | Installer Helmet + configurer **toute la suite** : CSP, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy, nosniff | Sécurité | ✅ |
+| 2b | staging / CSP enforce / HSTS phase B/C | Sécurité | ⬜ |
 | 3 | CSRF : vérifier ce que Better Auth fournit, sinon implémenter | Sécurité | ⬜ |
-| 4 | **Audit log admin** (modèle `AdminAuditLog` + écriture sur role/permissions change) | Observabilité | ⬜ |
+| 4 | **Audit log admin** (modèle `AdminAuditLog` + écriture sur role/permissions change) après Payments/Booking | Observabilité | ⬜ |
 | 5 | Rate limiting auth → Redis (pas in-memory) | Sécurité | ⬜ |
 | 6 | Corriger `GET /uploads/:filename` (path traversal) | Sécurité | ⬜ |
 | 7 | Désactiver/restreindre le signup public OU restreindre par domaine | Sécurité | ⬜ |
-| 8 | Déplacer `lastLoginAt` au login + refresh de session (plus de write à chaque requête) | Perf | ⬜ |
+| 8 | Déplacer `lastLoginAt` au login + refresh de session (plus de write à chaque requête) après Payments/Booking | Perf | ⬜ |
 | 9 | ~~Ajouter Request ID / Correlation ID (middleware + réponse)~~ ✅ **Fait via Error Handling Phase 2** — `RequestIdMiddleware` génère `req.requestId`, pose `X-Request-Id`, `LoggerMiddleware` le logge, `GlobalExceptionFilter` l'injecte dans les erreurs. Référence : `.tracking/Error-Handling-Architecture.md` §7. Plus aucune action RBAC requise | Observabilité | ✅ |
 | 36 | Ajouter la colonne `status` sur `User` (type `UserStatus` **déjà existant** dans le schéma — `ACTIVE`/`SUSPENDED`/`DISABLED`, défaut `ACTIVE`) — voir §2.1. **Pas de nouvel enum à créer**, migration légère (ajout de colonne uniquement). `SUSPENDED` sans mécanique de verrouillage automatique pour l'instant | Prisma | ⬜ |
 | 37 | Supprimer `Session.status` + `enum UserStatus` (Session) — confirmé mort : 0 référence dans `src/`, absent du schéma Better Auth (`sessionSchema` core) | Prisma | ⬜ |
