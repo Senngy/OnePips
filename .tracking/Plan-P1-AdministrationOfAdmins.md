@@ -150,23 +150,23 @@ permission connue ?
   - [x] Fail closed si `/me/permissions` échoue.
 
 - **Étape 2 — Layout : shell affiché, contenu permission-dépendant en attente** (principe 3)
-  - [ ] Le shell admin (Sidebar/Navbar) s'affiche ; le contenu dépendant des permissions reste en état de chargement jusqu'à résolution de `usePermissions()` (pas de blocage global inutile).
-  - [ ] Principe conservé : **permissions inconnues → aucune décision d'autorisation → aucun contenu métier protégé → aucun fetch métier**.
+  - [x] Le shell admin (Sidebar/Navbar) s'affiche ; le contenu dépendant des permissions reste en état de chargement jusqu'à résolution de `usePermissions()` (pas de blocage global inutile).
+  - [x] Principe conservé : **permissions inconnues → aucune décision d'autorisation → aucun contenu métier protégé → aucun fetch métier**.
 
 - **Étape 3 — Sidebar** (principe 4)
-  - [ ] Afficher un item uniquement si la permission `READ` correspondante est présente.
+  - [x] Afficher un item uniquement si la permission `READ` correspondante est présente (Sidebar + MobileNav).
 
 - **Étape 4 — Gardes de pages + fetch conditionnel** (principes 5, 6)
-  - [ ] Vérifier `READ` avant de monter le contenu métier ; absent → `AccessDenied`.
-  - [ ] `enabled: !permissionsLoading && hasPermission(...)` sur le fetch métier.
+  - [x] Vérifier `READ` avant de monter le contenu métier ; absent → `AccessDenied`.
+  - [x] `enabled: !permissionsLoading && hasPermission(...)` sur le fetch métier.
 
 - **Étape 5 — Actions** (principes 7, 9)
-  - [ ] `WRITE`/`DELETE` contrôlent les boutons/actions, indépendamment de `READ`.
-  - [ ] Loading + anti-double-submit sur les mutations.
+  - [x] `WRITE`/`DELETE` contrôlent les boutons/actions, indépendamment de `READ`.
+  - [x] Loading + anti-double-submit sur les mutations.
 
 - **Étape 6 — Robustesse** (principes 8, 11)
-  - [ ] Conserver l'état des formulaires en cas de 403.
-  - [ ] Traiter le 403 backend proprement (toast/erreur), sans faux succès ni état incohérent.
+  - [x] Conserver l'état des formulaires en cas de 403.
+  - [x] Traiter le 403 backend proprement (toast/erreur), sans faux succès ni état incohérent.
 
 ---
 

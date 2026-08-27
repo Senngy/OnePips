@@ -6,6 +6,8 @@ import { formatDate, formatInterest, formatSource, formatStatus } from "@/lib/he
 import { useToast } from "@/lib/hooks/useToast";
 import ConfirmModal from "@/components/modals/confirm-modal";
 import AccessDenied, { isForbiddenError } from "@/components/admin/access-denied";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
+import { getUserFacingError } from "@/lib/services/users.service";
 
 
 export default function LeadTab() {
@@ -21,6 +23,8 @@ export default function LeadTab() {
     const { leads, isLoading, error, total, page, lastPage } = useLeads(filters);
     const { success: toastSuccess, error: toastError } = useToast();
     const { mutate: deleteLead, isPending: isDeleting } = useDeleteLead();
+    const { hasPermission } = usePermissions();
+    const canDelete = hasPermission("LEADS_DELETE");
     const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
     if (isForbiddenError(error)) {
@@ -135,12 +139,15 @@ export default function LeadTab() {
                                             <button className="p-2 text-outline hover:text-primary hover:bg-surface-container transition-all rounded" title="Contacter">
                                                 <span className="material-symbols-outlined text-lg">mail</span>
                                             </button>
-                                            <button onClick={() => setDeleteTargetId(lead.id)} className="p-2 text-outline hover:text-error hover:bg-error-container/10 transition-all rounded" title="Supprimer">
-                                                <span className="material-symbols-outlined text-lg">delete</span>
-                                            </button>
+                                            {canDelete && (
+                                                <button onClick={() => setDeleteTargetId(lead.id)} className="p-2 text-outline hover:text-error hover:bg-error-container/10 transition-all rounded" title="Supprimer">
+                                                    <span className="material-symbols-outlined text-lg">delete</span>
+                                                </button>
+                                            )}
                                             <ConfirmModal
                                                 open={deleteTargetId === lead.id}
                                                 onCancel={() => setDeleteTargetId(null)}
+                                                loading={isDeleting}
                                                 onConfirm={() => {
                                                     deleteLead(lead.id, {
                                                         onSuccess: () => {
@@ -148,7 +155,7 @@ export default function LeadTab() {
                                                             setDeleteTargetId(null);
                                                         },
                                                         onError: (err) => {
-                                                            toastError({ title: "Erreur", description: err?.message ?? "Impossible de supprimer le lead." });
+                                                            toastError({ title: "Erreur", description: getUserFacingError(err) });
                                                             setDeleteTargetId(null);
                                                         },
                                                     });

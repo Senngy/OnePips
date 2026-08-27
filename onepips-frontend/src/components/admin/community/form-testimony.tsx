@@ -2,6 +2,7 @@
 import { useState, FormEvent } from "react";
 import { useCreateTestimonial } from "@/lib/hooks/community/useTestimonials";
 import { useToast } from "@/lib/hooks/useToast";
+import { getUserFacingError } from "@/lib/services/users.service";
 
 export default function FormTestimony() {
     const { mutate: createTestimonial, isPending: creatingTestimonial } = useCreateTestimonial();
@@ -36,7 +37,7 @@ export default function FormTestimony() {
                 setLoading(false);
                 toastError({
                     title: "Échec de l'enregistrement",
-                    description: err.message ?? "Une erreur est survenue. Réessayez.",
+                    description: getUserFacingError(err),
                 });
             }
         });

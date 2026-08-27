@@ -9,6 +9,7 @@ import { useApplicants } from "@/lib/hooks/applicants/useApplicants";
 import { useState } from "react";
 import { ApplicationDto } from "@/lib/services/applications.service";
 import { formatInterest, formatAccountType } from "@/lib/helpers/formatData";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
 
 
 export default function AdminApplicationsPage() {
@@ -31,6 +32,8 @@ export default function AdminApplicationsPage() {
 
 function ApplicationsContent() {
   const { applicants, isLoading, error } = useApplicants();
+  const { hasPermission } = usePermissions();
+  const canWrite = hasPermission("APPLICATIONS_WRITE");
   const [selectedApplicant, setSelectedApplicant] = useState<ApplicationDto | null>(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -86,7 +89,9 @@ function ApplicationsContent() {
                 </div>
                 <p className="text-outline text-base max-w-xl">{`Intéressé par : ${formatInterest(selectedApplicant?.answers?.interests)} • Expérience: ${selectedApplicant?.answers?.tradingYears ? `${selectedApplicant?.answers?.tradingYears} ans de trading` : 'N/A'}`}</p>
                 <div className="flex flex-wrap gap-2 mt-6">
-                  <button className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:brightness-110 active:scale-95 transition-all" onClick={() => setShowModal(true)}>Approuvé candidature</button>
+                  {canWrite && (
+                    <button className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:brightness-110 active:scale-95 transition-all" onClick={() => setShowModal(true)}>Approuvé candidature</button>
+                  )}
                   <button className="bg-surface-container-highest text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright active:scale-95 transition-all">Demander un entretien</button>
                   <button className="bg-transparent border border-error/30 text-error px-6 py-2.5 rounded-md font-bold text-sm hover:bg-error/10 active:scale-95 transition-all">Rejeter</button>
                 </div>

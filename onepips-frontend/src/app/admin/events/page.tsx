@@ -13,6 +13,9 @@ import { useArchivedEvents } from "@/lib/hooks/events/useArchivedEvent";
 import { getTimeLeft } from "@/lib/utils/getEventTimeLeft";
 import { usePublishEvent } from "@/lib/hooks/events/usePublishEvent";
 import { useCancelEvent } from "@/lib/hooks/events/useCancelEvent";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
+import { useToast } from "@/lib/hooks/useToast";
+import { getUserFacingError } from "@/lib/services/users.service";
 
 export default function AdminEventsPage() {
   return (
@@ -42,8 +45,12 @@ function EventsContent() {
   const displayedEventTimeLeft = getTimeLeft(displayedEvent?.startsAt as string);
   const displayedEventParticipantsList = displayedEvent?.participants || [];
 
-  const { mutate: publish } = usePublishEvent();
-  const { mutate: cancel } = useCancelEvent();
+  const { mutate: publish, isPending: publishing } = usePublishEvent();
+  const { mutate: cancel, isPending: cancelling } = useCancelEvent();
+  const { hasPermission } = usePermissions();
+  const canWrite = hasPermission("EVENTS_WRITE");
+  const canDelete = hasPermission("EVENTS_DELETE");
+  const { error: toastError } = useToast();
 
   const handleCreateLive = () => {
     setIsNewLiveModalOpen(true);
@@ -61,12 +68,14 @@ function EventsContent() {
         <div className="flex items-center justify-between mb-8">
             <h1 className="text-4xl font-headline font-bold">Gestion des Lives</h1>
             <div className="flex items-center gap-3">
-              <button
-                onClick={handleCreateLive}
-                className="flex items-center gap-2 bg-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-bold text-sm active:scale-95 transition-all shadow-[0_0_15px_rgba(124,58,237,0.25)]">
-                <span className="material-symbols-outlined text-sm">add</span>
-                Créer un Live
-              </button>
+              {canWrite && (
+                <button
+                  onClick={handleCreateLive}
+                  className="flex items-center gap-2 bg-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-bold text-sm active:scale-95 transition-all shadow-[0_0_15px_rgba(124,58,237,0.25)]">
+                  <span className="material-symbols-outlined text-sm">add</span>
+                  Créer un Live
+                </button>
+              )}
             </div>
           </div>
           {/* Next Event par defaut ou event selectionné */}
@@ -117,30 +126,35 @@ function EventsContent() {
                         +{displayedEvent.participants?.length || 0}</div>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <button
-                        className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 shadow-lg shadow-primary-container/20"
-                        onClick={() => {
-                          setIsUpdateLiveModalOpen(true);
-                        }}
-                      >
-                        Mettre à jour
-                      </button>
+                      {canWrite && (
+                        <button
+                          className="bg-primary-container text-on-primary-container px-6 py-2.5 rounded-md font-bold text-sm hover:opacity-90 transition-opacity active:scale-95 shadow-lg shadow-primary-container/20"
+                          onClick={() => {
+                            setIsUpdateLiveModalOpen(true);
+                          }}
+                        >
+                          Mettre à jour
+                        </button>
+                      )}
                       {isUpdateLiveModalOpen && displayedEvent && (
                         <UpdateLiveModal
                           setIsOpen={setIsUpdateLiveModalOpen}
                           event={displayedEvent}
                         />
                       )}
-                      <button
-                        className="bg-surface-variant text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright transition-colors active:scale-95"
-                        onClick={() => {
-                          setSelectedEventId(displayedEvent.id!);
-                          setConfirmType("publish");
-                        }}>
-                        Publier
-                      </button>
+                      {canWrite && (
+                        <button
+                          className="bg-surface-variant text-on-surface px-6 py-2.5 rounded-md font-bold text-sm hover:bg-surface-bright transition-colors active:scale-95"
+                          onClick={() => {
+                            setSelectedEventId(displayedEvent.id!);
+                            setConfirmType("publish");
+                          }}>
+                          Publier
+                        </button>
+                      )}
                       <ConfirmModal
                         open={!!confirmType}
+                        loading={publishing || cancelling}
                         title={
                           confirmType === "publish"
                             ? "Confirmer la publication"
@@ -154,28 +168,40 @@ function EventsContent() {
                         onConfirm={() => {
                           if (!selectedEventId) return;
 
-                          if (confirmType === "publish") {
-                            publish(selectedEventId);
-                          } else {
-                            cancel(selectedEventId);
-                          }
+                          const onSuccess = () => {
+                            setConfirmType(null);
+                            setSelectedEventId(null);
+                          };
+                          const onError = (err: unknown) => {
+                            toastError({
+                              title: "Action échouée",
+                              description: getUserFacingError(err),
+                            });
+                            setConfirmType(null);
+                            setSelectedEventId(null);
+                          };
 
-                          setConfirmType(null);
-                          setSelectedEventId(null);
+                          if (confirmType === "publish") {
+                            publish(selectedEventId, { onSuccess, onError });
+                          } else {
+                            cancel(selectedEventId, { onSuccess, onError });
+                          }
                         }}
                         onCancel={() => {
                           setConfirmType(null);
                           setSelectedEventId(null);
                         }}
                       />
-                      <button
-                        className="bg-transparent border border-error/30 text-error px-6 py-2.5 rounded-md font-bold text-sm hover:bg-error/10 transition-colors active:scale-95"
-                        onClick={() => {
-                          setSelectedEventId(displayedEvent.id!);
-                          setConfirmType("cancel");
-                        }}>
-                        Annuler
-                      </button>
+                      {canDelete && (
+                        <button
+                          className="bg-transparent border border-error/30 text-error px-6 py-2.5 rounded-md font-bold text-sm hover:bg-error/10 transition-colors active:scale-95"
+                          onClick={() => {
+                            setSelectedEventId(displayedEvent.id!);
+                            setConfirmType("cancel");
+                          }}>
+                          Annuler
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

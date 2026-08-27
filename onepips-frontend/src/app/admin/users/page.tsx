@@ -8,6 +8,7 @@ import PermissionGate from "@/components/admin/permission-gate";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useToast } from "@/lib/hooks/useToast";
 import { useUsers } from "@/lib/hooks/users/useUsers";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
 import { getUserFacingError } from "@/lib/services/users.service";
 import UsersStats from "@/components/admin/users/users-stats";
 import UserCard from "@/components/admin/users/user-card";
@@ -30,6 +31,8 @@ export default function AdminUsersPage() {
 
 function UsersContent() {
   const { user: currentUser } = useAuth();
+  const { hasPermission } = usePermissions();
+  const canManage = hasPermission("USERS_MANAGE");
   const {
     users,
     loading,
@@ -106,15 +109,17 @@ function UsersContent() {
               Gestion des Utilisateurs
             </h1>
           </div>
-          <button
-            onClick={() => setInviteOpen(true)}
-            className="flex items-center gap-2 bg-primary-container text-on-primary-container px-5 py-3 rounded-md hover:brightness-110 transition-all"
-          >
-            <span className="material-symbols-outlined">person_add</span>
-            <span className="text-sm font-bold uppercase tracking-wider">
-              Inviter un admin
-            </span>
-          </button>
+          {canManage && (
+            <button
+              onClick={() => setInviteOpen(true)}
+              className="flex items-center gap-2 bg-primary-container text-on-primary-container px-5 py-3 rounded-md hover:brightness-110 transition-all"
+            >
+              <span className="material-symbols-outlined">person_add</span>
+              <span className="text-sm font-bold uppercase tracking-wider">
+                Inviter un admin
+              </span>
+            </button>
+          )}
         </div>
 
         {/* Stats */}

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useUpdateEvent } from '@/lib/hooks/events/useUpdateEvent';
 import { EventDto } from '@/lib/services/events.service';
+import { useToast } from '@/lib/hooks/useToast';
+import { getUserFacingError } from '@/lib/services/users.service';
 
 interface UpdateLiveModalProps {
     setIsOpen: (isOpen: boolean) => void;
@@ -15,7 +17,8 @@ export default function UpdateLiveModal({ setIsOpen, event }: UpdateLiveModalPro
     const [title, setTitle] = useState(event.title);
     const [description, setDescription] = useState(event.description || '');
 
-    const { mutateAsync: updateEvent } = useUpdateEvent();
+    const { mutateAsync: updateEvent, isPending: updatingEvent } = useUpdateEvent();
+    const { error: toastError } = useToast();
     const combinedDate = new Date(`${selectedDate}T${selectedTime}:00Z`);
 
     const handleSubmitUpdateEvent = async () => {
@@ -30,7 +33,10 @@ export default function UpdateLiveModal({ setIsOpen, event }: UpdateLiveModalPro
             });
             setIsOpen(false);
         } catch (error) {
-            console.error("(handleSubmitUpdateEvent) Error updating event: ", error);
+            toastError({
+                title: "Échec de la mise à jour",
+                description: getUserFacingError(error),
+            });
         }
     };
 
@@ -115,16 +121,18 @@ export default function UpdateLiveModal({ setIsOpen, event }: UpdateLiveModalPro
                     <button
                         type="button"
                         onClick={() => setIsOpen(false)}
-                        className="px-6 py-2.5 rounded-xl font-bold text-sm text-outline hover:text-on-surface hover:bg-surface-variant transition-all"
+                        disabled={updatingEvent}
+                        className="px-6 py-2.5 rounded-xl font-bold text-sm text-outline hover:text-on-surface hover:bg-surface-variant transition-all disabled:opacity-50"
                     >
                         Annuler
                     </button>
                     <button
                         type="button"
                         onClick={handleSubmitUpdateEvent}
-                        className="bg-primary-container text-on-primary-container px-8 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-[0_0_20px_rgba(124,58,237,0.3)] active:scale-[0.98]"
+                        disabled={updatingEvent}
+                        className="bg-primary-container text-on-primary-container px-8 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all shadow-[0_0_20px_rgba(124,58,237,0.3)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Mettre à jour le Live
+                        {updatingEvent ? "Mise à jour..." : "Mettre à jour le Live"}
                     </button>
                 </div>
             </div>

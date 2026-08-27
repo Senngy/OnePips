@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ALL_ROLES, type UserWithPerms } from "@/lib/services/users.service";
+import { usePermissions } from "@/lib/hooks/permissions/usePermissions";
 import Avatar from "./avatar";
 import RoleBadge from "./role-badge";
 import PermissionsPanel from "./permissions-panel";
@@ -25,6 +26,8 @@ export default function UserCard({
   onResetPermissions: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const { hasPermission } = usePermissions();
+  const canManage = hasPermission("USERS_MANAGE");
   const isSuperAdmin = user.role === "SUPER_ADMIN";
 
   return (
@@ -44,7 +47,7 @@ export default function UserCard({
         <div className="flex items-center gap-3">
           {isSuperAdmin ? (
             <span className="text-xs text-outline/60 italic">Accès complet</span>
-          ) : (
+          ) : canManage ? (
             <select
               value={user.role}
               disabled={isCurrentUser}
@@ -57,23 +60,26 @@ export default function UserCard({
                 </option>
               ))}
             </select>
+          ) : null}
+
+          {!isSuperAdmin && canManage && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              className="px-3 py-1.5 text-sm font-medium rounded-lg text-primary hover:bg-primary/10"
+            >
+              {expanded ? "Fermer" : "Permissions"}
+            </button>
           )}
 
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            disabled={isSuperAdmin}
-            className="px-3 py-1.5 text-sm font-medium rounded-lg text-primary hover:bg-primary/10 disabled:text-outline/40 disabled:cursor-not-allowed"
-          >
-            {expanded ? "Fermer" : "Permissions"}
-          </button>
-
-          <button
-            disabled
-            title="Désactivation à venir (User.status)"
-            className="px-3 py-1.5 text-sm font-bold rounded-lg border border-error/20 text-error/40 cursor-not-allowed"
-          >
-            Désactiver
-          </button>
+          {canManage && (
+            <button
+              disabled
+              title="Désactivation à venir (User.status)"
+              className="px-3 py-1.5 text-sm font-bold rounded-lg border border-error/20 text-error/40 cursor-not-allowed"
+            >
+              Désactiver
+            </button>
+          )}
         </div>
       </div>
 
