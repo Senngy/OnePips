@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../auth.js';
@@ -10,23 +11,31 @@ import { PrismaService } from '../../../../prisma/prisma.service.js';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(AuthGuard.name);
+  constructor(private readonly prisma: PrismaService,) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    
     const req = context.switchToHttp().getRequest();
-    console.log(
-      '🔑 AuthGuard: Checking authentication for request:',
-      req.method,
-      req.originalUrl,
-    );
+    const requestId = req.requestId ?? 'req_unknown';
+
+    this.logger.debug({
+      message: '🔑 AuthGuard: Auth Check for request:',
+      reqId: requestId,
+      method: req.method,
+      path: req.originalUrl,
+    });
 
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
     });
 
     if (!session) {
-      console.error(
-        '[API] auth/guards/auth.guard.ts | !session | 401 - Utilisateur non authentifié ❌ ', req.method, req.originalUrl, 'Headers:', req.headers,
-      );
+      this.logger.warn({
+        message: '❌ AuthGuard: No session found for request:',
+        reqId: requestId,
+        method: req.method,
+        path: req.originalUrl,
+      });
       throw new UnauthorizedException('[API] auth/guards/auth.guard.ts | 401 - Utilisateur non authentifié ❌');
     }
 
@@ -37,13 +46,12 @@ export class AuthGuard implements CanActivate {
     });
 
     if (!user) {
-      console.error(
-        '[API] auth/guards/auth.guard.ts | 404 - Utilisateur non trouvé ❌',
-        req.method,
-        req.originalUrl,
-        'Headers:',
-        req.headers,
-      );
+      this.logger.warn({
+        message: '❌ AuthGuard: User not found for session:',
+        reqId: requestId,
+        method: req.method,
+        path: req.originalUrl,
+      });
       throw new UnauthorizedException('[API] auth/guards/auth.guard.ts | 404 - Utilisateur non trouvé ❌');
     }
 
@@ -58,7 +66,9 @@ export class AuthGuard implements CanActivate {
     req.user = user;
     req.session = session.session;
 
-    console.log('✅ AuthGuard: Authenticated user:', {
+    this.logger.debug({
+      message: '✅ AuthGuard: Authenticated user:',
+      reqId: requestId,
       id: user.id,
       email: user.email,
       role: user.role,
