@@ -1,4 +1,4 @@
-# Plan P1 — Administration des Admins (suivi)
+# Plan P1 — Administration des Admins (suivi clôturé - plan P1 terminé ✅ Validée (27/08))
 
 > Créé : 26/08/2026 · Version : v3 (aligné sur les nouveaux items P1 14-22 + checkpoint frontend)
 > Source : `.tracking/RBAC-v3-audit.md` §10, section « P1 — Important » (items 10 à 22)
@@ -126,8 +126,7 @@ permission connue ?
 
 > **Le point fondamental** : le fetch métier ne doit démarrer qu'après la décision d'autorisation.
 
-### Principes (Checkpoint RBAC Frontend — implémentation)
-
+### Principes (Checkpoint RBAC Frontend — implémentation) ✅ Validée (26/08)
 > Objectif : utiliser les `effectivePermissions` réelles pour éviter les appels API métier inutiles et offrir une UX fluide. Le backend reste l'autorité finale.
 
 1. Utiliser uniquement `usePermissions()` + React Query comme source frontend. Aucun mapping `ROLE_PERMISSIONS` côté front.
@@ -174,46 +173,46 @@ permission connue ?
 
 **Objectif** : durcir la gestion de session Better Auth.
 
-### 17 — Configurer Better Auth (session)
-- [ ] **Étape 1 — Vérification de la documentation Better Auth** (version installée) par l'implémenteur : les notions `expiresIn`, `freshAge`, renouvellement et `rememberMe` ont des rôles distincts — **ne pas figer la formulation** avant vérification.
-- [ ] `session.expiresIn` : définir une durée explicite (ex. 7 jours).
-- [ ] Rotation de session : vérifier le mécanisme réel (`freshAge` ou équivalent) dans la version installée avant de le configurer.
-- [ ] `rememberMe` : configurer la durée étendue (ex. 30 jours).
-- [ ] Cookies : vérifier/forcer `Secure`, `HttpOnly`, `SameSite` (selon `useSecureCookies` et l'environnement).
+### 17 — Configurer Better Auth (session) ✅ Validée (27/08)
+- [x] **Étape 1 — Vérification de la documentation Better Auth** (version installée) par l'implémenteur : les notions `expiresIn`, `freshAge`, renouvellement et `rememberMe` ont des rôles distincts — **ne pas figer la formulation** avant vérification.
+- [x] `session.expiresIn` : définir une durée explicite (ex. 7 jours).
+- [x] Rotation de session : vérifier le mécanisme réel (`freshAge` ou équivalent) dans la version installée avant de le configurer.
+- [x] `rememberMe` : configurer la durée étendue (ex. 30 jours).
+- [x] Cookies : vérifier/forcer `Secure`, `HttpOnly`, `SameSite` (selon `useSecureCookies` et l'environnement). Solution : sera appliqué automatiquement par Better Auth en dectant ".env NODE_ENV=production"
 - **Fichier concerné** : `onepips-backend/src/modules/auth/auth.ts`.
 - **Note** : ne pas activer `requireEmailVerification` globalement (le signup public reste inchangé — décision déjà prise).
 
-### 18 — Vérifier session fixation / rotation (test)
-- [ ] Tester 2 logins consécutifs → vérifier qu'une nouvelle session/token est émise (rotation, pas de fixation).
-- [ ] Tester `rememberMe` on/off → durées de session différentes.
-- [ ] Tester l'expiration de session (après `expiresIn`).
-- [ ] Vérifier les attributs de cookie (`HttpOnly`, `Secure`, `SameSite`) dans la réponse.
+### 18 — Vérifier session fixation / rotation (test) ✅ Validée (27/08)
+- [x] Tester 2 logins consécutifs → vérifier qu'une nouvelle session/token est émise (rotation, pas de fixation).
+- [x] Tester `rememberMe` on/off → durées de session différentes.
+- [x] Tester l'expiration de session (après `expiresIn`).
+- [x] Vérifier les attributs de cookie (`HttpOnly`, `Secure`, `SameSite`) dans la réponse.
 - **Critère** : documenter le comportement observé ici (résultat des tests).
 
 ---
 
 ## 7. PHASE C — Observabilité (item 19)
 
-### 19 — Logs structurés (JSON) + intégrer `console.log` AuthGuard
-- [ ] Remplacer les `console.log` d'`AuthGuard` par le `Logger` Nest (structuré).
-- [ ] Adopter un format JSON pour les logs (via `Logger` + éventuellement un formatter).
-- [ ] Corréler avec `requestId` (déjà présent via `RequestIdMiddleware`).
+### 19 — Logs structurés (JSON) + intégrer `console.log` AuthGuard ✅ Validée (27/08)
+- [x] Remplacer les `console.log` d'`AuthGuard` par le `Logger` Nest (structuré).
+- [x] Adopter un format JSON pour les logs (via `Logger` + éventuellement un formatter). Decision : pour l'instant on active pas le json, ConsoleLogger est installé si besoin
+- [x] Corréler avec `requestId` (déjà présent via `RequestIdMiddleware`).
 - **Fichiers concernés** : `onepips-backend/src/modules/auth/guards/auth.guard.ts`, `logger.middleware.ts`.
 - **Note** : ne jamais logger de donnée sensible (token, mot de passe, cookie, header Authorization).
 
 ---
 
-## 8. PHASE D — Reporté (items 20, 21, 22)
+## 8. PHASE D — Reporté (items 20, 21) dans les améliorations possible RBAC P3
 
-### 20 — N+1 `findAllWithPermissions()` (reporté, optionnel)
+### 20 — N+1 `findAllWithPermissions()` (reporté P3, optionnel)
 - Optimisation en requête groupée (`groupBy`/`in`) **reportée en fin de plan** — non bloquante tant que la liste d'utilisateurs reste petite.
 - À réévaluer avec la pagination (#21).
 
-### 21 — Pagination + tri sur `GET /users` (reporté, optionnel)
+### 21 — Pagination + tri sur `GET /users` (reporté P3 , optionnel)
 - Ajouter `page`/`limit` + tri sur `GET /users` — **optionnel, reporté en fin de plan**.
 - Le frontend `UsersStats`/liste devra consommer cette pagination (à coordonner).
 
-### 22 — DTO sur `payments.controller` (reporté, dernière phase)
+### 22 — DTO sur `payments.controller` (reporté, dernière phase à validé après implémentation Payments)
 - `@Body() any` → DTO dédié, **à faire quand Payments sera réellement implémenté** (voir Error Handling Phase 8).
 - Dépendance : le service Payments n'existe pas encore.
 
