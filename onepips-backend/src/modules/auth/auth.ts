@@ -29,6 +29,12 @@ export const auth = betterAuth({
     },
   },
 
+  session: {
+    expiresIn: 60 * 60 * 8, // 8 hours
+    updateAge: 60 * 60 * 1, // 1 hour
+    freshAge: 60 * 30, // 30 minutes
+  },
+
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {

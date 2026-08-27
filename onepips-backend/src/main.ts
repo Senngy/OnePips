@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, BadRequestException } from '@nestjs/common';
+import { ValidationPipe, BadRequestException, ConsoleLogger } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'node:path';
 import helmet from 'helmet';
@@ -26,6 +26,7 @@ function exceptionFactory(errors: ValidationError[]) {
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false, // Requis par Better Auth
+    logger: new ConsoleLogger({}), // Utilisation de ConsoleLogger pour la compatibilité avec NestJS 10
   });
 
   app.use(helmet(helmetOptions(process.env.NODE_ENV || 'development')));
