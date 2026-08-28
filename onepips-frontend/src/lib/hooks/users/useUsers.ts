@@ -55,6 +55,7 @@ export function useUsers() {
     }) => updateUserPermissions(id, [{ permission, granted }]),
     onSuccess: () => refresh(),
   });
+  
 
   const resetPermissionsMutation = useMutation({
     mutationFn: (id: string) => resetUserPermissions(id),
@@ -76,4 +77,5 @@ export function useUsers() {
     resetPermissions: (id: string) =>
       resetPermissionsMutation.mutateAsync(id),
   };
+
 }
