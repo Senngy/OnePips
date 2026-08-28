@@ -8,7 +8,7 @@ import {
 import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../auth.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
-import { UserStatus } from 'generated/prisma/browser.js';
+import { UserStatus } from '../../../../generated/prisma/client.js';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

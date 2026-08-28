@@ -21,11 +21,11 @@ import { CompleteInvitationDto } from './dto/complete-invitation.dto.js';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name)
   constructor(
     private prisma: PrismaService,
     private permissionsService: PermissionsService,
     private emailService: EmailService,
-    private readonly logger: Logger = new Logger(UsersService.name),
   ) { }
 
   async findAll() {
@@ -380,7 +380,7 @@ export class UsersService {
           status: true,
           emailVerified: true,
           createdAt: true,
-          targetAt: true,
+          updatedAt: true,
         },
       });
 

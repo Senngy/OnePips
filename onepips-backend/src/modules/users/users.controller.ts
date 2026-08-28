@@ -12,12 +12,13 @@ import { UsersService } from './users.service.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import { CreateInvitationDto } from './dto/create-invitation.dto.js';
 import { CompleteInvitationDto } from './dto/complete-invitation.dto.js';
+import { UpdateUserStatusDto } from './dto/user-status.dto.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { PermissionsGuard } from '../permissions/guards/permissions.guard.js';
 import { Permissions } from '../permissions/decorators/permissions.decorator.js';
-import { Permission, Role } from '../../../generated/prisma/client.js';
+import { Permission, Role, UserStatus } from '../../../generated/prisma/client.js';
 import { UpdatePermissionsDto } from '../permissions/dto/permissions.dto.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { User } from '../../../generated/prisma/client.js';
@@ -27,7 +28,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly permissionsService: PermissionsService,
-  ) {}
+  ) { }
 
   @Get()
   @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
@@ -113,5 +114,21 @@ export class UsersController {
   @Roles(Role.SUPER_ADMIN)
   async resetPermissions(@Param('id') userId: string) {
     return this.usersService.resetPermissions(userId);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(AuthGuard, RolesGuard, PermissionsGuard)
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @Permissions(Permission.ADMINS_MANAGE)
+  async updateStatus(
+    @Param('id') userId: string,
+    @Body() dto: UpdateUserStatusDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.usersService.updateStatus(
+      userId,
+      dto.status,
+      currentUser,
+    );
   }
 }
