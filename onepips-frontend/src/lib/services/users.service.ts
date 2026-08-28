@@ -5,6 +5,7 @@ export type UserWithPerms = {
   email: string;
   name: string | null;
   role: string;
+  status: UserStatus;
   createdAt: string;
   updatedAt: string;
   permissions: { permission: string; granted: boolean }[];
