@@ -40,6 +40,7 @@ export default function UserCard({
   const canManage = hasPermission("USERS_MANAGE");
   const canManageAdmin = hasPermission("ADMINS_MANAGE");
   const isSuperAdmin = user.role === "SUPER_ADMIN";
+  const isActive = user.status === "ACTIVE";
 
   const handleDisable = async () => {
     try {
@@ -57,7 +58,12 @@ export default function UserCard({
 
   return (
     <>
-      <div className="glass-card rounded-xl border border-outline-variant/10 overflow-hidden">
+      <div
+        className={`glass-card rounded-xl border ${
+          isActive ? "border-outline-variant/10" : "border-error/20 bg-error/5" 
+        } overflow-hidden`}
+      >
+      
         <div className="p-6 flex flex-col md:flex-row md:items-center gap-4 md:justify-between">
           <div className="flex items-center gap-4">
             <Avatar name={user.name} />
@@ -65,6 +71,9 @@ export default function UserCard({
               <p className="font-headline font-bold text-on-surface text-lg flex items-center gap-2">
                 {user.name || "Sans nom"}
                 <RoleBadge role={user.role} />
+                { !isActive && (
+                  <p className="text-xs text-error/70">Status Désactivé</p>
+                )}
               </p>
               <p className="text-sm text-outline">{user.email}</p>
             </div>
