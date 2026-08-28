@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -24,6 +24,7 @@ import { AuthRateLimitMiddleware } from './common/middleware/auth-rate-limit.mid
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware.js';
 import { SecurityService } from './common/security.service.js';
 import { jsonBodyParserMiddleware } from './common/middleware/json-body-parser.middleware.js';
+import { CsrfMiddleware } from './common/middleware/csrf.middleware.js';
 
 @Module({
   imports: [
@@ -80,8 +81,16 @@ export class AppModule implements NestModule {
 
     // Apply JSON body parser middleware globally; middleware itself filters to /api/auth
     consumer.apply(jsonBodyParserMiddleware).forRoutes('*');
-    
+
     consumer.apply(LoggerMiddleware).forRoutes('*');
+
+    consumer
+      .apply(CsrfMiddleware)
+      .exclude({
+        path: 'auth/(.*)',
+        method: RequestMethod.ALL,
+      })
+      .forRoutes('*');
 
     // Apply auth rate limit middleware globally; middleware itself filters to /api/auth
     consumer.apply(AuthRateLimitMiddleware).forRoutes('*');
