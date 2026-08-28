@@ -1,5 +1,6 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import type { Request, Response, NextFunction } from 'express';
+import { RedisService } from '../redis/redis.service.js';
 
 type Entry = { count: number; expires: number };
 
@@ -7,48 +8,66 @@ const store = new Map<string, Entry>();
 
 @Injectable()
 export class AuthRateLimitMiddleware implements NestMiddleware {
-  use(req: Request, res: Response, next: NextFunction) {
+  private readonly logger = new Logger(AuthRateLimitMiddleware.name);
+
+  constructor(
+    private readonly redis: RedisService,
+  ) { }
+  async use(req: Request, res: Response, next: NextFunction) {
+
     try {
       const path = req.originalUrl || req.url || '';
       // Only apply to auth routes (API prefix included)
       if (!path.startsWith('/api/auth')) return next();
 
-      const ip = (req.ip ||
-        req.headers['x-forwarded-for'] ||
-        (req.connection && (req.connection as any).remoteAddress) ||
-        '') as string;
-      const now = Date.now();
-      const windowMs = 60 * 1000; // 1 minute
+      const pathname = path.split('?')[0];
 
-      // Stricter limits for sign-in / sign-up / forgot-password
+      const rawIp =
+        req.ip ||
+        req.socket.remoteAddress ||
+        'unknown';
+      const ip = rawIp.startsWith('::ffff:')
+        ? rawIp.substring(7)
+        : rawIp;
+
       const isSensitive =
-        /sign-in|sign-up|forgot-password|sign-in\/email|sign-up\/email/.test(
-          path,
+        /\/sign-in(?:\/email)?$|\/sign-up(?:\/email)?$|\/forgot-password/.test(
+          pathname,
         );
-      const limit = isSensitive ? 5 : 100; // 5/min for auth sensitive endpoints
 
-      const key = `${ip}:${path}`;
-      let entry = store.get(key);
-      if (!entry || entry.expires < now) {
-        entry = { count: 0, expires: now + windowMs };
-      }
+      const limit = isSensitive ? 5 : 100;
+      const windowSeconds = 60; // Redis key lifetime
 
-      entry.count += 1;
-      store.set(key, entry);
+      const key = `rate-limit:auth:${ip}:${pathname}`;
 
-      if (entry.count > limit) {
-        res.status(429).json({ message: 'Too many requests' });
+      const count = await this.redis.increment(
+        key,
+        windowSeconds,
+      );
+
+      res.setHeader('X-RateLimit-Limit', limit);
+      res.setHeader(
+        'X-RateLimit-Remaining',
+        Math.max(limit - count, 0),
+      );
+
+      if (count > limit) {
+        res.status(429).json({
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: 'Too many requests',
+        });
         return;
       }
 
-      // basic cleanup occasionally
-      if (store.size > 10000) {
-        const cutoff = now - windowMs * 2;
-        for (const [k, v] of store) if (v.expires < cutoff) store.delete(k);
-      }
-
       next();
-    } catch (e) {
+    } catch (error) {
+      this.logger.error(
+        'Redis rate limit failed',
+        error instanceof Error ? error.message : String(error),
+      );
+
+      // Fail-open :
+      // si Redis est indisponible, ne pas bloquer toute l'auth.
       next();
     }
   }

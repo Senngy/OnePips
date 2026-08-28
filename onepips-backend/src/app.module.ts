@@ -25,6 +25,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware.j
 import { SecurityService } from './common/security.service.js';
 import { jsonBodyParserMiddleware } from './common/middleware/json-body-parser.middleware.js';
 import { CsrfMiddleware } from './common/middleware/csrf.middleware.js';
+import { RedisModule } from './common/redis/redis.module.js';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { CsrfMiddleware } from './common/middleware/csrf.middleware.js';
         limit: 20,
       },
     ]),
+    RedisModule,
     AuthModule,
     PermissionsModule,
     UsersModule,
