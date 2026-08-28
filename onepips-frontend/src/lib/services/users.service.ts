@@ -16,6 +16,8 @@ export type PermissionOverride = {
   granted: boolean;
 };
 
+export type UserStatus = "ACTIVE" | "SUSPENDED" | "DISABLED";
+
 // Constantes d'AFFICHAGE uniquement — jamais une autorité de sécurité.
 // Le backend valide réellement rôle/permissions ; ces listes servent à construire l'UI.
 export const ALL_ROLES = [
@@ -69,6 +71,12 @@ export const updateUserPermissions = (
   api(`/users/${id}/permissions`, {
     method: "PATCH",
     body: JSON.stringify({ permissions: overrides }),
+  });
+
+  export const updateUserStatus = (id: string, status: UserStatus) =>
+  api(`/users/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
   });
 
 export const resetUserPermissions = (id: string) =>

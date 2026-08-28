@@ -501,14 +501,14 @@ Leads        —       Uses(global) Uses guard  —     —     —        —  
 | 3 | CSRF : vérifier ce que Better Auth fournit, sinon implémenter | Sécurité | ⬜ |
 | 4 | **Audit log admin** (modèle `AdminAuditLog` + écriture sur role/permissions change) après Payments/Booking | Observabilité | ⬜ |
 | 5 | Rate limiting auth → Redis (pas in-memory) | Sécurité | ⬜ |
-| 6 | Corriger `GET /uploads/:filename` (path traversal) | Sécurité | ⬜ |
-| 7 | Désactiver/restreindre le signup public OU restreindre par domaine | Sécurité | ⬜ |
+| 6 | Corriger `GET /uploads/:filename` (path traversal) | Sécurité | ✅ Fait et Testé (27/08) |
+| 7 | Désactiver/restreindre le signup public OU restreindre par domaine | Sécurité | ✅ Fait et Testé (27/08) |
 | 8 | Déplacer `lastLoginAt` au login + refresh de session (plus de write à chaque requête) après Payments/Booking | Perf | ⬜ |
 | 9 | ~~Ajouter Request ID / Correlation ID (middleware + réponse)~~ ✅ **Fait via Error Handling Phase 2** — `RequestIdMiddleware` génère `req.requestId`, pose `X-Request-Id`, `LoggerMiddleware` le logge, `GlobalExceptionFilter` l'injecte dans les erreurs. Référence : `.tracking/Error-Handling-Architecture.md` §7. Plus aucune action RBAC requise | Observabilité | ✅ |
-| 36 | Ajouter la colonne `status` sur `User` (type `UserStatus` **déjà existant** dans le schéma — `ACTIVE`/`SUSPENDED`/`DISABLED`, défaut `ACTIVE`) — voir §2.1. **Pas de nouvel enum à créer**, migration légère (ajout de colonne uniquement). `SUSPENDED` sans mécanique de verrouillage automatique pour l'instant | Prisma | ⬜ |
-| 37 | Supprimer `Session.status` + `enum UserStatus` (Session) — confirmé mort : 0 référence dans `src/`, absent du schéma Better Auth (`sessionSchema` core) | Prisma | ⬜ |
-| 38 | `AuthGuard` : vérifier `user.status === ACTIVE` juste après le `findUnique`, sinon `401` — **avant** `RolesGuard`/`PermissionsGuard`, sans bypass `SUPER_ADMIN` (§3.2bis) | Backend | ⬜ |
-| 39 | `Disable`/`Lock` : appeler `auth.api.revokeSessions({ userId })` immédiatement après l'écriture de `User.status` (§2.1) | Backend | ⬜ |
+| 36 | Ajouter la colonne `status` sur `User` (type `UserStatus` **déjà existant** dans le schéma — `ACTIVE`/`SUSPENDED`/`DISABLED`, défaut `ACTIVE`) — voir §2.1. **Pas de nouvel enum à créer**, migration légère (ajout de colonne uniquement). `SUSPENDED` sans mécanique de verrouillage automatique pour l'instant | Prisma | ✅ |
+| 37 | Supprimer `Session.status` + `enum UserStatus` (Session) — confirmé mort : 0 référence dans `src/`, absent du schéma Better Auth (`sessionSchema` core) | Prisma | ✅ |
+| 38 | `AuthGuard` : vérifier `user.status === ACTIVE` juste après le `findUnique`, sinon `401` — **avant** `RolesGuard`/`PermissionsGuard`, sans bypass `SUPER_ADMIN` (§3.2bis) | Backend | ✅ |
+| 39 | `Disable`/`Lock` : appeler `auth.api.revokeSessions({ userId })` immédiatement après l'écriture de `User.status` (§2.1) | Backend | ✅ |
 
 #### Vérification P0 contre le code réel — 17/08/2026
 
