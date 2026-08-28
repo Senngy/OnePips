@@ -3,13 +3,15 @@ import {
   ForbiddenException,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
   ConflictException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { randomBytes, createHash } from 'node:crypto';
 import { PrismaService } from '../../../prisma/prisma.service.js';
-import { Role } from '../../../generated/prisma/client.js';
-import type { User, UserPermission } from '../../../generated/prisma/client.js';
+import { Role, UserStatus } from '../../../generated/prisma/client.js';
+import type { User, UserPermission, } from '../../../generated/prisma/client.js';
 import { PermissionsService } from '../permissions/permissions.service.js';
 import { PermissionOverrideDto } from '../permissions/dto/permissions.dto.js';
 import { auth } from '../auth/auth.js';
@@ -23,6 +25,7 @@ export class UsersService {
     private prisma: PrismaService,
     private permissionsService: PermissionsService,
     private emailService: EmailService,
+    private readonly logger: Logger = new Logger(UsersService.name),
   ) { }
 
   async findAll() {
@@ -75,6 +78,7 @@ export class UsersService {
         role: true,
         createdAt: true,
         updatedAt: true,
+        status: true,
       },
     });
 
@@ -134,9 +138,7 @@ export class UsersService {
       .catch(() => {
         // Envoi non bloquant : l'invitation reste valide même si l'email échoue.
         // Ne jamais logger le token ni les détails SMTP.
-        console.error(
-          "[invitation] Échec de l'envoi de l'email d'invitation.",
-        );
+        this.logger.error(`[API] UsersService - Invitation email failed to send to ${dto.email}`);
       });
 
     return {
@@ -212,6 +214,7 @@ export class UsersService {
         email: true,
         name: true,
         role: true,
+        status: true,
         emailVerified: true,
         createdAt: true,
         updatedAt: true,
@@ -232,7 +235,7 @@ export class UsersService {
     currentUser: User,
   ): Promise<User> {
 
-    if (newRole === 'SUPER_ADMIN') {
+    if (newRole === Role.SUPER_ADMIN) {
       throw new ForbiddenException('Promotion non authorisé');
     }
     const targetUser = await this.prisma.user.findUnique({
@@ -250,8 +253,8 @@ export class UsersService {
     }
 
     if (
-      targetUser.role === 'SUPER_ADMIN' &&
-      currentUser.role !== 'SUPER_ADMIN'
+      targetUser.role === Role.SUPER_ADMIN &&
+      currentUser.role !== Role.SUPER_ADMIN
     ) {
       throw new ForbiddenException(
         'Vous ne pouvez pas modifier le rôle du SUPER_ADMIN.',
@@ -266,6 +269,7 @@ export class UsersService {
         email: true,
         name: true,
         role: true,
+        status: true,
         emailVerified: true,
         createdAt: true,
         updatedAt: true,
@@ -340,5 +344,92 @@ export class UsersService {
     });
 
     return { success: true };
+  }
+
+  async updateStatus(
+    userId: string,
+    newStatus: UserStatus,
+    currentUser: User,
+  ) {
+    if (
+      currentUser.role !== Role.ADMIN &&
+      currentUser.role !== Role.SUPER_ADMIN
+    ) {
+      this.logger.warn({
+        message: 'Unauthorize attempted authenticated request',
+        userId: currentUser.id,
+        userEmail: currentUser.email,
+        status: currentUser.status,
+      });
+      throw new ForbiddenException('Vous n\'êtes pas autorisé à modifier le statut des utilisateurs.');
+    }
+
+    if (currentUser.id === userId) {
+      throw new ForbiddenException(
+        'Vous ne pouvez pas modifier votre propre statut.',
+      );
+    }
+    const user = await this.prisma.$transaction(async (tx) => {
+      const targetUser = await tx.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          status: true,
+          emailVerified: true,
+          createdAt: true,
+          targetAt: true,
+        },
+      });
+
+      if (!targetUser) {
+        throw new NotFoundException({
+          code: 'USER_NOT_FOUND',
+          message: 'Utilisateur non trouvé.',
+        });
+      }
+
+      if (targetUser.role === Role.SUPER_ADMIN) {
+        this.logger.warn({
+          message: 'Unauthorize attempted authenticated request',
+          userId: currentUser.id,
+          userEmail: currentUser.email,
+          status: currentUser.status,
+        });
+        throw new ForbiddenException(
+          'Le statut d’un SUPER_ADMIN ne peut pas être modifié.',
+        );
+      }
+
+      const updatedUser = await tx.user.update({
+        where: { id: userId },
+        data: { status: newStatus },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          status: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (
+        newStatus === UserStatus.SUSPENDED ||
+        newStatus === UserStatus.DISABLED
+      ) {
+        await tx.session.deleteMany({ // Invalide Session BetterAuth pour forcer la déconnexion de l'utilisateur | Update possible avec plugin BetterAuth.
+          where: {
+            userId,
+          },
+        });
+      }
+      return updatedUser;
+    });
+    return user;
   }
 }
